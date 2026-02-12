@@ -18,13 +18,13 @@ export function AboutContent() {
                 </p>
             </div>
             <p className="text-foreground/80 md:text-lg">
-              LeafLux was born from a simple, yet profound, love for tea. Not the dusty bags found in supermarket aisles, but the rich, authentic, and diverse world of loose-leaf tea. I found myself on a quest, constantly searching for those hidden gems—small, passionate shops dedicated to the art of the perfect brew.
+              My journey into the world of tea began for two simple reasons: to find a healthier alternative to sugary drinks and to carve out moments of peace and meditation in my daily life. Over the years, this simple practice has brought me immense joy and significantly lowered my stress.
             </p>
             <p className="text-foreground/80 md:text-lg">
-              It was a frustrating journey, filled with endless searching and missed opportunities. I knew there had to be a better way to connect fellow tea lovers with the places that would truly ignite their passion.
+              The problem I faced, however, was living in what I call a 'tea desert.' To grow my hobby, I had to order all of my loose-leaf tea, teaware, and accessories online, missing out on the community and discovery that only a local shop can provide.
             </p>
              <p className="text-foreground/80 md:text-lg">
-              And that's where Chammy comes in.
+              My dream is to change that. LeafLux is my effort to unite tea lovers with authentic shops everywhere and to expose the 'tea deserts' in hopes of cultivating new growth. My sincerest hope is that this tool helps you find wonderful tea shops, deepens your own hobby, and maybe even inspires a few new shops to open where they're needed most.
             </p>
           </div>
           <div className="flex items-center justify-center">
