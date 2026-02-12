@@ -172,6 +172,9 @@ export function TeaFinder() {
             <p className="text-sm text-muted-foreground mt-2">
                 We attempt to use your browser's location. If the map is wrong, or you want to search elsewhere, please enter a location.
             </p>
+            <p className="text-xs text-muted-foreground mt-2 italic">
+                Note: This pre-alpha version is currently limited to select areas in Ohio, Indiana, and Illinois.
+            </p>
           </CardContent>
         </Card>
         
