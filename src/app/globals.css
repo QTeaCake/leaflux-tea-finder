@@ -20,15 +20,15 @@ body {
     --secondary-foreground: 260 25% 25%;
     --muted: 260 20% 94%;
     --muted-foreground: 260 20% 45%;
-    --accent: 30 50% 60%; /* Warm, elegant copper */
-    --accent-foreground: 30 40% 10%;
+    --accent: 340 65% 70%; /* Soft, inviting pink */
+    --accent-foreground: 340 40% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 260 15% 85%;
     --input: 260 15% 92%;
     --ring: 260 25% 50%;
     --chart-1: 260 25% 50%;
-    --chart-2: 30 50% 60%;
+    --chart-2: 340 65% 70%;
     --chart-3: 260 20% 90%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
@@ -55,15 +55,15 @@ body {
     --secondary-foreground: 260 20% 95%;
     --muted: 260 15% 20%;
     --muted-foreground: 260 20% 65%;
-    --accent: 30 50% 65%;
-    --accent-foreground: 30 30% 98%;
+    --accent: 340 60% 75%;
+    --accent-foreground: 340 30% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 260 15% 25%;
     --input: 260 15% 18%;
     --ring: 260 25% 60%;
     --chart-1: 260 25% 60%;
-    --chart-2: 30 50% 65%;
+    --chart-2: 340 60% 75%;
     --chart-3: 260 15% 25%;
     --chart-4: 40 60% 65%;
     --chart-5: 20 70% 60%;
