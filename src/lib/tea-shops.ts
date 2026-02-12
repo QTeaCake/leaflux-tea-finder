@@ -1,3 +1,5 @@
+export type TeaType = 'white' | 'green' | 'yellow' | 'oolong' | 'black' | 'puerh' | 'dark' | 'herbal' | 'matcha';
+
 export type Offering = 'loose leaf' | 'teaware' | 'classes';
 
 export type TeaShop = {
@@ -9,6 +11,7 @@ export type TeaShop = {
     lng: number;
   };
   offerings: Offering[];
+  teaTypes: TeaType[];
   praise: number;
   userTags: string[];
   ethical: boolean;
@@ -30,6 +33,7 @@ export const teaShops: TeaShop[] = [
       lng: -84.97670994071623,
     },
     offerings: ['loose leaf'],
+    teaTypes: ['herbal', 'black'],
     praise: 12,
     userTags: ['herbal', 'spices'],
     ethical: false,
@@ -47,6 +51,7 @@ export const teaShops: TeaShop[] = [
       lng: -85.57101400451032,
     },
     offerings: ['loose leaf'],
+    teaTypes: ['black', 'green', 'herbal'],
     praise: 8,
     userTags: ['coffee', 'cozy'],
     ethical: false,
@@ -64,6 +69,7 @@ export const teaShops: TeaShop[] = [
       lng: -85.13615200946663,
     },
     offerings: ['loose leaf'],
+    teaTypes: ['black', 'herbal'],
     praise: 5,
     userTags: [],
     ethical: false,
@@ -81,6 +87,7 @@ export const teaShops: TeaShop[] = [
       lng: -86.22733017756487,
     },
     offerings: ['loose leaf'],
+    teaTypes: ['herbal', 'green'],
     praise: 15,
     userTags: ['natural', 'health'],
     ethical: false,
@@ -98,6 +105,7 @@ export const teaShops: TeaShop[] = [
       lng: -86.0213365246702,
     },
     offerings: ['loose leaf'],
+    teaTypes: ['white', 'green', 'oolong', 'black', 'herbal'],
     praise: 22,
     userTags: ['subscription', 'local'],
     ethical: false,
@@ -115,6 +123,7 @@ export const teaShops: TeaShop[] = [
       lng: -83.73788445216886,
     },
     offerings: ['loose leaf'],
+    teaTypes: ['white', 'green', 'yellow', 'oolong', 'black', 'puerh', 'dark', 'herbal', 'matcha'],
     praise: 31,
     userTags: ['organic', 'online'],
     ethical: true,
@@ -132,6 +141,7 @@ export const teaShops: TeaShop[] = [
       lng: -84.66766768959064,
     },
     offerings: ['loose leaf', 'teaware', 'classes'],
+    teaTypes: ['white', 'green', 'oolong', 'black', 'puerh', 'dark'],
     praise: 42,
     userTags: ['gongfu', 'community'],
     ethical: false,
@@ -150,6 +160,7 @@ export const teaShops: TeaShop[] = [
       lng: -87.64653838176316,
     },
     offerings: ['loose leaf', 'teaware'],
+    teaTypes: ['green', 'oolong', 'puerh', 'black'],
     praise: 18,
     userTags: ['oolong', 'puerh'],
     ethical: false,
@@ -167,6 +178,7 @@ export const teaShops: TeaShop[] = [
       lng: -88.21782742739538,
     },
     offerings: ['loose leaf', 'teaware', 'classes'],
+    teaTypes: ['green', 'matcha'],
     praise: 33,
     userTags: ['matcha', 'ceremony', 'culture'],
     ethical: false,
@@ -184,6 +196,7 @@ export const teaShops: TeaShop[] = [
       lng: -86.50396029049867,
     },
     offerings: ['loose leaf'],
+    teaTypes: ['herbal', 'black'],
     praise: 4,
     userTags: [],
     ethical: false,
@@ -201,6 +214,7 @@ export const teaShops: TeaShop[] = [
       lng: -80.15652325193659,
     },
     offerings: ['loose leaf'],
+    teaTypes: ['green', 'oolong', 'herbal'],
     praise: 9,
     userTags: [],
     ethical: false,
@@ -218,6 +232,7 @@ export const teaShops: TeaShop[] = [
       lng: -84.53696385850519,
     },
     offerings: ['loose leaf'],
+    teaTypes: ['oolong', 'black', 'green'],
     praise: 14,
     userTags: ['boba'],
     ethical: false,
@@ -235,6 +250,7 @@ export const teaShops: TeaShop[] = [
       lng: -87.88376538176318,
     },
     offerings: ['loose leaf'],
+    teaTypes: ['matcha', 'green'],
     praise: 17,
     userTags: ['matcha', 'cafe'],
     ethical: false,

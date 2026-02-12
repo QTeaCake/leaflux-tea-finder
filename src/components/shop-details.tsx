@@ -65,11 +65,16 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, pr
         </SheetHeader>
         <div className="py-6 space-y-6">
           <div className="space-y-4">
-            <h3 className="font-headline text-lg">Tags</h3>
+            <h3 className="font-headline text-lg">Offerings, Types & Tags</h3>
             <div className="flex flex-wrap gap-2">
               {shop.offerings.map(offering => (
                 <Badge key={offering} variant="default" className="capitalize">
                   {offering}
+                </Badge>
+              ))}
+              {shop.teaTypes?.map(type => (
+                <Badge key={type} variant="secondary" className="capitalize">
+                  {type}
                 </Badge>
               ))}
               {shop.userTags?.map(tag => (
@@ -78,7 +83,7 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, pr
                 </Badge>
               ))}
             </div>
-             <div className="space-y-2">
+             <div className="space-y-2 pt-4">
                 <Label htmlFor="add-tag-input" className="text-xs text-muted-foreground">Suggest a new tag</Label>
                 <div className="flex items-center gap-2">
                     <Input 
