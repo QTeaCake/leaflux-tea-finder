@@ -52,14 +52,14 @@ export function TeaFinder() {
         },
         error => {
           console.error("Error getting location:", error);
-          setLocationError('Could not get your location. Please enable location services or enter a location manually.');
-          setUserLocation(DEFAULT_LOCATION);
+          setLocationError('Could not get your location. Please enable location services or enter an address.');
+          setUserLocation(null);
           setIsLocating(false);
         }
       );
     } else {
-      setLocationError('Geolocation is not supported by your browser. Please enter a location manually.');
-      setUserLocation(DEFAULT_LOCATION);
+      setLocationError('Geolocation is not supported by your browser. Please enter an address.');
+      setUserLocation(null);
       setIsLocating(false);
     }
   }, []);
@@ -84,10 +84,12 @@ export function TeaFinder() {
       } else {
         console.error('Geocoding API Error:', data.status, data.error_message);
         setLocationError(`Could not find location: "${locationInput}". Please try again.`);
+        setUserLocation(null);
       }
     } catch (error) {
       console.error("Error geocoding:", error);
       setLocationError("There was an error searching for the location.");
+      setUserLocation(null);
     }
   }, [locationInput]);
 
@@ -149,122 +151,159 @@ export function TeaFinder() {
           </p>
         </div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-2xl flex items-center gap-2">
-              <Icons.mapPin className="h-6 w-6 text-primary" />
-              Set Your Location
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-             {locationError && <p className="text-center text-destructive mb-4">{locationError}</p>}
-            <div className="flex flex-col sm:flex-row gap-2">
-                <Input 
-                    placeholder="Enter an address, city, or zip code" 
-                    value={locationInput}
-                    onChange={(e) => setLocationInput(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleLocationSearch();
-                        }
-                    }}
-                    className="flex-grow"
-                />
-                <Button onClick={handleLocationSearch} className="w-full sm:w-auto">
-                    <Icons.search className="mr-2 h-4 w-4" />
-                    Search
-                </Button>
-            </div>
-            <p className="text-sm text-muted-foreground mt-2">
-                We attempt to use your browser's location. If the map is wrong, or you want to search elsewhere, please enter a location.
-            </p>
-            <p className="text-xs text-muted-foreground mt-2 italic">
-                Note: This pre-alpha version is currently limited to select areas in Ohio, Indiana, and Illinois.
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="font-headline text-2xl flex items-center gap-2">
-              <Icons.filters className="h-6 w-6 text-primary" />
-              Refine Your Search
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-6 md:grid-cols-3">
-            <div className="space-y-4">
-              <Label htmlFor="radius-slider">Search Radius: <span className="font-medium text-foreground">{radius}</span> miles</Label>
-              <Slider
-                id="radius-slider"
-                value={[radius]}
-                onValueChange={([val]) => setRadius(val)}
-                max={250}
-                step={5}
-              />
-            </div>
-            <div className="space-y-4">
-              <Label>Offerings</Label>
-              <div className="flex flex-wrap gap-2">
-                {offeringOptions.map(option => {
-                  const Icon = Icons[option.icon];
-                  return (
-                    <Button
-                      key={option.name}
-                      variant={filters.offerings.includes(option.name) ? 'secondary' : 'outline'}
-                      size="sm"
-                      onClick={() => handleFilterChange(option.name)}
-                      className="capitalize"
-                    >
-                      <Icon className="mr-2 h-4 w-4" />
-                      {option.name}
+        {!userLocation ? (
+             <Card className="shadow-lg animate-in fade-in-50">
+                <CardHeader>
+                    <CardTitle className="font-headline text-2xl flex items-center gap-2">
+                    <Icons.mapPin className="h-6 w-6 text-primary" />
+                    Welcome! Set Your Location to Begin
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {locationError && <p className="text-center text-destructive mb-4">{locationError}</p>}
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <Input 
+                            placeholder="Enter an address, city, or zip code" 
+                            value={locationInput}
+                            onChange={(e) => setLocationInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleLocationSearch();
+                                }
+                            }}
+                            className="flex-grow"
+                        />
+                        <Button onClick={handleLocationSearch} className="w-full sm:w-auto">
+                            <Icons.search className="mr-2 h-4 w-4" />
+                            Search
+                        </Button>
+                    </div>
+                     <p className="text-xs text-muted-foreground mt-2 italic">
+                        Note: This pre-alpha version is currently limited to select areas in Ohio, Indiana, and Illinois.
+                    </p>
+                </CardContent>
+            </Card>
+        ) : (
+        <>
+            <Card>
+            <CardHeader>
+                <CardTitle className="font-headline text-2xl flex items-center gap-2">
+                <Icons.mapPin className="h-6 w-6 text-primary" />
+                Set Your Location
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                {locationError && <p className="text-center text-destructive mb-4">{locationError}</p>}
+                <div className="flex flex-col sm:flex-row gap-2">
+                    <Input 
+                        placeholder="Enter an address, city, or zip code" 
+                        value={locationInput}
+                        onChange={(e) => setLocationInput(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleLocationSearch();
+                            }
+                        }}
+                        className="flex-grow"
+                    />
+                    <Button onClick={handleLocationSearch} className="w-full sm:w-auto">
+                        <Icons.search className="mr-2 h-4 w-4" />
+                        Search
                     </Button>
-                  );
-                })}
-              </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                    We attempt to use your browser's location. If the map is wrong, or you want to search elsewhere, please enter a location.
+                </p>
+                <p className="text-xs text-muted-foreground mt-2 italic">
+                    Note: This pre-alpha version is currently limited to select areas in Ohio, Indiana, and Illinois.
+                </p>
+            </CardContent>
+            </Card>
+            
+            <Card className="shadow-lg">
+            <CardHeader>
+                <CardTitle className="font-headline text-2xl flex items-center gap-2">
+                <Icons.filters className="h-6 w-6 text-primary" />
+                Refine Your Search
+                </CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-6 md:grid-cols-3">
+                <div className="space-y-4">
+                <Label htmlFor="radius-slider">Search Radius: <span className="font-medium text-foreground">{radius}</span> miles</Label>
+                <Slider
+                    id="radius-slider"
+                    value={[radius]}
+                    onValueChange={([val]) => setRadius(val)}
+                    max={250}
+                    step={5}
+                />
+                </div>
+                <div className="space-y-4">
+                <Label>Offerings</Label>
+                <div className="flex flex-wrap gap-2">
+                    {offeringOptions.map(option => {
+                    const Icon = Icons[option.icon];
+                    return (
+                        <Button
+                        key={option.name}
+                        variant={filters.offerings.includes(option.name) ? 'secondary' : 'outline'}
+                        size="sm"
+                        onClick={() => handleFilterChange(option.name)}
+                        className="capitalize"
+                        >
+                        <Icon className="mr-2 h-4 w-4" />
+                        {option.name}
+                        </Button>
+                    );
+                    })}
+                </div>
+                </div>
+                <div className="space-y-4">
+                <Label>Values</Label>
+                <div className="flex items-center space-x-2">
+                    <Button
+                        variant={filters.ethical ? 'secondary' : 'outline'}
+                        size="sm"
+                        onClick={() => setFilters(prev => ({ ...prev, ethical: !prev.ethical }))}
+                    >
+                        <Icons.ethical className="mr-2 h-4 w-4" />
+                        Ethical Sourcing
+                    </Button>
+                </div>
+                </div>
+            </CardContent>
+            </Card>
+
+            <div className="grid gap-8 lg:grid-cols-12">
+            <div className="lg:col-span-4 h-[60vh] lg:h-[80vh] overflow-y-auto pr-2">
+                <ShopList 
+                shops={filteredShops} 
+                onSelectShop={setSelectedShop}
+                onHoverShop={setHoveredShopId}
+                hoveredShopId={hoveredShopId}
+                />
             </div>
-            <div className="space-y-4">
-              <Label>Values</Label>
-              <div className="flex items-center space-x-2">
-                 <Button
-                    variant={filters.ethical ? 'secondary' : 'outline'}
-                    size="sm"
-                    onClick={() => setFilters(prev => ({ ...prev, ethical: !prev.ethical }))}
-                  >
-                    <Icons.ethical className="mr-2 h-4 w-4" />
-                    Ethical Sourcing
-                  </Button>
-              </div>
+            <div className="lg:col-span-8 h-[60vh] lg:h-[80vh] rounded-lg overflow-hidden shadow-lg">
+                <ShopMap
+                apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+                shops={filteredShops}
+                center={mapCenter}
+                onSelectShop={setSelectedShop}
+                onHoverShop={setHoveredShopId}
+                hoveredShopId={hoveredShopId}
+                />
             </div>
-          </CardContent>
-        </Card>
+            </div>
 
-        <div className="grid gap-8 lg:grid-cols-12">
-          <div className="lg:col-span-4 h-[60vh] lg:h-[80vh] overflow-y-auto pr-2">
-            <ShopList 
-              shops={filteredShops} 
-              onSelectShop={setSelectedShop}
-              onHoverShop={setHoveredShopId}
-              hoveredShopId={hoveredShopId}
-            />
-          </div>
-          <div className="lg:col-span-8 h-[60vh] lg:h-[80vh] rounded-lg overflow-hidden shadow-lg">
-            <ShopMap
-              apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
-              shops={filteredShops}
-              center={mapCenter}
-              onSelectShop={setSelectedShop}
-              onHoverShop={setHoveredShopId}
-              hoveredShopId={hoveredShopId}
-            />
-          </div>
-        </div>
+            <div className="pt-8">
+                <RecommendationsTool nearbyShops={filteredShops} />
+            </div>
 
-        <div className="pt-8">
-            <RecommendationsTool nearbyShops={filteredShops} />
-        </div>
-
-        <ShopDetails shop={selectedShop} isOpen={!!selectedShop} onOpenChange={(open) => !open && setSelectedShop(null)} />
+            <ShopDetails shop={selectedShop} isOpen={!!selectedShop} onOpenChange={(open) => !open && setSelectedShop(null)} />
+        </>
+        )}
       </div>
     </section>
   );
