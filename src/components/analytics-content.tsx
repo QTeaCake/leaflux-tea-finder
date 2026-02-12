@@ -1,8 +1,5 @@
-import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from './icons';
-import { AnalyticsMap } from './analytics-map';
-import { teaShops } from '@/lib/tea-shops';
 
 export function AnalyticsContent() {
   return (
@@ -27,10 +24,10 @@ export function AnalyticsContent() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                This heatmap visualizes tea shop density. Think of it as a 'competition map.' The hotter, redder areas are saturated markets. The vast, cooler blue areas are the 'tea deserts'—untapped markets with high potential. This is where opportunity lies.
+                This heatmap will visualize tea shop density, highlighting saturated markets ('tea oases') versus untapped markets ('tea deserts'). This is where opportunity lies.
               </p>
-              <div className="relative aspect-video w-full rounded-lg overflow-hidden border">
-                <AnalyticsMap shops={teaShops} apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY} />
+              <div className="relative aspect-video w-full rounded-lg overflow-hidden border flex items-center justify-center bg-muted">
+                 <p className="text-muted-foreground font-semibold">[Work in Progress: Competition Heatmap]</p>
               </div>
             </CardContent>
           </Card>
@@ -40,16 +37,10 @@ export function AnalyticsContent() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                This visualization shows where our users are searching from, providing insights into regional demand and brand reach.
+                This map will show where our users are searching from, providing insights into regional demand and brand reach.
               </p>
-               <div className="relative aspect-video w-full rounded-lg overflow-hidden border">
-                <Image
-                  src="https://picsum.photos/seed/userinterest/800/450"
-                  alt="A map showing user interest locations."
-                  fill
-                  className="object-cover"
-                  data-ai-hint="user locations map"
-                />
+               <div className="relative aspect-video w-full rounded-lg overflow-hidden border flex items-center justify-center bg-muted">
+                 <p className="text-muted-foreground font-semibold">[Work in Progress: Demand Heatmap]</p>
               </div>
             </CardContent>
           </Card>
@@ -59,10 +50,10 @@ export function AnalyticsContent() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Analytics on which shop features, offerings, and user-generated tags are receiving the most positive engagement, indicating consumer preferences.
+                This chart will show which shop features, offerings, and user-generated tags are receiving the most positive engagement, indicating key consumer preferences.
               </p>
               <div className="relative aspect-video w-full rounded-lg overflow-hidden border flex items-center justify-center bg-muted">
-                 <p className="text-muted-foreground font-semibold">[Chart showing popular tags and offerings]</p>
+                 <p className="text-muted-foreground font-semibold">[Work in Progress: Consumer Preference Chart]</p>
               </div>
             </CardContent>
           </Card>
