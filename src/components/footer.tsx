@@ -1,8 +1,43 @@
+import { WaitlistForm } from '@/components/waitlist-form';
+import { ContactForm } from '@/components/contact-form';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from './icons';
 
 export function Footer() {
   return (
     <footer className="bg-primary/80 text-primary-foreground">
+      <div className="w-full bg-background py-12 md:py-20 border-t">
+        <div className="container mx-auto grid gap-12 px-4 md:px-6 lg:grid-cols-2 lg:gap-24">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="font-headline text-3xl flex items-center gap-2 text-foreground">
+                <Icons.list className="h-8 w-8 text-primary" />
+                Join the Waitlist
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4 text-muted-foreground">
+                Be the first to know about new features, exclusive tea discoveries, and upcoming events. Sign up for our waitlist!
+              </p>
+              <WaitlistForm />
+            </CardContent>
+          </Card>
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="font-headline text-3xl flex items-center gap-2 text-foreground">
+                <Icons.mail className="h-8 w-8 text-primary" />
+                Contact Us
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4 text-muted-foreground">
+                Have a question, feedback, or a tea shop suggestion? We'd love to hear from you.
+              </p>
+              <ContactForm />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
       <div className="container mx-auto flex items-center justify-between px-4 py-6 md:px-6">
         <div className="flex items-center gap-2">
           <Icons.logo className="h-6 w-6" />
