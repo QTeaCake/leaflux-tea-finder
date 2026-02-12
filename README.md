@@ -32,7 +32,7 @@ This project uses the Google Maps API to display shop locations. To enable the m
 2.  Add your API key to the file:
 
     ```
-    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=YOUR_API_KEY_HERE
+    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSyC6r59ETVjJAnpYzBC5KdOHF6ZpFeQ-Qco
     ```
 
 You can get an API key from the [Google Cloud Console](https://console.cloud.google.com/google/maps-apis/overview). You will need to enable the "Maps JavaScript API" and "Places API".
