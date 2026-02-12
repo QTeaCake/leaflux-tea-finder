@@ -17,7 +17,7 @@ export default {
     },
     extend: {
       backgroundImage: {
-        'teaware-pattern': `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23d9d3e0' stroke-width='1'%3E%3Cg transform='translate(50,50) scale(1.5) rotate(15)'%3E%3Cpath d='M17 8h1a4 4 0 1 1 0 8h-1'/%3E%3Cpath d='M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z'/%3E%3Cline x1='6' x2='6' y1='2' y2='4'/%3E%3Cline x1='10' x2='10' y1='2' y2='4'/%3E%3Cline x1='14' x2='14' y1='2' y2='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        'teaware-pattern': `url("https://images.unsplash.com/photo-1597318181433-2c5298f26514?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbWFsaXN0JTIwdGVhd2FyZXxlbnwwfHx8fDE3MTk1ODU4MTR8MA&ixlib=rb-4.0.3&q=80&w=1920")`,
       },
       fontFamily: {
         body: ['Open Sans', 'sans-serif'],
