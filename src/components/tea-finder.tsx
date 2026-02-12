@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Label } from './ui/label';
 import { Slider } from './ui/slider';
 import { Icons } from './icons';
-import { RecommendationsTool } from './recommendations-tool';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 
@@ -338,10 +337,6 @@ export function TeaFinder() {
                 hoveredShopId={hoveredShopId}
                 />
             </div>
-            </div>
-
-            <div className="pt-8">
-                <RecommendationsTool nearbyShops={filteredShops} />
             </div>
 
             <ShopDetails 
