@@ -12,15 +12,20 @@ type Props = {
 };
 
 export function ShopCard({ shop, onSelect, onHover, isHovered }: Props) {
+  const isSpecial = shop.id === 'blue-lantern-tea-greenville';
+
   return (
     <Card 
-      className={`cursor-pointer transition-all duration-300 ease-in-out hover:shadow-xl ${isHovered ? 'shadow-xl scale-[1.02] border-primary' : 'shadow-md'}`}
+      className={`cursor-pointer transition-all duration-300 ease-in-out hover:shadow-xl ${isHovered ? 'shadow-xl scale-[1.02] border-primary' : 'shadow-md'} ${isSpecial && !isHovered ? 'shadow-accent/20 shadow-lg' : ''}`}
       onClick={() => onSelect(shop)}
       onMouseEnter={() => onHover(shop.id)}
       onMouseLeave={() => onHover(null)}
     >
       <CardHeader>
-        <CardTitle className="font-headline text-xl">{shop.name}</CardTitle>
+        <CardTitle className="font-headline text-xl flex justify-between items-center">
+          {shop.name}
+          {isSpecial && <Icons.ai className="h-5 w-5 text-accent" />}
+        </CardTitle>
         <CardDescription className="flex items-center gap-2">
           <Icons.mapPin className="h-4 w-4" />
           {shop.address}
