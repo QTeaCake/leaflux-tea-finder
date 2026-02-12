@@ -103,7 +103,6 @@ export function TeaFinder() {
         const { lat, lng } = data.results[0].geometry.location;
         setUserLocation({ lat, lng });
       } else {
-        console.error('Geocoding API Error:', data.status, data.error_message);
         if (data.status === 'REQUEST_DENIED') {
           setLocationError('There was an issue with the Google Maps API key. Please check that the Geocoding API is enabled in your Google Cloud project.');
         } else {
