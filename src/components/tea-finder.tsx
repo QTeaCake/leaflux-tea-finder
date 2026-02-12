@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { teaShops as allShops, TeaShop } from '@/lib/tea-shops';
+import { teaShops as allShops, TeaShop, Offering } from '@/lib/tea-shops';
 import { getDistance } from '@/lib/utils';
 import { ShopList } from './shop-list';
 import { ShopMap } from './shop-map';
@@ -20,7 +20,7 @@ type Filters = {
   ethical: boolean;
 };
 
-const offeringOptions: { name: string; icon: keyof typeof Icons }[] = [
+const offeringOptions: { name: Offering; icon: keyof typeof Icons }[] = [
   { name: 'loose leaf', icon: 'looseLeaf' },
   { name: 'teaware', icon: 'teaware' },
   { name: 'classes', icon: 'classes' },
@@ -28,6 +28,7 @@ const offeringOptions: { name: string; icon: keyof typeof Icons }[] = [
 const DEFAULT_LOCATION = { lat: 41.0793, lng: -85.1393 }; // Fort Wayne, IN
 
 export function TeaFinder() {
+  const [shopsData, setShopsData] = useState<TeaShop[]>(allShops);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [radius, setRadius] = useState(150); // in miles
@@ -102,21 +103,41 @@ export function TeaFinder() {
     });
   }, []);
 
+  const handleVote = useCallback((shopId: string, offering: Offering) => {
+    setShopsData(currentShops =>
+      currentShops.map(shop => {
+        if (shop.id === shopId) {
+          const newVotes = {
+            ...shop.offeringVotes,
+            [offering]: (shop.offeringVotes?.[offering] || 0) + 1,
+          };
+          return { ...shop, offeringVotes: newVotes };
+        }
+        return shop;
+      })
+    );
+  }, []);
+
   const filteredShops = useMemo(() => {
     if (!userLocation) return [];
     
-    return allShops
+    return shopsData
       .map(shop => ({
         ...shop,
         distance: getDistance(userLocation.lat, userLocation.lng, shop.location.lat, shop.location.lng),
       }))
       .filter(shop => shop.distance <= radius)
       .filter(shop => !filters.ethical || shop.ethical)
-      .filter(shop => filters.offerings.length === 0 || filters.offerings.every(f => shop.offerings.includes(f)))
+      .filter(shop => filters.offerings.length === 0 || filters.offerings.every(f => shop.offerings.includes(f as Offering)))
       .sort((a, b) => a.distance - b.distance);
-  }, [userLocation, radius, filters]);
+  }, [userLocation, radius, filters, shopsData]);
 
   const mapCenter = useMemo(() => userLocation || DEFAULT_LOCATION, [userLocation]);
+
+  const shopForDetails = useMemo(() => {
+    if (!selectedShop) return null;
+    return shopsData.find(s => s.id === selectedShop.id) || null;
+  }, [selectedShop, shopsData]);
 
   if (!isClient || isLocating) {
     return (
@@ -301,7 +322,12 @@ export function TeaFinder() {
                 <RecommendationsTool nearbyShops={filteredShops} />
             </div>
 
-            <ShopDetails shop={selectedShop} isOpen={!!selectedShop} onOpenChange={(open) => !open && setSelectedShop(null)} />
+            <ShopDetails 
+              shop={shopForDetails} 
+              isOpen={!!selectedShop} 
+              onOpenChange={(open) => !open && setSelectedShop(null)}
+              onVote={handleVote} 
+            />
         </>
         )}
       </div>
