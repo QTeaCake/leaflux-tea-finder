@@ -18,6 +18,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { RecommendationsTool } from './recommendations-tool';
 
 type Filters = {
   offerings: string[];
