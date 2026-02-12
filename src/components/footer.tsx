@@ -3,6 +3,7 @@ import { ContactForm } from '@/components/contact-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from './icons';
 import { SuggestShopForm } from './suggest-shop-form';
+import { AnalyticsGate } from './analytics-gate';
 
 export function Footer() {
   return (
@@ -58,7 +59,10 @@ export function Footer() {
           <Icons.logo className="h-6 w-6" />
           <p className="font-headline text-lg font-semibold">LeafLux's Tea Finder</p>
         </div>
-        <p className="text-sm text-primary-foreground/80">&copy; {new Date().getFullYear()} LeafLux. All rights reserved.</p>
+        <div className="flex items-center gap-4">
+          <AnalyticsGate />
+          <p className="text-sm text-primary-foreground/80">&copy; {new Date().getFullYear()} LeafLux. All rights reserved.</p>
+        </div>
       </div>
     </footer>
   );
