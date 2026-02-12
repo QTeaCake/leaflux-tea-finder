@@ -10,8 +10,6 @@ import { Skeleton } from './ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Label } from './ui/label';
 import { Slider } from './ui/slider';
-import { Switch } from './ui/switch';
-import { Checkbox } from './ui/checkbox';
 import { Icons } from './icons';
 import { RecommendationsTool } from './recommendations-tool';
 import { Input } from './ui/input';
@@ -22,7 +20,11 @@ type Filters = {
   ethical: boolean;
 };
 
-const offeringOptions = ['loose leaf', 'teaware', 'classes'];
+const offeringOptions: { name: string; icon: keyof typeof Icons }[] = [
+  { name: 'loose leaf', icon: 'looseLeaf' },
+  { name: 'teaware', icon: 'teaware' },
+  { name: 'classes', icon: 'classes' },
+];
 const DEFAULT_LOCATION = { lat: 41.0793, lng: -85.1393 }; // Fort Wayne, IN
 
 export function TeaFinder() {
@@ -139,7 +141,7 @@ export function TeaFinder() {
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Explore Tea Shops</h2>
           <p className="max-w-[700px] text-muted-foreground md:text-xl">
-            Use the filters to find the perfect tea shop. Click on a shop in the list or on the map for more details.
+            Uncover authentic tea shops nearby and fuel your passion for the perfect cup.
           </p>
         </div>
         
@@ -189,7 +191,7 @@ export function TeaFinder() {
           </CardHeader>
           <CardContent className="grid gap-6 md:grid-cols-3">
             <div className="space-y-4">
-              <Label htmlFor="radius-slider">Search Radius: {radius} miles</Label>
+              <Label htmlFor="radius-slider">Search Radius: <span className="font-medium text-foreground">{radius}</span> miles</Label>
               <Slider
                 id="radius-slider"
                 value={[radius]}
@@ -200,28 +202,35 @@ export function TeaFinder() {
             </div>
             <div className="space-y-4">
               <Label>Offerings</Label>
-              <div className="flex items-center space-x-4">
-                {offeringOptions.map(option => (
-                  <div key={option} className="flex items-center space-x-2">
-                    <Checkbox 
-                      id={option} 
-                      checked={filters.offerings.includes(option)}
-                      onCheckedChange={() => handleFilterChange(option)}
-                    />
-                    <Label htmlFor={option} className="font-normal capitalize">{option}</Label>
-                  </div>
-                ))}
+              <div className="flex flex-wrap gap-2">
+                {offeringOptions.map(option => {
+                  const Icon = Icons[option.icon];
+                  return (
+                    <Button
+                      key={option.name}
+                      variant={filters.offerings.includes(option.name) ? 'secondary' : 'outline'}
+                      size="sm"
+                      onClick={() => handleFilterChange(option.name)}
+                      className="capitalize"
+                    >
+                      <Icon className="mr-2 h-4 w-4" />
+                      {option.name}
+                    </Button>
+                  );
+                })}
               </div>
             </div>
             <div className="space-y-4">
               <Label>Values</Label>
               <div className="flex items-center space-x-2">
-                <Switch 
-                  id="ethical-sourcing" 
-                  checked={filters.ethical} 
-                  onCheckedChange={checked => setFilters(prev => ({ ...prev, ethical: checked }))}
-                />
-                <Label htmlFor="ethical-sourcing" className="font-normal flex items-center gap-1"><Icons.ethical className="h-4 w-4" /> Ethical Sourcing</Label>
+                 <Button
+                    variant={filters.ethical ? 'secondary' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilters(prev => ({ ...prev, ethical: !prev.ethical }))}
+                  >
+                    <Icons.ethical className="mr-2 h-4 w-4" />
+                    Ethical Sourcing
+                  </Button>
               </div>
             </div>
           </CardContent>

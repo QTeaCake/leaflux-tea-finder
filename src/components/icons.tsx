@@ -1,4 +1,4 @@
-import { Leaf, List, Mail, MapPin, Search, SlidersHorizontal, Sparkles, Sprout, Wind, Loader2, Store } from 'lucide-react';
+import { Leaf, List, Mail, MapPin, Search, SlidersHorizontal, Sparkles, Sprout, Wind, Loader2, Store, ShoppingBag, BookOpen } from 'lucide-react';
 
 export const Icons = {
   logo: Leaf,
@@ -12,4 +12,7 @@ export const Icons = {
   wind: Wind,
   spinner: Loader2,
   store: Store,
+  looseLeaf: Leaf,
+  teaware: ShoppingBag,
+  classes: BookOpen,
 };
