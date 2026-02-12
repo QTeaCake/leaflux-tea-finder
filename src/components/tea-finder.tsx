@@ -13,6 +13,7 @@ import { Slider } from './ui/slider';
 import { Icons } from './icons';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
+import { RecommendationsTool } from './recommendations-tool';
 
 type Filters = {
   offerings: string[];
@@ -52,6 +53,7 @@ export function TeaFinder() {
   const [locationInput, setLocationInput] = useState('');
   const [isLocating, setIsLocating] = useState(true);
   const [praisedShops, setPraisedShops] = useState<string[]>([]);
+  const [votedTags, setVotedTags] = useState<Record<string, 'up' | 'down'>>({});
 
   useEffect(() => {
     setIsClient(true);
@@ -130,15 +132,6 @@ export function TeaFinder() {
     if (praisedShops.includes(shopId)) {
         return;
     }
-
-    setShopsData(currentShops =>
-      currentShops.map(shop => {
-        if (shop.id === shopId) {
-          return { ...shop, praise: (shop.praise || 0) + 1 };
-        }
-        return shop;
-      })
-    );
     setPraisedShops(prev => [...prev, shopId]);
   }, [praisedShops]);
 
@@ -147,8 +140,8 @@ export function TeaFinder() {
       currentShops.map(shop => {
         if (shop.id === shopId) {
           const newTags = [...(shop.userTags || [])];
-          if (!newTags.includes(tag.toLowerCase())) {
-            newTags.push(tag.toLowerCase());
+          if (!newTags.find(t => t.name.toLowerCase() === tag.toLowerCase())) {
+            newTags.push({ name: tag.toLowerCase(), score: 1 });
           }
           return { ...shop, userTags: newTags };
         }
@@ -157,27 +150,57 @@ export function TeaFinder() {
     );
   }, []);
   
+  const handleVoteTag = useCallback((shopId: string, tagName: string, vote: 'up' | 'down') => {
+    const tagId = `${shopId}-${tagName}`;
+    if (votedTags[tagId]) return;
+
+    setShopsData(currentShops =>
+      currentShops.map(shop => {
+        if (shop.id === shopId) {
+          const updatedTags = shop.userTags.map(tag => {
+            if (tag.name === tagName) {
+              return { ...tag, score: tag.score + (vote === 'up' ? 1 : -1) };
+            }
+            return tag;
+          });
+          return { ...shop, userTags: updatedTags };
+        }
+        return shop;
+      })
+    );
+    setVotedTags(prev => ({...prev, [tagId]: vote}));
+  }, [votedTags]);
+
   const filteredShops = useMemo(() => {
-    if (!userLocation) return [];
+    let baseShops = shopsData;
+
+    if(userLocation) {
+        baseShops = baseShops.map(shop => ({
+            ...shop,
+            distance: getDistance(userLocation.lat, userLocation.lng, shop.location.lat, shop.location.lng),
+        })).filter(shop => shop.distance <= radius);
+    }
     
-    return shopsData
-      .map(shop => ({
-        ...shop,
-        distance: getDistance(userLocation.lat, userLocation.lng, shop.location.lat, shop.location.lng),
-      }))
-      .filter(shop => shop.distance <= radius)
+    return baseShops
       .filter(shop => !filters.ethical || shop.ethical)
       .filter(shop => filters.offerings.length === 0 || filters.offerings.every(f => shop.offerings.includes(f as Offering)))
-      .filter(shop => filters.teaTypes.length === 0 || filters.teaTypes.every(t => shop.teaTypes.includes(t as TeaType)))
-      .sort((a, b) => a.distance - b.distance);
+      .filter(shop => {
+          const allShopTags = [
+              ...shop.teaTypes,
+              ...(shop.userTags?.map(t => t.name) || [])
+          ];
+          return filters.teaTypes.length === 0 || filters.teaTypes.every(t => allShopTags.includes(t as TeaType))
+      })
+      .sort((a, b) => (a.distance ?? 999) - (b.distance ?? 999));
   }, [userLocation, radius, filters, shopsData]);
 
   const mapCenter = useMemo(() => userLocation || DEFAULT_LOCATION, [userLocation]);
 
   const shopForDetails = useMemo(() => {
     if (!selectedShop) return null;
-    return shopsData.find(s => s.id === selectedShop.id) || null;
-  }, [selectedShop, shopsData]);
+    // We find the shop from filteredShops to ensure distance and other dynamic data is present
+    return filteredShops.find(s => s.id === selectedShop.id) || null;
+  }, [selectedShop, filteredShops]);
 
   if (!isClient || isLocating) {
     return (
@@ -240,9 +263,6 @@ export function TeaFinder() {
                             Search
                         </Button>
                     </div>
-                     <p className="text-xs text-muted-foreground mt-2 italic">
-                        Note: This pre-alpha version is currently limited to select areas in Ohio, Indiana, and Illinois.
-                    </p>
                 </CardContent>
             </Card>
         ) : (
@@ -274,12 +294,6 @@ export function TeaFinder() {
                         Search
                     </Button>
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                    We attempt to use your browser's location. If the map is wrong, or you want to search elsewhere, please enter a location.
-                </p>
-                <p className="text-xs text-muted-foreground mt-2 italic">
-                    Note: This pre-alpha version is currently limited to select areas in Ohio, Indiana, and Illinois.
-                </p>
             </CardContent>
             </Card>
             
@@ -335,7 +349,7 @@ export function TeaFinder() {
                       </div>
                   </div>
                   <div className="space-y-4 md:col-span-2">
-                      <Label className="flex items-center"><Icons.types className="mr-2 h-4 w-4" />Tea Types</Label>
+                      <Label className="flex items-center"><Icons.types className="mr-2 h-4 w-4" />Tea Types & User Tags</Label>
                       <div className="flex flex-wrap gap-2">
                           {teaTypeOptions.map(option => (
                               <Button
@@ -353,25 +367,38 @@ export function TeaFinder() {
               </CardContent>
             </Card>
 
+            <div className="my-8">
+              <RecommendationsTool nearbyShops={filteredShops} />
+            </div>
+
             <div className="grid gap-8 lg:grid-cols-12">
-            <div className="lg:col-span-4 h-[60vh] lg:h-[80vh] overflow-y-auto pr-2">
-                <ShopList 
-                shops={filteredShops} 
-                onSelectShop={setSelectedShop}
-                onHoverShop={setHoveredShopId}
-                hoveredShopId={hoveredShopId}
-                />
+              <div className="lg:col-span-4 h-[60vh] lg:h-[80vh] overflow-y-auto pr-2">
+                  <ShopList 
+                  shops={filteredShops} 
+                  onSelectShop={setSelectedShop}
+                  onHoverShop={setHoveredShopId}
+                  hoveredShopId={hoveredShopId}
+                  />
+              </div>
+              <div className="lg:col-span-8 h-[60vh] lg:h-[80vh] rounded-lg overflow-hidden shadow-lg">
+                  <ShopMap
+                  apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+                  shops={filteredShops}
+                  center={mapCenter}
+                  onSelectShop={setSelectedShop}
+                  onHoverShop={setHoveredShopId}
+                  hoveredShopId={hoveredShopId}
+                  />
+              </div>
             </div>
-            <div className="lg:col-span-8 h-[60vh] lg:h-[80vh] rounded-lg overflow-hidden shadow-lg">
-                <ShopMap
-                apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
-                shops={filteredShops}
-                center={mapCenter}
-                onSelectShop={setSelectedShop}
-                onHoverShop={setHoveredShopId}
-                hoveredShopId={hoveredShopId}
-                />
-            </div>
+
+            <div className="text-center">
+                <p className="text-sm text-muted-foreground mt-4">
+                    We attempt to use your browser's location. If the map is wrong, or you want to search elsewhere, please enter a location.
+                </p>
+                <p className="text-xs text-muted-foreground mt-2 italic">
+                    Note: This pre-alpha version is currently limited to select areas in Ohio, Indiana, Illinois, and Michigan.
+                </p>
             </div>
 
             <ShopDetails 
@@ -381,6 +408,8 @@ export function TeaFinder() {
               onPraise={handlePraise}
               onAddTag={handleAddTag}
               praisedShops={praisedShops}
+              onVoteTag={handleVoteTag}
+              votedTags={votedTags}
             />
         </>
         )}
