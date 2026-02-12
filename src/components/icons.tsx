@@ -1,4 +1,4 @@
-import { Leaf, List, Mail, MapPin, Search, SlidersHorizontal, Sparkles, Sprout, Wind, Loader2, Store, ShoppingBag, BookOpen, Target, Lightbulb, TrendingUp, Package, PlusCircle } from 'lucide-react';
+import { Leaf, List, Mail, MapPin, Search, SlidersHorizontal, Sparkles, Sprout, Wind, Loader2, Store, ShoppingBag, BookOpen, Target, Lightbulb, TrendingUp, Package, PlusCircle, Star } from 'lucide-react';
 
 export const Icons = {
   logo: Leaf,
@@ -20,4 +20,5 @@ export const Icons = {
   vision: TrendingUp,
   order: Package,
   plusCircle: PlusCircle,
+  star: Star,
 };

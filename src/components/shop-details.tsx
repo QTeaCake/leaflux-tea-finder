@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { useState } from 'react';
 import type { TeaShop, Offering } from '@/lib/tea-shops';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -11,16 +12,28 @@ import {
 import { Icons } from './icons';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 
 type Props = {
   shop: TeaShop | null;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onVote: (shopId: string, offering: Offering) => void;
+  onPraise: (shopId: string) => void;
+  onAddTag: (shopId: string, tag: string) => void;
 };
 
-export function ShopDetails({ shop, isOpen, onOpenChange, onVote }: Props) {
+export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag }: Props) {
+  const [newTag, setNewTag] = useState('');
+
   if (!shop) return null;
+
+  const handleAddTagClick = () => {
+    if (newTag.trim() && shop) {
+      onAddTag(shop.id, newTag.trim());
+      setNewTag(''); // Clear input after adding
+    }
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -35,33 +48,52 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onVote }: Props) {
               data-ai-hint="tea shop interior"
             />
           </div>
-          <SheetTitle className="font-headline text-3xl">{shop.name}</SheetTitle>
+          <div className="flex justify-between items-start">
+            <SheetTitle className="font-headline text-3xl">{shop.name}</SheetTitle>
+            <Button variant="outline" size="sm" onClick={() => onPraise(shop.id)} className="shrink-0">
+                <Icons.star className="w-4 h-4 mr-2 text-yellow-400 fill-yellow-400" />
+                <span className="font-bold">{shop.praise || 0}</span>
+            </Button>
+          </div>
           <SheetDescription className="flex items-center gap-2 pt-1 !mt-0">
             <Icons.mapPin className="h-4 w-4" />
             {shop.address}
           </SheetDescription>
         </SheetHeader>
         <div className="py-6 space-y-6">
-          <div className="space-y-3">
-            <h3 className="font-headline text-lg">Offerings</h3>
-            <div className="flex flex-wrap gap-3">
+          <div className="space-y-4">
+            <h3 className="font-headline text-lg">Tags</h3>
+            <div className="flex flex-wrap gap-2">
               {shop.offerings.map(offering => (
-                <div key={offering} className="flex items-center gap-2 rounded-full border border-primary/50 bg-primary/10 pl-3 pr-1 py-1 text-sm transition-shadow hover:shadow-md">
-                   <span className="capitalize font-medium text-foreground">{offering}</span>
-                   <Badge variant="secondary" className="text-xs pointer-events-none">
-                     {shop.offeringVotes?.[offering] || 0}
-                   </Badge>
-                   <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-6 w-6 rounded-full"
-                    onClick={() => onVote(shop.id, offering)}
-                    aria-label={`Add vote for ${offering}`}
-                  >
-                    <Icons.plusCircle className="h-4 w-4 text-primary hover:text-accent" />
-                  </Button>
-                </div>
+                <Badge key={offering} variant="default" className="capitalize">
+                  {offering}
+                </Badge>
               ))}
+              {shop.userTags?.map(tag => (
+                <Badge key={tag} variant="outline" className="capitalize">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="add-tag-input" className="text-xs text-muted-foreground">Suggest a new tag</Label>
+                <div className="flex items-center gap-2">
+                    <Input 
+                        id="add-tag-input"
+                        value={newTag}
+                        onChange={(e) => setNewTag(e.target.value)}
+                        placeholder="e.g., 'cozy' or 'good for study'"
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddTagClick();
+                            }
+                        }}
+                    />
+                    <Button size="icon" onClick={handleAddTagClick} disabled={!newTag.trim()} aria-label="Add Tag">
+                        <Icons.plusCircle className="h-5 w-5" />
+                    </Button>
+                </div>
             </div>
           </div>
 

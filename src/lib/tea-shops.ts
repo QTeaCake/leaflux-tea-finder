@@ -9,7 +9,8 @@ export type TeaShop = {
     lng: number;
   };
   offerings: Offering[];
-  offeringVotes: { [key in Offering]?: number };
+  praise: number;
+  userTags: string[];
   ethical: boolean;
   contact: {
     phone: string;
@@ -29,7 +30,8 @@ export const teaShops: TeaShop[] = [
       lng: -84.97670994071623,
     },
     offerings: ['loose leaf'],
-    offeringVotes: { 'loose leaf': 12 },
+    praise: 12,
+    userTags: ['herbal', 'spices'],
     ethical: false,
     contact: {
       phone: '+12606159634',
@@ -45,7 +47,8 @@ export const teaShops: TeaShop[] = [
       lng: -85.57101400451032,
     },
     offerings: ['loose leaf'],
-    offeringVotes: { 'loose leaf': 8 },
+    praise: 8,
+    userTags: ['coffee', 'cozy'],
     ethical: false,
     contact: {
       phone: '+15749031033',
@@ -61,7 +64,8 @@ export const teaShops: TeaShop[] = [
       lng: -85.13615200946663,
     },
     offerings: ['loose leaf'],
-    offeringVotes: { 'loose leaf': 5 },
+    praise: 5,
+    userTags: [],
     ethical: false,
     contact: {
       phone: '+17406066265',
@@ -77,7 +81,8 @@ export const teaShops: TeaShop[] = [
       lng: -86.22733017756487,
     },
     offerings: ['loose leaf'],
-    offeringVotes: { 'loose leaf': 15 },
+    praise: 15,
+    userTags: ['natural', 'health'],
     ethical: false,
     contact: {
       phone: '+13176362961',
@@ -93,7 +98,8 @@ export const teaShops: TeaShop[] = [
       lng: -86.0213365246702,
     },
     offerings: ['loose leaf'],
-    offeringVotes: { 'loose leaf': 22 },
+    praise: 22,
+    userTags: ['subscription', 'local'],
     ethical: false,
     contact: {
       phone: '',
@@ -109,7 +115,8 @@ export const teaShops: TeaShop[] = [
       lng: -83.73788445216886,
     },
     offerings: ['loose leaf'],
-    offeringVotes: { 'loose leaf': 31 },
+    praise: 31,
+    userTags: ['organic', 'online'],
     ethical: true,
     contact: {
       phone: '+17349947698',
@@ -125,7 +132,8 @@ export const teaShops: TeaShop[] = [
       lng: -84.66766768959064,
     },
     offerings: ['loose leaf', 'teaware', 'classes'],
-    offeringVotes: { 'loose leaf': 42, 'teaware': 28, 'classes': 19 },
+    praise: 42,
+    userTags: ['gongfu', 'community'],
     ethical: false,
     contact: {
       phone: '+19374232862',
@@ -142,7 +150,8 @@ export const teaShops: TeaShop[] = [
       lng: -87.64653838176316,
     },
     offerings: ['loose leaf', 'teaware'],
-    offeringVotes: { 'loose leaf': 18, 'teaware': 11 },
+    praise: 18,
+    userTags: ['oolong', 'puerh'],
     ethical: false,
     contact: {
       phone: '+17738882918',
@@ -158,7 +167,8 @@ export const teaShops: TeaShop[] = [
       lng: -88.21782742739538,
     },
     offerings: ['loose leaf', 'teaware', 'classes'],
-    offeringVotes: { 'loose leaf': 25, 'teaware': 21, 'classes': 33 },
+    praise: 33,
+    userTags: ['matcha', 'ceremony', 'culture'],
     ethical: false,
     contact: {
       phone: '+12172449934',
@@ -174,7 +184,8 @@ export const teaShops: TeaShop[] = [
       lng: -86.50396029049867,
     },
     offerings: ['loose leaf'],
-    offeringVotes: { 'loose leaf': 4 },
+    praise: 4,
+    userTags: [],
     ethical: false,
     contact: {
       phone: '+13175392507',
@@ -190,7 +201,8 @@ export const teaShops: TeaShop[] = [
       lng: -80.15652325193659,
     },
     offerings: ['loose leaf'],
-    offeringVotes: { 'loose leaf': 9 },
+    praise: 9,
+    userTags: [],
     ethical: false,
     contact: {
       phone: '+18144800844',
@@ -206,7 +218,8 @@ export const teaShops: TeaShop[] = [
       lng: -84.53696385850519,
     },
     offerings: ['loose leaf'],
-    offeringVotes: { 'loose leaf': 14 },
+    praise: 14,
+    userTags: ['boba'],
     ethical: false,
     contact: {
       phone: '+19195250594',
@@ -222,7 +235,8 @@ export const teaShops: TeaShop[] = [
       lng: -87.88376538176318,
     },
     offerings: ['loose leaf'],
-    offeringVotes: { 'loose leaf': 17 },
+    praise: 17,
+    userTags: ['matcha', 'cafe'],
     ethical: false,
     contact: {
       phone: '+17089379225',

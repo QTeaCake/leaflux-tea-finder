@@ -103,20 +103,32 @@ export function TeaFinder() {
     });
   }, []);
 
-  const handleVote = useCallback((shopId: string, offering: Offering) => {
+  const handlePraise = useCallback((shopId: string) => {
     setShopsData(currentShops =>
       currentShops.map(shop => {
         if (shop.id === shopId) {
-          const newVotes = {
-            ...shop.offeringVotes,
-            [offering]: (shop.offeringVotes?.[offering] || 0) + 1,
-          };
-          return { ...shop, offeringVotes: newVotes };
+          return { ...shop, praise: (shop.praise || 0) + 1 };
         }
         return shop;
       })
     );
   }, []);
+
+  const handleAddTag = useCallback((shopId: string, tag: string) => {
+    setShopsData(currentShops =>
+      currentShops.map(shop => {
+        if (shop.id === shopId) {
+          const newTags = [...(shop.userTags || [])];
+          if (!newTags.includes(tag.toLowerCase())) {
+            newTags.push(tag.toLowerCase());
+          }
+          return { ...shop, userTags: newTags };
+        }
+        return shop;
+      })
+    );
+  }, []);
+
 
   const filteredShops = useMemo(() => {
     if (!userLocation) return [];
@@ -326,7 +338,8 @@ export function TeaFinder() {
               shop={shopForDetails} 
               isOpen={!!selectedShop} 
               onOpenChange={(open) => !open && setSelectedShop(null)}
-              onVote={handleVote} 
+              onPraise={handlePraise}
+              onAddTag={handleAddTag}
             />
         </>
         )}
