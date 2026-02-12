@@ -18,6 +18,18 @@ export type TeaShop = {
 export const teaShops: TeaShop[] = [
   // Indiana
   {
+    id: 'ts-in-01',
+    name: "The Spice & Tea Exchange of Fort Wayne",
+    address: "405 E Jefferson Blvd, Fort Wayne, IN 46802",
+    location: { lat: 41.0772, lng: -85.1352 },
+    offerings: ['loose leaf', 'teaware'],
+    ethical: false,
+    contact: {
+      phone: "(260) 444-5991",
+      website: "https://www.spiceandtea.com/fort-wayne"
+    }
+  },
+  {
     id: 'ts-in-02',
     name: "Circle City Cuppa",
     address: "49 W Maryland St, Indianapolis, IN 46204",

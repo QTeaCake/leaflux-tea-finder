@@ -28,7 +28,7 @@ const DEFAULT_LOCATION = { lat: 41.0793, lng: -85.1393 }; // Fort Wayne, IN
 export function TeaFinder() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [radius, setRadius] = useState(10); // in miles
+  const [radius, setRadius] = useState(150); // in miles
   const [filters, setFilters] = useState<Filters>({ offerings: [], ethical: false });
   const [selectedShop, setSelectedShop] = useState<TeaShop | null>(null);
   const [hoveredShopId, setHoveredShopId] = useState<string | null>(null);
@@ -194,8 +194,8 @@ export function TeaFinder() {
                 id="radius-slider"
                 value={[radius]}
                 onValueChange={([val]) => setRadius(val)}
-                max={50}
-                step={1}
+                max={250}
+                step={5}
               />
             </div>
             <div className="space-y-4">
