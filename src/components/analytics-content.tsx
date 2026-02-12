@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from './icons';
+import { AnalyticsMap } from './analytics-map';
+import { teaShops } from '@/lib/tea-shops';
 
 export function AnalyticsContent() {
   return (
@@ -21,20 +23,14 @@ export function AnalyticsContent() {
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="font-headline text-2xl">Tea Desert Heatmap</CardTitle>
+              <CardTitle className="font-headline text-2xl">Tea Shop Distribution</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                This map visualizes areas with high user interest but a low density of authentic tea shops, highlighting potential market gaps for new businesses.
+                This map shows the locations of all currently listed tea shops. Areas with no markers represent potential "tea deserts"—untapped markets with high potential for new businesses.
               </p>
               <div className="relative aspect-video w-full rounded-lg overflow-hidden border">
-                <Image
-                  src="https://picsum.photos/seed/heatmap/800/450"
-                  alt="A heatmap showing tea deserts."
-                  fill
-                  className="object-cover"
-                  data-ai-hint="geographic heat map"
-                />
+                <AnalyticsMap shops={teaShops} apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY} />
               </div>
             </CardContent>
           </Card>
