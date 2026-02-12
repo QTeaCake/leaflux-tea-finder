@@ -2,10 +2,7 @@ export type TeaType = 'white' | 'green' | 'yellow' | 'oolong' | 'black' | 'puerh
 
 export type Offering = 'loose leaf' | 'teaware' | 'classes';
 
-export type UserTag = {
-  name: string;
-  score: number;
-};
+export type UserTag = string;
 
 export type TeaShop = {
   id: string;
@@ -40,10 +37,7 @@ export const teaShops: TeaShop[] = [
     offerings: ['loose leaf', 'teaware'],
     teaTypes: ['herbal', 'black'],
     praise: 12,
-    userTags: [
-      { name: 'herbal', score: 1 },
-      { name: 'spices', score: 1 },
-    ],
+    userTags: ['herbal', 'spices'],
     ethical: false,
     contact: {
       phone: '+12606159634',
@@ -87,24 +81,6 @@ export const teaShops: TeaShop[] = [
     },
   },
   {
-    id: 'natures-tea-company-indianapolis',
-    name: "Nature's Tea Company",
-    address: '6210 La Pas Trail, Indianapolis, IN 46268',
-    location: {
-      lat: 39.88167006426876,
-      lng: -86.22733017756487,
-    },
-    offerings: [],
-    teaTypes: [],
-    praise: 15,
-    userTags: [],
-    ethical: false,
-    contact: {
-      phone: '+13176362961',
-      website: 'https://www.naturesteacompany.com/',
-    },
-  },
-  {
     id: 'nelsons-tea-indianapolis',
     name: "Nelson's Tea",
     address: '8709 Castle Park Dr, Indianapolis, IN 46256',
@@ -133,10 +109,7 @@ export const teaShops: TeaShop[] = [
     offerings: ['loose leaf', 'teaware'],
     teaTypes: ['white', 'green', 'yellow', 'oolong', 'black', 'puerh', 'herbal', 'matcha'],
     praise: 31,
-    userTags: [
-      { name: 'organic', score: 1 },
-      { name: 'online', score: 1 },
-    ],
+    userTags: ['organic', 'online'],
     ethical: true,
     contact: {
       phone: '+17349947698',
