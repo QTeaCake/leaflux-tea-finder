@@ -13,6 +13,7 @@ export type TeaShop = {
     website: string;
   };
   distance?: number;
+  isFeatured?: boolean;
 };
 
 export const teaShops: TeaShop[] = [
@@ -114,12 +115,13 @@ export const teaShops: TeaShop[] = [
       lat: 40.160302323757335,
       lng: -84.66766768959064,
     },
-    offerings: ['loose leaf'],
+    offerings: ['loose leaf', 'teaware', 'classes'],
     ethical: false,
     contact: {
       phone: '+19374232862',
       website: 'https://www.bluelanterntea.com/menu/',
     },
+    isFeatured: true,
   },
   {
     id: 'taian-chicago',
@@ -129,7 +131,7 @@ export const teaShops: TeaShop[] = [
       lat: 41.92830363239487,
       lng: -87.64653838176316,
     },
-    offerings: ['loose leaf'],
+    offerings: ['loose leaf', 'teaware'],
     ethical: false,
     contact: {
       phone: '+17738882918',

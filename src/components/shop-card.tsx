@@ -26,7 +26,7 @@ const getDistanceColorClasses = (distance: number): string => {
 
 
 export function ShopCard({ shop, onSelect, onHover, isHovered }: Props) {
-  const isSpecial = shop.id === 'blue-lantern-tea-greenville';
+  const isSpecial = !!shop.isFeatured;
 
   return (
     <Card 

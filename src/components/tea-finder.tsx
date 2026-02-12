@@ -36,6 +36,7 @@ export function TeaFinder() {
   const [hoveredShopId, setHoveredShopId] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [locationInput, setLocationInput] = useState('');
+  const [isLocating, setIsLocating] = useState(true);
 
   useEffect(() => {
     setIsClient(true);
@@ -47,16 +48,19 @@ export function TeaFinder() {
             lng: position.coords.longitude,
           });
           setLocationError(null);
+          setIsLocating(false);
         },
         error => {
           console.error("Error getting location:", error);
-          setLocationError('Could not get your location. Please enable location services. Using a default location.');
+          setLocationError('Could not get your location. Please enable location services or enter a location manually.');
           setUserLocation(DEFAULT_LOCATION);
+          setIsLocating(false);
         }
       );
     } else {
-      setLocationError('Geolocation is not supported by your browser. Using a default location.');
+      setLocationError('Geolocation is not supported by your browser. Please enter a location manually.');
       setUserLocation(DEFAULT_LOCATION);
+      setIsLocating(false);
     }
   }, []);
 
@@ -112,7 +116,7 @@ export function TeaFinder() {
 
   const mapCenter = useMemo(() => userLocation || DEFAULT_LOCATION, [userLocation]);
 
-  if (!isClient || !userLocation) {
+  if (!isClient || isLocating) {
     return (
       <section id="finder" className="w-full py-12 md:py-20 bg-background">
         <div className="container mx-auto px-4 md:px-6">
@@ -145,8 +149,6 @@ export function TeaFinder() {
           </p>
         </div>
         
-        {locationError && <p className="text-center text-destructive">{locationError}</p>}
-
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl flex items-center gap-2">
@@ -155,6 +157,7 @@ export function TeaFinder() {
             </CardTitle>
           </CardHeader>
           <CardContent>
+             {locationError && <p className="text-center text-destructive mb-4">{locationError}</p>}
             <div className="flex flex-col sm:flex-row gap-2">
                 <Input 
                     placeholder="Enter an address, city, or zip code" 
