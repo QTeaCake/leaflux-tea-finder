@@ -288,8 +288,8 @@ export function TeaFinder() {
                     Refine Your Search
                   </CardTitle>
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Icons.filters className="h-5 w-5" />
+                    <Button variant="ghost" size="icon" className="[&>svg]:transition-transform [&>svg]:duration-200 [&[data-state=open]>svg]:rotate-180">
+                      <Icons.chevronDown className="h-5 w-5" />
                       <span className="sr-only">Toggle Filters</span>
                     </Button>
                   </CollapsibleTrigger>
