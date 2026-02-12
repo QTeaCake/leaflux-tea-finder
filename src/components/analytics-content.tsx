@@ -27,7 +27,7 @@ export function AnalyticsContent() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                This heatmap visualizes the density of tea shops across the country. Hotter, redder areas indicate a high concentration of shops, while the vast, cooler areas are the 'tea deserts'—untapped markets with high potential.
+                This heatmap visualizes tea shop density. Think of it as a 'competition map.' The hotter, redder areas are saturated markets. The vast, cooler blue areas are the 'tea deserts'—untapped markets with high potential. This is where opportunity lies.
               </p>
               <div className="relative aspect-video w-full rounded-lg overflow-hidden border">
                 <AnalyticsMap shops={teaShops} apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY} />
