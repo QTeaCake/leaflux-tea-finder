@@ -7,7 +7,7 @@ import { SuggestShopForm } from './suggest-shop-form';
 export function Footer() {
   return (
     <footer className="bg-primary/80 text-primary-foreground">
-      <div className="w-full bg-background py-12 md:py-20 border-t">
+      <div id="contact-section" className="w-full bg-background py-12 md:py-20 border-t">
         <div className="container mx-auto grid gap-12 px-4 md:px-6 lg:grid-cols-3 lg:gap-8">
           <Card className="shadow-lg">
             <CardHeader>

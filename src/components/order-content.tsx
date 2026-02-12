@@ -1,4 +1,7 @@
+import Link from 'next/link';
+import { Button } from './ui/button';
 import { Icons } from './icons';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function OrderContent() {
   return (
@@ -36,6 +39,28 @@ export function OrderContent() {
             </p>
           </div>
         </div>
+
+        <div className="mt-20 max-w-2xl mx-auto">
+          <Card className="text-center shadow-lg p-6">
+            <CardHeader className="p-0">
+              <div className="flex justify-center">
+                <div className="bg-primary/10 p-3 rounded-lg w-fit">
+                  <Icons.mail className="h-8 w-8 text-primary" />
+                </div>
+              </div>
+              <CardTitle className="font-headline text-3xl !mt-4">Are you a Tea Vendor?</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0 pt-4">
+              <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
+                Interested in reaching a dedicated community of tea lovers? Partner with us to feature your products for online ordering. Use the contact form below to get in touch!
+              </p>
+              <Button asChild>
+                  <Link href="#contact-section">Get in Touch</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
       </div>
     </section>
   );
