@@ -27,7 +27,7 @@ export function AnalyticsContent() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                This map shows the locations of all currently listed tea shops. Areas with no markers represent potential "tea deserts"—untapped markets with high potential for new businesses.
+                This heatmap visualizes the density of tea shops across the country. Hotter, redder areas indicate a high concentration of shops, while the vast, cooler areas are the 'tea deserts'—untapped markets with high potential.
               </p>
               <div className="relative aspect-video w-full rounded-lg overflow-hidden border">
                 <AnalyticsMap shops={teaShops} apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY} />
