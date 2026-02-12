@@ -38,6 +38,7 @@ export function TeaFinder() {
   const [isClient, setIsClient] = useState(false);
   const [locationInput, setLocationInput] = useState('');
   const [isLocating, setIsLocating] = useState(true);
+  const [praisedShops, setPraisedShops] = useState<string[]>([]);
 
   useEffect(() => {
     setIsClient(true);
@@ -104,15 +105,24 @@ export function TeaFinder() {
   }, []);
 
   const handlePraise = useCallback((shopId: string) => {
+    // Prevent praising more than once per session
+    if (praisedShops.includes(shopId)) {
+        return;
+    }
+
     setShopsData(currentShops =>
       currentShops.map(shop => {
         if (shop.id === shopId) {
+          // Note: We're still incrementing the original praise count
+          // for potential future analytics, even though it's not displayed.
           return { ...shop, praise: (shop.praise || 0) + 1 };
         }
         return shop;
       })
     );
-  }, []);
+    // Add to the list of shops praised in this session
+    setPraisedShops(prev => [...prev, shopId]);
+  }, [praisedShops]);
 
   const handleAddTag = useCallback((shopId: string, tag: string) => {
     setShopsData(currentShops =>
@@ -340,6 +350,7 @@ export function TeaFinder() {
               onOpenChange={(open) => !open && setSelectedShop(null)}
               onPraise={handlePraise}
               onAddTag={handleAddTag}
+              praisedShops={praisedShops}
             />
         </>
         )}

@@ -30,15 +30,18 @@ export function ShopCard({ shop, onSelect, onHover, isHovered }: Props) {
 
   return (
     <Card 
-      className={`cursor-pointer transition-all duration-300 ease-in-out hover:shadow-xl ${isHovered ? 'shadow-xl scale-[1.02] border-primary' : 'shadow-md'} ${isSpecial && !isHovered ? 'shadow-accent/20 shadow-lg' : ''}`}
+      className={`group cursor-pointer transition-all duration-300 ease-in-out hover:shadow-xl ${isHovered ? 'shadow-xl scale-[1.02] border-primary' : 'shadow-md'} ${isSpecial && !isHovered ? 'shadow-accent/20 shadow-lg' : ''}`}
       onClick={() => onSelect(shop)}
       onMouseEnter={() => onHover(shop.id)}
       onMouseLeave={() => onHover(null)}
     >
       <CardHeader>
         <CardTitle className="font-headline text-xl flex justify-between items-center">
-          {shop.name}
-          {isSpecial && <Icons.ai className="h-5 w-5 text-accent" />}
+          <span>{shop.name}</span>
+          <span className="flex items-center gap-2">
+            {isSpecial && <Icons.ai className="h-5 w-5 text-accent" />}
+            <Icons.arrowRight className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </span>
         </CardTitle>
         <CardDescription className="flex items-center gap-2">
           <Icons.mapPin className="h-4 w-4" />

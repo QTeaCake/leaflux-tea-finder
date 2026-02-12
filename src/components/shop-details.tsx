@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { useState } from 'react';
-import type { TeaShop, Offering } from '@/lib/tea-shops';
+import type { TeaShop } from '@/lib/tea-shops';
 import { Badge } from '@/components/ui/badge';
 import {
   Sheet,
@@ -21,9 +21,10 @@ type Props = {
   onOpenChange: (isOpen: boolean) => void;
   onPraise: (shopId: string) => void;
   onAddTag: (shopId: string, tag: string) => void;
+  praisedShops: string[];
 };
 
-export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag }: Props) {
+export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, praisedShops }: Props) {
   const [newTag, setNewTag] = useState('');
 
   if (!shop) return null;
@@ -34,6 +35,8 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag }: 
       setNewTag(''); // Clear input after adding
     }
   };
+
+  const isPraised = praisedShops.includes(shop.id);
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -50,9 +53,9 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag }: 
           </div>
           <div className="flex justify-between items-start">
             <SheetTitle className="font-headline text-3xl">{shop.name}</SheetTitle>
-            <Button variant="outline" size="sm" onClick={() => onPraise(shop.id)} className="shrink-0">
-                <Icons.star className="w-4 h-4 mr-2 text-yellow-400 fill-yellow-400" />
-                <span>Praise</span>
+            <Button variant="outline" size="sm" onClick={() => onPraise(shop.id)} disabled={isPraised} className="shrink-0">
+                <Icons.star className={`w-4 h-4 mr-2 text-yellow-400 transition-colors ${isPraised ? 'fill-yellow-400' : 'fill-transparent'}`} />
+                <span>{isPraised ? 'Praised!' : 'Praise'}</span>
             </Button>
           </div>
           <SheetDescription className="flex items-center gap-2 pt-1 !mt-0">
