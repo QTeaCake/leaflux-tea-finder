@@ -96,7 +96,7 @@ export function TeaFinder() {
     }
 
     try {
-      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(locationInput)}&components=country:US&key=${apiKey}`);
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(locationInput)}&key=${apiKey}`);
       const data = await response.json();
 
       if (data.status === 'OK' && data.results[0]) {
