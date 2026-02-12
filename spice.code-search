@@ -1,0 +1,13 @@
+# Query: spice
+# ContextLines: 1
+
+2 results - 1 file
+
+src/lib/tea-shops.ts:
+  21      id: 'ts-in-01',
+  22:     name: "The Spice Shack",
+  23      address: "11334 Page Rd, Grabill, IN 46741",
+
+  28        phone: "+12606159634",
+  29:       website: "http://thespiceshack.org/"
+  30      }
