@@ -18,18 +18,6 @@ export type TeaShop = {
 export const teaShops: TeaShop[] = [
   // Indiana
   {
-    id: 'ts-in-01',
-    name: "Summit City Tea",
-    address: "203 E Berry St, Fort Wayne, IN 46802",
-    location: { lat: 41.0793, lng: -85.1393 },
-    offerings: ['loose leaf', 'teaware'],
-    ethical: true,
-    contact: {
-      phone: "(260) 555-1234",
-      website: "https://www.summitcitytea.com"
-    }
-  },
-  {
     id: 'ts-in-02',
     name: "Circle City Cuppa",
     address: "49 W Maryland St, Indianapolis, IN 46204",

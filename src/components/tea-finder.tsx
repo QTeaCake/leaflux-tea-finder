@@ -48,12 +48,12 @@ export function TeaFinder() {
         error => {
           console.error("Error getting location:", error);
           setLocationError('Could not get your location. Please enable location services. Using a default location.');
-          setUserLocation({ lat: 41.0793, lng: -85.1393 }); // Default to Fort Wayne
+          setUserLocation({ lat: 39.7661, lng: -86.1593 }); // Default to Indianapolis
         }
       );
     } else {
       setLocationError('Geolocation is not supported by your browser. Using a default location.');
-      setUserLocation({ lat: 41.0793, lng: -85.1393 }); // Default to Fort Wayne
+      setUserLocation({ lat: 39.7661, lng: -86.1593 }); // Default to Indianapolis
     }
   }, []);
 
@@ -106,7 +106,7 @@ export function TeaFinder() {
       .sort((a, b) => a.distance - b.distance);
   }, [userLocation, radius, filters]);
 
-  const mapCenter = useMemo(() => userLocation || { lat: 41.0793, lng: -85.1393 }, [userLocation]);
+  const mapCenter = useMemo(() => userLocation || { lat: 39.7661, lng: -86.1593 }, [userLocation]);
 
   if (!isClient || !userLocation) {
     return (
