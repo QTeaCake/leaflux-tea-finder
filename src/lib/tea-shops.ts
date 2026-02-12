@@ -16,100 +16,103 @@ export type TeaShop = {
 };
 
 export const teaShops: TeaShop[] = [
+  // Indiana
   {
-    id: 'ts001',
-    name: "The Jade Leaf",
-    address: "123 Serenity Lane, Los Angeles, CA 90012",
-    location: { lat: 34.058, lng: -118.239 },
-    offerings: ['loose leaf', 'teaware', 'classes'],
-    ethical: true,
-    contact: {
-      phone: "(213) 555-1234",
-      website: "https://www.thejadeleaf.com"
-    }
-  },
-  {
-    id: 'ts002',
-    name: "Steeped Thoughts",
-    address: "456 Wisdom Way, Santa Monica, CA 90401",
-    location: { lat: 34.021, lng: -118.491 },
-    offerings: ['loose leaf', 'classes'],
-    ethical: false,
-    contact: {
-      phone: "(310) 555-5678",
-      website: "https://www.steepedthoughts.com"
-    }
-  },
-  {
-    id: 'ts003',
-    name: "Oolong Oasis",
-    address: "789 Dragon St, Pasadena, CA 91101",
-    location: { lat: 34.147, lng: -118.144 },
+    id: 'ts-in-01',
+    name: "Summit City Tea",
+    address: "203 E Berry St, Fort Wayne, IN 46802",
+    location: { lat: 41.0793, lng: -85.1393 },
     offerings: ['loose leaf', 'teaware'],
     ethical: true,
     contact: {
-      phone: "(626) 555-9012",
-      website: "https://www.oolongoasis.com"
+      phone: "(260) 555-1234",
+      website: "https://www.summitcitytea.com"
     }
   },
   {
-    id: 'ts004',
-    name: "The Tea Kettle",
-    address: "101 Brewmaster Ave, Culver City, CA 90232",
-    location: { lat: 34.021, lng: -118.396 },
-    offerings: ['teaware', 'classes'],
-    ethical: true,
-    contact: {
-      phone: "(310) 555-3456",
-      website: "https://www.theteakettle.com"
-    }
-  },
-  {
-    id: 'ts005',
-    name: "Golden Tipple Teas",
-    address: "212 Tranquil Blvd, Beverly Hills, CA 90210",
-    location: { lat: 34.073, lng: -118.400 },
-    offerings: ['loose leaf'],
+    id: 'ts-in-02',
+    name: "Circle City Cuppa",
+    address: "49 W Maryland St, Indianapolis, IN 46204",
+    location: { lat: 39.7661, lng: -86.1593 },
+    offerings: ['loose leaf', 'classes'],
     ethical: false,
     contact: {
-      phone: "(310) 555-7890",
-      website: "https://www.goldentippleteas.com"
+      phone: "(317) 555-5678",
+      website: "https://www.circlecitycuppa.com"
     }
   },
+  // Illinois
   {
-    id: 'ts006',
-    name: "Matcha Mecca",
-    address: "333 Greenery Rd, Long Beach, CA 90802",
-    location: { lat: 33.770, lng: -118.193 },
+    id: 'ts-il-01',
+    name: "Windy City Tea Emporium",
+    address: "835 N Michigan Ave, Chicago, IL 60611",
+    location: { lat: 41.8974, lng: -87.6241 },
     offerings: ['loose leaf', 'teaware', 'classes'],
     ethical: true,
     contact: {
-      phone: "(562) 555-1122",
-      website: "https://www.matchamecca.com"
-    }
-  },
-    {
-    id: 'ts007',
-    name: "Pu-erh Palace",
-    address: "444 Fermentia Circle, Glendale, CA 91203",
-    location: { lat: 34.142, lng: -118.255 },
-    offerings: ['loose leaf'],
-    ethical: true,
-    contact: {
-      phone: "(818) 555-3344",
-      website: "https://www.puerhpalace.com"
+      phone: "(312) 555-9012",
+      website: "https://www.windycitytea.com"
     }
   },
   {
-    id: 'ts008',
-    name: "Aroma & Vessel",
-    address: "555 Clay Court, Burbank, CA 91502",
-    location: { lat: 34.180, lng: -118.309 },
-    offerings: ['teaware'],
+    id: 'ts-il-02',
+    name: "Lincoln's Tea Leaves",
+    address: "400 E Monroe St, Springfield, IL 62701",
+    location: { lat: 39.7990, lng: -89.6438 },
+    offerings: ['loose leaf'],
+    ethical: true,
+    contact: {
+      phone: "(217) 555-3456",
+      website: "https://www.lincolnstea.com"
+    }
+  },
+    {
+    id: 'ts-il-03',
+    name: "The Loop Leaf",
+    address: "20 W Jackson Blvd, Chicago, IL 60604",
+    location: { lat: 41.8780, lng: -87.6292 },
+    offerings: ['teaware', 'classes'],
     ethical: false,
     contact: {
-      phone: "(818) 555-5566",
-      website: "https://www.aromavessel.com"
+      phone: "(312) 555-2233",
+      website: "https://www.theloopleaf.com"
+    }
+  },
+  // Ohio
+  {
+    id: 'ts-oh-01',
+    name: "Buckeye Brews",
+    address: "187 S High St, Columbus, OH 43215",
+    location: { lat: 39.9592, lng: -83.0010 },
+    offerings: ['loose leaf', 'teaware', 'classes'],
+    ethical: true,
+    contact: {
+      phone: "(614) 555-7890",
+      website: "https://www.buckeyebrews.com"
+    }
+  },
+  {
+    id: 'ts-oh-02',
+    name: "Rock & Roll Teas",
+    address: "1100 E 9th St, Cleveland, OH 44114",
+    location: { lat: 41.5085, lng: -81.6912 },
+    offerings: ['loose leaf', 'teaware'],
+    ethical: false,
+    contact: {
+      phone: "(216) 555-1122",
+      website: "https://www.rockandrollteas.com"
+    }
+  },
+  {
+    id: 'ts-oh-03',
+    name: "Queen City Oolong",
+    address: "1420 Vine St, Cincinnati, OH 45202",
+    location: { lat: 39.1098, lng: -84.5165 },
+    offerings: ['loose leaf', 'classes'],
+    ethical: true,
+    contact: {
+      phone: "(513) 555-4455",
+      website: "https://www.queencityoolong.com"
     }
   }
 ];
