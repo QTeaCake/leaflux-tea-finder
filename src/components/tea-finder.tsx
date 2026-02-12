@@ -14,6 +14,8 @@ import { Switch } from './ui/switch';
 import { Checkbox } from './ui/checkbox';
 import { Icons } from './icons';
 import { RecommendationsTool } from './recommendations-tool';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
 
 type Filters = {
   offerings: string[];
@@ -30,6 +32,7 @@ export function TeaFinder() {
   const [selectedShop, setSelectedShop] = useState<TeaShop | null>(null);
   const [hoveredShopId, setHoveredShopId] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [locationInput, setLocationInput] = useState('');
 
   useEffect(() => {
     setIsClient(true);
@@ -45,14 +48,40 @@ export function TeaFinder() {
         error => {
           console.error("Error getting location:", error);
           setLocationError('Could not get your location. Please enable location services. Using a default location.');
-          setUserLocation({ lat: 34.0522, lng: -118.2437 }); // Default to LA
+          setUserLocation({ lat: 41.0793, lng: -85.1393 }); // Default to Fort Wayne
         }
       );
     } else {
       setLocationError('Geolocation is not supported by your browser. Using a default location.');
-      setUserLocation({ lat: 34.0522, lng: -118.2437 }); // Default to LA
+      setUserLocation({ lat: 41.0793, lng: -85.1393 }); // Default to Fort Wayne
     }
   }, []);
+
+  const handleLocationSearch = useCallback(async () => {
+    if (!locationInput) return;
+
+    setLocationError(null);
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      setLocationError("API Key is missing for geocoding.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(locationInput)}&key=${apiKey}`);
+      const data = await response.json();
+
+      if (data.status === 'OK' && data.results[0]) {
+        const { lat, lng } = data.results[0].geometry.location;
+        setUserLocation({ lat, lng });
+      } else {
+        setLocationError(`Could not find location: "${locationInput}". Please try again.`);
+      }
+    } catch (error) {
+      console.error("Error geocoding:", error);
+      setLocationError("There was an error searching for the location.");
+    }
+  }, [locationInput]);
 
   const handleFilterChange = useCallback((offering: string) => {
     setFilters(prev => {
@@ -77,7 +106,7 @@ export function TeaFinder() {
       .sort((a, b) => a.distance - b.distance);
   }, [userLocation, radius, filters]);
 
-  const mapCenter = useMemo(() => userLocation || { lat: 34.0522, lng: -118.2437 }, [userLocation]);
+  const mapCenter = useMemo(() => userLocation || { lat: 41.0793, lng: -85.1393 }, [userLocation]);
 
   if (!isClient || !userLocation) {
     return (
@@ -113,6 +142,38 @@ export function TeaFinder() {
         </div>
         
         {locationError && <p className="text-center text-destructive">{locationError}</p>}
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-headline text-2xl flex items-center gap-2">
+              <Icons.mapPin className="h-6 w-6 text-primary" />
+              Set Your Location
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-2">
+                <Input 
+                    placeholder="Enter an address, city, or zip code" 
+                    value={locationInput}
+                    onChange={(e) => setLocationInput(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleLocationSearch();
+                        }
+                    }}
+                    className="flex-grow"
+                />
+                <Button onClick={handleLocationSearch} className="w-full sm:w-auto">
+                    <Icons.search className="mr-2 h-4 w-4" />
+                    Search
+                </Button>
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">
+                We attempt to use your browser's location. If the map is wrong, or you want to search elsewhere, please enter a location.
+            </p>
+          </CardContent>
+        </Card>
         
         <Card className="shadow-lg">
           <CardHeader>
