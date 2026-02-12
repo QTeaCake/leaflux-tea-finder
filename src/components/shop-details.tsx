@@ -14,6 +14,7 @@ import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { PraiseButton } from './praise-button';
 
 type Props = {
   shop: TeaShop | null;
@@ -53,10 +54,11 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, pr
           </div>
           <div className="flex justify-between items-start">
             <SheetTitle className="font-headline text-3xl">{shop.name}</SheetTitle>
-            <Button variant="outline" size="sm" onClick={() => onPraise(shop.id)} disabled={isPraised} className="shrink-0">
-                <Icons.star className={`w-4 h-4 mr-2 text-yellow-400 transition-colors ${isPraised ? 'fill-yellow-400' : 'fill-transparent'}`} />
-                <span>{isPraised ? 'Praised!' : 'Praise'}</span>
-            </Button>
+            <PraiseButton
+              shopId={shop.id}
+              onPraise={onPraise}
+              isPraised={isPraised}
+            />
           </div>
           <SheetDescription className="flex items-center gap-2 pt-1 !mt-0">
             <Icons.mapPin className="h-4 w-4" />
