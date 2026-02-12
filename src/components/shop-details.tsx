@@ -52,7 +52,7 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag }: 
             <SheetTitle className="font-headline text-3xl">{shop.name}</SheetTitle>
             <Button variant="outline" size="sm" onClick={() => onPraise(shop.id)} className="shrink-0">
                 <Icons.star className="w-4 h-4 mr-2 text-yellow-400 fill-yellow-400" />
-                <span className="font-bold">{shop.praise || 0}</span>
+                <span>Praise</span>
             </Button>
           </div>
           <SheetDescription className="flex items-center gap-2 pt-1 !mt-0">
