@@ -5,6 +5,7 @@ import './globals.css';
 export const metadata: Metadata = {
   title: "LeafLux's Tea Finder",
   description: 'Discover authentic tea shops and personalized recommendations.',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -15,6 +16,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="application-name" content="LeafLux" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="LeafLux" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#a4b19c" />
+
+        <link rel="apple-touch-icon" href="/icon-192x192.png" />
+        
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
