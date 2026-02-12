@@ -29,7 +29,7 @@ function Hero() {
           Find Your Perfect Steep
         </h1>
         <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto font-medium" style={{textShadow: '1px 1px 2px rgba(0,0,0,0.3)'}}>
-          Discover authentic local tea shops and get personalized recommendations for your next favorite brew.
+          Uncover authentic tea shops nearby and fuel your passion for the perfect cup.
         </p>
       </div>
     </section>
