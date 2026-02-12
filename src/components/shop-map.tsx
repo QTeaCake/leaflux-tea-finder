@@ -26,6 +26,11 @@ export function ShopMap({ shops, apiKey, center, onSelectShop, onHoverShop, hove
     );
   }
 
+  // Colors match the new theme in globals.css
+  const primaryColor = '#666699'; // hsl(260, 25%, 50%)
+  const accentColor = '#d9a36c';  // hsl(30, 50%, 60%)
+  const backgroundColor = '#f7f5f2'; // hsl(45, 30%, 96%)
+
   return (
     <APIProvider apiKey={apiKey}>
       <Map
@@ -46,9 +51,9 @@ export function ShopMap({ shops, apiKey, center, onSelectShop, onHoverShop, hove
             onPointerLeave={() => onHoverShop(null)}
           >
             <Pin
-              background={hoveredShopId === shop.id ? '#B87333' : '#A8B893'} // accent : primary
-              borderColor={hoveredShopId === shop.id ? '#A8B893' : '#B87333'}
-              glyphColor={'#F5F5DC'} // background
+              background={hoveredShopId === shop.id ? accentColor : primaryColor}
+              borderColor={hoveredShopId === shop.id ? primaryColor : accentColor}
+              glyphColor={backgroundColor}
             />
           </AdvancedMarker>
         ))}
