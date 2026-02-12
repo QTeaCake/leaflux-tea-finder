@@ -14,6 +14,11 @@ import { Icons } from './icons';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { RecommendationsTool } from './recommendations-tool';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 type Filters = {
   offerings: string[];
@@ -53,7 +58,7 @@ export function TeaFinder() {
   const [locationInput, setLocationInput] = useState('');
   const [isLocating, setIsLocating] = useState(true);
   const [praisedShops, setPraisedShops] = useState<string[]>([]);
-  const [votedTags, setVotedTags] = useState<Record<string, 'up' | 'down'>>({});
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -140,8 +145,8 @@ export function TeaFinder() {
       currentShops.map(shop => {
         if (shop.id === shopId) {
           const newTags = [...(shop.userTags || [])];
-          if (!newTags.find(t => t.name.toLowerCase() === tag.toLowerCase())) {
-            newTags.push({ name: tag.toLowerCase(), score: 1 });
+          if (!newTags.includes(tag.toLowerCase())) {
+            newTags.push(tag.toLowerCase());
           }
           return { ...shop, userTags: newTags };
         }
@@ -149,27 +154,6 @@ export function TeaFinder() {
       })
     );
   }, []);
-  
-  const handleVoteTag = useCallback((shopId: string, tagName: string, vote: 'up' | 'down') => {
-    const tagId = `${shopId}-${tagName}`;
-    if (votedTags[tagId]) return;
-
-    setShopsData(currentShops =>
-      currentShops.map(shop => {
-        if (shop.id === shopId) {
-          const updatedTags = shop.userTags.map(tag => {
-            if (tag.name === tagName) {
-              return { ...tag, score: tag.score + (vote === 'up' ? 1 : -1) };
-            }
-            return tag;
-          });
-          return { ...shop, userTags: updatedTags };
-        }
-        return shop;
-      })
-    );
-    setVotedTags(prev => ({...prev, [tagId]: vote}));
-  }, [votedTags]);
 
   const filteredShops = useMemo(() => {
     let baseShops = shopsData;
@@ -187,7 +171,7 @@ export function TeaFinder() {
       .filter(shop => {
           const allShopTags = [
               ...shop.teaTypes,
-              ...(shop.userTags?.map(t => t.name) || [])
+              ...(shop.userTags || [])
           ];
           return filters.teaTypes.length === 0 || filters.teaTypes.every(t => allShopTags.includes(t as TeaType))
       })
@@ -298,73 +282,102 @@ export function TeaFinder() {
             </Card>
             
             <Card className="shadow-lg">
-              <CardHeader>
+              <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="font-headline text-2xl flex items-center gap-2">
-                  <Icons.filters className="h-6 w-6 text-primary" />
-                  Refine Your Search
+                    <Icons.filters className="h-6 w-6 text-primary" />
+                    Refine Your Search
                   </CardTitle>
-              </CardHeader>
-              <CardContent className="grid gap-8 md:grid-cols-2">
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Icons.filters className="h-5 w-5" />
+                      <span className="sr-only">Toggle Filters</span>
+                    </Button>
+                  </CollapsibleTrigger>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-4">
-                      <Label htmlFor="radius-slider">Search Radius: <span className="font-medium text-foreground">{radius}</span> miles</Label>
-                      <Slider
-                          id="radius-slider"
-                          value={[radius]}
-                          onValueChange={([val]) => setRadius(val)}
-                          max={250}
-                          step={5}
-                      />
+                    <Label htmlFor="radius-slider">
+                      Search Radius:{" "}
+                      <span className="font-medium text-foreground">{radius}</span> miles
+                    </Label>
+                    <Slider
+                      id="radius-slider"
+                      value={[radius]}
+                      onValueChange={([val]) => setRadius(val)}
+                      max={250}
+                      step={5}
+                    />
                   </div>
-                  <div className="space-y-4">
+                  <CollapsibleContent className="mt-8 grid gap-8 md:grid-cols-2 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95">
+                    <div className="space-y-4">
                       <Label>Values</Label>
                       <div className="flex items-center space-x-2">
-                          <Button
-                              variant={filters.ethical ? 'secondary' : 'outline'}
-                              size="sm"
-                              onClick={() => setFilters(prev => ({ ...prev, ethical: !prev.ethical }))}
-                          >
-                              <Icons.ethical className="mr-2 h-4 w-4" />
-                              Ethical Sourcing
-                          </Button>
+                        <Button
+                          variant={filters.ethical ? "secondary" : "outline"}
+                          size="sm"
+                          onClick={() =>
+                            setFilters((prev) => ({
+                              ...prev,
+                              ethical: !prev.ethical,
+                            }))
+                          }
+                        >
+                          <Icons.ethical className="mr-2 h-4 w-4" />
+                          Ethical Sourcing
+                        </Button>
                       </div>
-                  </div>
-                  <div className="space-y-4 md:col-span-2">
+                    </div>
+                    <div className="space-y-4 md:col-span-2">
                       <Label>Offerings</Label>
                       <div className="flex flex-wrap gap-2">
-                          {offeringOptions.map(option => {
+                        {offeringOptions.map((option) => {
                           const Icon = Icons[option.icon];
                           return (
-                              <Button
+                            <Button
                               key={option.name}
-                              variant={filters.offerings.includes(option.name) ? 'secondary' : 'outline'}
+                              variant={
+                                filters.offerings.includes(option.name)
+                                  ? "secondary"
+                                  : "outline"
+                              }
                               size="sm"
                               onClick={() => handleFilterChange(option.name)}
                               className="capitalize"
-                              >
+                            >
                               <Icon className="mr-2 h-4 w-4" />
                               {option.name}
-                              </Button>
+                            </Button>
                           );
-                          })}
+                        })}
                       </div>
-                  </div>
-                  <div className="space-y-4 md:col-span-2">
-                      <Label className="flex items-center"><Icons.types className="mr-2 h-4 w-4" />Tea Types & User Tags</Label>
+                    </div>
+                    <div className="space-y-4 md:col-span-2">
+                      <Label className="flex items-center">
+                        <Icons.types className="mr-2 h-4 w-4" />
+                        Tea Types & User Tags
+                      </Label>
                       <div className="flex flex-wrap gap-2">
-                          {teaTypeOptions.map(option => (
-                              <Button
-                              key={option.name}
-                              variant={filters.teaTypes.includes(option.name) ? 'secondary' : 'outline'}
-                              size="sm"
-                              onClick={() => handleTeaTypeFilterChange(option.name)}
-                              className="capitalize"
-                              >
-                              {option.name}
-                              </Button>
-                          ))}
+                        {teaTypeOptions.map((option) => (
+                          <Button
+                            key={option.name}
+                            variant={
+                              filters.teaTypes.includes(option.name)
+                                ? "secondary"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() => handleTeaTypeFilterChange(option.name)}
+                            className="capitalize"
+                          >
+                            {option.name}
+                          </Button>
+                        ))}
                       </div>
-                  </div>
-              </CardContent>
+                    </div>
+                  </CollapsibleContent>
+                </CardContent>
+              </Collapsible>
             </Card>
 
             <div className="my-8">
@@ -408,8 +421,6 @@ export function TeaFinder() {
               onPraise={handlePraise}
               onAddTag={handleAddTag}
               praisedShops={praisedShops}
-              onVoteTag={handleVoteTag}
-              votedTags={votedTags}
             />
         </>
         )}
