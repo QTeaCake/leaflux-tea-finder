@@ -29,13 +29,13 @@ export function ShopMap({ shops, apiKey, center, onSelectShop, onHoverShop, hove
   return (
     <APIProvider apiKey={apiKey}>
       <Map
+        key={`${center.lat}-${center.lng}`}
         mapId="leaf-lux-map"
         style={{ width: '100%', height: '100%' }}
         defaultCenter={center}
         defaultZoom={12}
         gestureHandling={'greedy'}
         disableDefaultUI={true}
-        center={center}
       >
         {shops.map((shop) => (
           <AdvancedMarker

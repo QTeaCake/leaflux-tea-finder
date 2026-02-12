@@ -23,6 +23,7 @@ type Filters = {
 };
 
 const offeringOptions = ['loose leaf', 'teaware', 'classes'];
+const DEFAULT_LOCATION = { lat: 41.0793, lng: -85.1393 }; // Fort Wayne, IN
 
 export function TeaFinder() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -48,12 +49,12 @@ export function TeaFinder() {
         error => {
           console.error("Error getting location:", error);
           setLocationError('Could not get your location. Please enable location services. Using a default location.');
-          setUserLocation({ lat: 39.7661, lng: -86.1593 }); // Default to Indianapolis
+          setUserLocation(DEFAULT_LOCATION);
         }
       );
     } else {
       setLocationError('Geolocation is not supported by your browser. Using a default location.');
-      setUserLocation({ lat: 39.7661, lng: -86.1593 }); // Default to Indianapolis
+      setUserLocation(DEFAULT_LOCATION);
     }
   }, []);
 
@@ -68,13 +69,14 @@ export function TeaFinder() {
     }
 
     try {
-      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(locationInput)}&key=${apiKey}`);
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(locationInput)}&components=country:US&key=${apiKey}`);
       const data = await response.json();
 
       if (data.status === 'OK' && data.results[0]) {
         const { lat, lng } = data.results[0].geometry.location;
         setUserLocation({ lat, lng });
       } else {
+        console.error('Geocoding API Error:', data.status, data.error_message);
         setLocationError(`Could not find location: "${locationInput}". Please try again.`);
       }
     } catch (error) {
@@ -106,7 +108,7 @@ export function TeaFinder() {
       .sort((a, b) => a.distance - b.distance);
   }, [userLocation, radius, filters]);
 
-  const mapCenter = useMemo(() => userLocation || { lat: 39.7661, lng: -86.1593 }, [userLocation]);
+  const mapCenter = useMemo(() => userLocation || DEFAULT_LOCATION, [userLocation]);
 
   if (!isClient || !userLocation) {
     return (
