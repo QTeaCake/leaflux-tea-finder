@@ -76,7 +76,7 @@ export function AboutContent() {
             </CardHeader>
             <CardContent className="p-0 flex-grow">
               <p className="text-muted-foreground">
-                Our goal is to create the definitive global directory for tea shops. By highlighting demand and exposing "tea deserts," we aim to not only serve existing communities but also inspire and de-risk the opening of new shops where they're needed most.
+                Our vision extends beyond a map. We aim to elevate global tea knowledge, demystifying the rich world of tea—from oolongs to rooibos, gaiwans to matcha. By building the definitive directory for tea shops and exposing 'tea deserts,' we will not only connect communities but also foster a deeper appreciation for this ancient craft, inspiring new shops to open and new hobbyists to begin their journey.
               </p>
             </CardContent>
           </Card>
