@@ -11,6 +11,20 @@ type Props = {
   isHovered: boolean;
 };
 
+const getDistanceColorClasses = (distance: number): string => {
+  if (distance <= 15) {
+    // Green
+    return 'bg-green-100 text-green-900 border-green-200 dark:bg-green-900/40 dark:text-green-200 dark:border-green-800';
+  }
+  if (distance <= 50) {
+    // Yellow
+    return 'bg-yellow-100 text-yellow-900 border-yellow-200 dark:bg-yellow-900/40 dark:text-yellow-200 dark:border-yellow-800';
+  }
+  // Red
+  return 'bg-red-100 text-red-900 border-red-200 dark:bg-red-900/40 dark:text-red-200 dark:border-red-800';
+};
+
+
 export function ShopCard({ shop, onSelect, onHover, isHovered }: Props) {
   const isSpecial = shop.id === 'blue-lantern-tea-greenville';
 
@@ -33,7 +47,7 @@ export function ShopCard({ shop, onSelect, onHover, isHovered }: Props) {
       </CardHeader>
       <CardContent className="space-y-3">
         {shop.distance != null && (
-            <Badge variant="outline">{shop.distance.toFixed(1)} miles away</Badge>
+            <Badge className={getDistanceColorClasses(shop.distance)}>{shop.distance.toFixed(1)} miles away</Badge>
         )}
         {shop.ethical && (
           <Badge variant="secondary" className="flex items-center gap-1 w-fit">
