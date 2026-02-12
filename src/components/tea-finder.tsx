@@ -13,7 +13,6 @@ import { Slider } from './ui/slider';
 import { Icons } from './icons';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { RecommendationsTool } from './recommendations-tool';
 import {
   Collapsible,
   CollapsibleContent,
@@ -379,10 +378,6 @@ export function TeaFinder() {
                 </CardContent>
               </Collapsible>
             </Card>
-
-            <div className="my-8">
-              <RecommendationsTool nearbyShops={filteredShops} />
-            </div>
 
             <div className="grid gap-8 lg:grid-cols-12">
               <div className="lg:col-span-4 h-[60vh] lg:h-[80vh] overflow-y-auto pr-2">
