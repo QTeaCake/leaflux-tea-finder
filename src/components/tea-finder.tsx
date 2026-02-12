@@ -104,7 +104,11 @@ export function TeaFinder() {
         setUserLocation({ lat, lng });
       } else {
         console.error('Geocoding API Error:', data.status, data.error_message);
-        setLocationError(`Could not find location: "${locationInput}". Please try again.`);
+        if (data.status === 'REQUEST_DENIED') {
+          setLocationError('There was an issue with the Google Maps API key. Please check that the Geocoding API is enabled in your Google Cloud project.');
+        } else {
+          setLocationError(`Could not find location: "${locationInput}". Please try again.`);
+        }
         setUserLocation(null);
       }
     } catch (error) {
