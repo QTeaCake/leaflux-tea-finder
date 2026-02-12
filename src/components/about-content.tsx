@@ -11,12 +11,6 @@ export function AboutContent() {
             <h1 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Why LeafLux? Our Story.
             </h1>
-            <div className="flex items-center gap-4">
-                <Icons.logo className="h-8 w-8 text-primary" />
-                <p className="font-headline text-xl text-muted-foreground">
-                    Fueled by tea, inspired by a batcat.
-                </p>
-            </div>
             <p className="text-foreground/80 md:text-lg">
               My journey into the world of tea began for two simple reasons: to find a healthier alternative to sugary drinks and to carve out moments of peace and meditation in my daily life. Over the years, this simple practice has brought me immense joy and significantly lowered my stress.
             </p>
@@ -32,7 +26,7 @@ export function AboutContent() {
               <div className="relative aspect-square rounded-lg overflow-hidden">
                 <Image
                   src="https://picsum.photos/seed/chammy/600/600"
-                  alt="Chammy, the corpulent batcat mascot who loves tea"
+                  alt="The tea-loving mascot for LeafLux, a corpulent bat-like cat."
                   fill
                   className="object-cover"
                   data-ai-hint="cute bat cat mascot"
@@ -41,12 +35,6 @@ export function AboutContent() {
             </Card>
           </div>
         </div>
-         <div className="mt-16 space-y-4">
-            <h2 className="font-headline text-2xl font-bold tracking-tighter sm:text-3xl text-center">Meet Chammy, Our Spirit Animal</h2>
-            <p className="max-w-3xl mx-auto text-center text-foreground/80 md:text-lg">
-               Chammy, the corpulent batcat with a penchant for chamomile, is the heart and soul of LeafLux. She represents the cozy, joyful, and slightly quirky moments that a good cup of tea can bring. She's a reminder that tea is more than just a drink; it's a comforting ritual, a moment of peace, and a delightful indulgence. Our mission is to help you find your own "Chammy moment" by discovering the perfect tea shop near you.
-            </p>
-         </div>
       </div>
     </section>
   );
