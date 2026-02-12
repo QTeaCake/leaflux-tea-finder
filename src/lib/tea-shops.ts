@@ -26,7 +26,7 @@ export type TeaShop = {
 };
 
 export const teaShops: TeaShop[] = [
-  {
+    {
     id: 'the-spice-shack-grabill',
     name: 'The Spice Shack',
     address: '11334 Page Rd, Grabill, IN 46741',
@@ -89,7 +89,7 @@ export const teaShops: TeaShop[] = [
       lng: -86.0213365246702,
     },
     offerings: ['loose leaf'],
-    teaTypes: ['black', 'herbal', 'white'],
+    teaTypes: ['black', 'herbal', 'white', 'dark'],
     praise: 22,
     userTags: [],
     ethical: false,
@@ -107,7 +107,7 @@ export const teaShops: TeaShop[] = [
       lng: -83.73788445216886,
     },
     offerings: ['loose leaf', 'teaware'],
-    teaTypes: ['white', 'green', 'yellow', 'oolong', 'black', 'puerh', 'herbal', 'matcha'],
+    teaTypes: ['white', 'green', 'yellow', 'oolong', 'black', 'puerh', 'dark', 'herbal', 'matcha'],
     praise: 31,
     userTags: ['organic', 'online'],
     ethical: true,
@@ -259,24 +259,6 @@ export const teaShops: TeaShop[] = [
     contact: {
       phone: '+16304282556',
       website: 'http://www.adagio.com/stores/il_naperville.html',
-    },
-  },
-  {
-    id: 'traverse-city-spice-tea-merchants',
-    name: 'Traverse City Spice & Tea Merchants',
-    address: '145 E Front St, Traverse City, MI 49684',
-    location: {
-      lat: 44.792232766741385,
-      lng: -85.63024867929938,
-    },
-    offerings: ['loose leaf', 'teaware'],
-    teaTypes: [],
-    praise: 11,
-    userTags: [],
-    ethical: false,
-    contact: {
-      phone: '+12319477423',
-      website: 'https://www.spicemerchants.biz/traverse-city-spice-store',
     },
   },
   {
