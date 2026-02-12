@@ -21,10 +21,12 @@ type Props = {
   onOpenChange: (isOpen: boolean) => void;
   onPraise: (shopId: string) => void;
   onAddTag: (shopId: string, tag: string) => void;
+  onTagVote: (shopId: string, tagName: string, vote: 'up' | 'down') => void;
   praisedShops: string[];
+  votedTags: { [tagId: string]: 'up' | 'down' };
 };
 
-export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, praisedShops }: Props) {
+export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, onTagVote, praisedShops, votedTags }: Props) {
   const [newTag, setNewTag] = useState('');
 
   if (!shop) return null;
@@ -77,11 +79,39 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, pr
                   {type}
                 </Badge>
               ))}
-              {shop.userTags?.map(tag => (
-                <Badge key={tag} variant="outline" className="capitalize">
-                  {tag}
-                </Badge>
-              ))}
+              {shop.userTags?.map(tag => {
+                const tagId = `${shop.id}-${tag.name}`;
+                const userVote = votedTags[tagId];
+                return (
+                  <div key={tag.name} className="flex items-center gap-1 overflow-hidden rounded-full border bg-background text-sm">
+                    <span className="pl-3 capitalize font-medium">{tag.name}</span>
+                    <span className="font-mono text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm">{tag.score}</span>
+                    <div className="flex items-center bg-muted/50">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 rounded-none"
+                        onClick={() => onTagVote(shop.id, tag.name, 'up')}
+                        disabled={userVote === 'up'}
+                        aria-label="Upvote tag"
+                      >
+                        <Icons.thumbsUp className={`h-4 w-4 ${userVote === 'up' ? 'text-primary fill-primary/20' : ''}`} />
+                      </Button>
+                      <Separator orientation="vertical" className="h-4" />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 rounded-none"
+                        onClick={() => onTagVote(shop.id, tag.name, 'down')}
+                        disabled={userVote === 'down'}
+                        aria-label="Downvote tag"
+                      >
+                        <Icons.thumbsDown className={`h-4 w-4 ${userVote === 'down' ? 'text-destructive fill-destructive/20' : ''}`} />
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
              <div className="space-y-2 pt-4">
                 <Label htmlFor="add-tag-input" className="text-xs text-muted-foreground">Suggest a new tag</Label>

@@ -2,6 +2,11 @@ export type TeaType = 'white' | 'green' | 'yellow' | 'oolong' | 'black' | 'puerh
 
 export type Offering = 'loose leaf' | 'teaware' | 'classes';
 
+export type UserTag = {
+  name: string;
+  score: number;
+};
+
 export type TeaShop = {
   id: string;
   name: string;
@@ -13,7 +18,7 @@ export type TeaShop = {
   offerings: Offering[];
   teaTypes: TeaType[];
   praise: number;
-  userTags: string[];
+  userTags: UserTag[];
   ethical: boolean;
   contact: {
     phone: string;
@@ -35,7 +40,10 @@ export const teaShops: TeaShop[] = [
     offerings: ['loose leaf', 'teaware'],
     teaTypes: ['herbal', 'black'],
     praise: 12,
-    userTags: ['herbal', 'spices'],
+    userTags: [
+      { name: 'herbal', score: 1 },
+      { name: 'spices', score: 1 },
+    ],
     ethical: false,
     contact: {
       phone: '+12606159634',
@@ -125,7 +133,10 @@ export const teaShops: TeaShop[] = [
     offerings: ['loose leaf', 'teaware'],
     teaTypes: ['white', 'green', 'yellow', 'oolong', 'black', 'puerh', 'herbal', 'matcha'],
     praise: 31,
-    userTags: ['organic', 'online'],
+    userTags: [
+      { name: 'organic', score: 1 },
+      { name: 'online', score: 1 },
+    ],
     ethical: true,
     contact: {
       phone: '+17349947698',
@@ -185,42 +196,6 @@ export const teaShops: TeaShop[] = [
     contact: {
       phone: '+13175392507',
       website: 'http://www.msbsteas.com/menu',
-    },
-  },
-  {
-    id: 'tiger-spirit-teahouse-erie',
-    name: 'Tiger Spirit Teahouse',
-    address: '2131 W 8th St, Erie, PA 16505',
-    location: {
-      lat: 42.158120297956444,
-      lng: -80.15652325193659,
-    },
-    offerings: [],
-    teaTypes: [],
-    praise: 9,
-    userTags: [],
-    ethical: false,
-    contact: {
-      phone: '+18144800844',
-      website: 'https://tiger-spirit-teahouse.square.site/',
-    },
-  },
-  {
-    id: 'chengdu-teahouse-lansing',
-    name: 'Chengdu Teahouse',
-    address: '100 E César E. Chávez Ave, Lansing, MI 48906',
-    location: {
-      lat: 42.77723985365868,
-      lng: -84.53696385850519,
-    },
-    offerings: [],
-    teaTypes: [],
-    praise: 14,
-    userTags: [],
-    ethical: false,
-    contact: {
-      phone: '+19195250594',
-      website: 'https://www.thechengduteahouse.com/',
     },
   },
   {
@@ -311,24 +286,6 @@ export const teaShops: TeaShop[] = [
     contact: {
       phone: '+16304282556',
       website: 'http://www.adagio.com/stores/il_naperville.html',
-    },
-  },
-  {
-    id: 'spice-merchants-marquette',
-    name: 'Spice Merchants',
-    address: '106 W Washington St, Marquette, MI 49855',
-    location: {
-      lat: 46.54364348314,
-      lng: -87.39294598280682,
-    },
-    offerings: ['loose leaf', 'teaware'],
-    teaTypes: [],
-    praise: 10,
-    userTags: [],
-    ethical: false,
-    contact: {
-      phone: '+19062351887',
-      website: 'https://www.spicemerchants.biz/marquette-spice-store',
     },
   },
   {

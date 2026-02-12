@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { teaShops as allShops, TeaShop, Offering, TeaType } from '@/lib/tea-shops';
+import { teaShops as allShops, TeaShop, Offering, TeaType, UserTag } from '@/lib/tea-shops';
 import { getDistance } from '@/lib/utils';
 import { ShopList } from './shop-list';
 import { ShopMap } from './shop-map';
@@ -52,6 +52,7 @@ export function TeaFinder() {
   const [locationInput, setLocationInput] = useState('');
   const [isLocating, setIsLocating] = useState(true);
   const [praisedShops, setPraisedShops] = useState<string[]>([]);
+  const [votedTags, setVotedTags] = useState<{ [tagId: string]: 'up' | 'down' }>({});
 
   useEffect(() => {
     setIsClient(true);
@@ -127,7 +128,6 @@ export function TeaFinder() {
   }, []);
 
   const handlePraise = useCallback((shopId: string) => {
-    // Prevent praising more than once per session
     if (praisedShops.includes(shopId)) {
         return;
     }
@@ -135,14 +135,11 @@ export function TeaFinder() {
     setShopsData(currentShops =>
       currentShops.map(shop => {
         if (shop.id === shopId) {
-          // Note: We're still incrementing the original praise count
-          // for potential future analytics, even though it's not displayed.
           return { ...shop, praise: (shop.praise || 0) + 1 };
         }
         return shop;
       })
     );
-    // Add to the list of shops praised in this session
     setPraisedShops(prev => [...prev, shopId]);
   }, [praisedShops]);
 
@@ -151,8 +148,8 @@ export function TeaFinder() {
       currentShops.map(shop => {
         if (shop.id === shopId) {
           const newTags = [...(shop.userTags || [])];
-          if (!newTags.includes(tag.toLowerCase())) {
-            newTags.push(tag.toLowerCase());
+          if (!newTags.some(t => t.name === tag.toLowerCase())) {
+            newTags.push({ name: tag.toLowerCase(), score: 1 });
           }
           return { ...shop, userTags: newTags };
         }
@@ -160,6 +157,29 @@ export function TeaFinder() {
       })
     );
   }, []);
+  
+  const handleTagVote = useCallback((shopId: string, tagName: string, vote: 'up' | 'down') => {
+    const tagId = `${shopId}-${tagName}`;
+    if (votedTags[tagId]) return; // Already voted in this session
+
+    setShopsData(currentShops =>
+      currentShops.map(shop => {
+        if (shop.id === shopId) {
+          const newTags = shop.userTags.map(tag => {
+            if (tag.name === tagName) {
+              return { ...tag, score: tag.score + (vote === 'up' ? 1 : -1) };
+            }
+            return tag;
+          });
+          newTags.sort((a, b) => b.score - a.score);
+          return { ...shop, userTags: newTags };
+        }
+        return shop;
+      })
+    );
+
+    setVotedTags(prev => ({ ...prev, [tagId]: vote }));
+  }, [votedTags]);
 
 
   const filteredShops = useMemo(() => {
@@ -386,6 +406,8 @@ export function TeaFinder() {
               onPraise={handlePraise}
               onAddTag={handleAddTag}
               praisedShops={praisedShops}
+              onTagVote={handleTagVote}
+              votedTags={votedTags}
             />
         </>
         )}
