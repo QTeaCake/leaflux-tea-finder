@@ -27,7 +27,7 @@ export function ShopMap({ shops, apiKey, center, onSelectShop, onHoverShop, hove
   }
 
   const primaryColor = '#A8B893'; // Sage Green
-  const accentColor = '#B87333';  // Bronze
+  const accentColor = '#9966cc';  // Magical Purple
   const borderColor = '#3a2d1f'; // Dark Brown
   const glyphColor = '#FFFFFF'; // White
 
