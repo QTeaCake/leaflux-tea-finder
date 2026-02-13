@@ -118,7 +118,7 @@ export function SubmissionsContent({ submissions, teaShops }: Props) {
                       <SelectGroup>
                         {sortedTeaShops.length > 0 ? (
                           sortedTeaShops.map((shop) => (
-                            <SelectItem key={shop.id} value={shop.name}>
+                            <SelectItem key={shop.id} value={shop.name} className="select-text">
                               {shop.name}
                             </SelectItem>
                           ))
