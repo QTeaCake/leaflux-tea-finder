@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Icons } from './icons';
 import { useToast } from '@/hooks/use-toast';
 
-const ACCESS_CODE = '1234';
+const ACCESS_CODE = '2223';
 
 export function SubmissionsGate({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
