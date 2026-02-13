@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -23,8 +23,7 @@ type SuggestShopFormValues = z.infer<typeof suggestShopSchema>;
 
 export function SuggestShopForm() {
   const { toast } = useToast();
-  const [state, formAction] = useActionState(submitShopSuggestion, null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [state, formAction, isPending] = useActionState(submitShopSuggestion, null);
 
   const form = useForm<SuggestShopFormValues>({
     resolver: zodResolver(suggestShopSchema),
@@ -38,8 +37,6 @@ export function SuggestShopForm() {
   useEffect(() => {
     if (!state) return;
     
-    setIsSubmitting(false);
-
     if (state.message) {
       toast({
         title: 'Success!',
@@ -65,7 +62,6 @@ export function SuggestShopForm() {
   }, [state, toast, form]);
 
   const processForm = (data: SuggestShopFormValues) => {
-    setIsSubmitting(true);
     const formData = new FormData();
     formData.append('shopName', data.shopName);
     formData.append('shopLocation', data.shopLocation);
@@ -118,8 +114,8 @@ export function SuggestShopForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? (
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending ? (
             <>
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
               Submitting...

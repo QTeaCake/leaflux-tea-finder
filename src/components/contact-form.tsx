@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -23,8 +23,7 @@ type ContactFormValues = z.infer<typeof contactSchema>;
 
 export function ContactForm() {
   const { toast } = useToast();
-  const [state, formAction] = useActionState(submitContactForm, null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [state, formAction, isPending] = useActionState(submitContactForm, null);
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
@@ -37,8 +36,6 @@ export function ContactForm() {
 
   useEffect(() => {
     if (!state) return; // Initial state is null, do nothing
-    
-    setIsSubmitting(false); // Action finished
 
     if (state.message) {
       toast({
@@ -65,7 +62,6 @@ export function ContactForm() {
   }, [state, toast, form]);
 
   const processForm = (data: ContactFormValues) => {
-    setIsSubmitting(true);
     const formData = new FormData();
     formData.append('name', data.name);
     formData.append('email', data.email);
@@ -118,8 +114,8 @@ export function ContactForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? (
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending ? (
             <>
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
               Sending...

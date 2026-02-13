@@ -1,5 +1,14 @@
 {
-  "waitlist": [],
+  "waitlist": [
+    {
+      "email": "mayo.anastatius@gmail.com",
+      "submittedAt": "2026-02-13T17:15:37.255Z"
+    },
+    {
+      "email": "mayo.anastatius@gmail.com",
+      "submittedAt": "2026-02-13T17:15:26.193Z"
+    }
+  ],
   "contact": [
     {
       "name": "Anastatius Mayo",
@@ -14,5 +23,12 @@
       "submittedAt": "2024-07-26T10:00:00.000Z"
     }
   ],
-  "suggestions": []
+  "suggestions": [
+    {
+      "shopName": "Anastatius Mayo",
+      "shopLocation": "6925 Forestwood Dr",
+      "notes": "its mah house",
+      "submittedAt": "2026-02-13T17:15:11.172Z"
+    }
+  ]
 }

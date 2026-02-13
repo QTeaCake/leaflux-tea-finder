@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -20,8 +20,7 @@ type WaitlistFormValues = z.infer<typeof waitlistSchema>;
 
 export function WaitlistForm() {
   const { toast } = useToast();
-  const [state, formAction] = useActionState(signUpForWaitlist, null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [state, formAction, isPending] = useActionState(signUpForWaitlist, null);
 
   const form = useForm<WaitlistFormValues>({
     resolver: zodResolver(waitlistSchema),
@@ -30,8 +29,6 @@ export function WaitlistForm() {
 
   useEffect(() => {
     if (!state) return;
-
-    setIsSubmitting(false);
 
     if (state.message) {
       toast({
@@ -53,7 +50,6 @@ export function WaitlistForm() {
   }, [state, toast, form]);
 
   const processForm = (data: WaitlistFormValues) => {
-    setIsSubmitting(true);
     const formData = new FormData();
     formData.append('email', data.email);
     formAction(formData);
@@ -79,8 +75,8 @@ export function WaitlistForm() {
             )}
           />
         </div>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (
+        <Button type="submit" disabled={isPending}>
+          {isPending ? (
             <Icons.spinner className="h-4 w-4 animate-spin" />
           ) : (
             'Join'
