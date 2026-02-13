@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -21,6 +21,7 @@ type WaitlistFormValues = z.infer<typeof waitlistSchema>;
 export function WaitlistForm() {
   const { toast } = useToast();
   const [state, formAction, isPending] = useActionState(signUpForWaitlist, null);
+  const [, startTransition] = useTransition();
 
   const form = useForm<WaitlistFormValues>({
     resolver: zodResolver(waitlistSchema),
@@ -52,7 +53,9 @@ export function WaitlistForm() {
   const processForm = (data: WaitlistFormValues) => {
     const formData = new FormData();
     formData.append('email', data.email);
-    formAction(formData);
+    startTransition(() => {
+      formAction(formData);
+    });
   };
 
   return (

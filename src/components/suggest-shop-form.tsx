@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,6 +24,7 @@ type SuggestShopFormValues = z.infer<typeof suggestShopSchema>;
 export function SuggestShopForm() {
   const { toast } = useToast();
   const [state, formAction, isPending] = useActionState(submitShopSuggestion, null);
+  const [, startTransition] = useTransition();
 
   const form = useForm<SuggestShopFormValues>({
     resolver: zodResolver(suggestShopSchema),
@@ -66,7 +67,9 @@ export function SuggestShopForm() {
     formData.append('shopName', data.shopName);
     formData.append('shopLocation', data.shopLocation);
     formData.append('notes', data.notes || '');
-    formAction(formData);
+    startTransition(() => {
+      formAction(formData);
+    });
   };
 
   return (
