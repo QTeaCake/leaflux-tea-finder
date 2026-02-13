@@ -1,4 +1,4 @@
-export type TeaType = 'white' | 'green' | 'yellow' | 'oolong' | 'black' | 'puerh' | 'dark' | 'herbal' | 'matcha';
+export type TeaType = 'white' | 'green' | 'yellow' | 'oolong' | 'black' | 'puerh' | 'dark' | 'herbal' | 'matcha' | 'jasmine' | 'earl grey' | 'chai' | 'rooibos' | 'chamomile' | 'mint' | 'mate';
 
 export type Offering = 'loose leaf' | 'teaware' | 'classes';
 

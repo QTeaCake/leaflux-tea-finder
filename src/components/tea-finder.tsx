@@ -33,16 +33,29 @@ const offeringOptions: { name: Offering; icon: keyof typeof Icons }[] = [
   { name: 'classes', icon: 'classes' },
 ];
 
-const teaTypeOptions: { name: TeaType }[] = [
-    { name: 'white' },
-    { name: 'green' },
-    { name: 'yellow' },
-    { name: 'oolong' },
+const pureTeaOptions: { name: TeaType }[] = [
     { name: 'black' },
-    { name: 'puerh' },
+    { name: 'green' },
+    { name: 'oolong' },
+    { name: 'white' },
     { name: 'dark' },
-    { name: 'herbal' },
+    { name: 'yellow' },
+    { name: 'puerh' },
     { name: 'matcha' },
+];
+
+const flavoredTeaOptions: { name: TeaType }[] = [
+    { name: 'jasmine' },
+    { name: 'earl grey' },
+    { name: 'chai' },
+];
+
+const herbalTeaOptions: { name: TeaType }[] = [
+    { name: 'herbal' },
+    { name: 'rooibos' },
+    { name: 'chamomile' },
+    { name: 'mint' },
+    { name: 'mate' },
 ];
 
 const DEFAULT_LOCATION = { lat: 41.0793, lng: -85.1393 }; // Fort Wayne, IN
@@ -363,27 +376,66 @@ export function TeaFinder() {
                         })}
                       </div>
                     </div>
-                    <div className="space-y-4 md:col-span-2">
-                      <Label className="flex items-center">
-                        <Icons.types className="mr-2 h-4 w-4" />
-                        Tea Types & User Tags
-                      </Label>
-                      <div className="flex flex-wrap gap-2">
-                        {teaTypeOptions.map((option) => (
-                          <Button
-                            key={option.name}
-                            variant={
-                              filters.teaTypes.includes(option.name)
-                                ? "secondary"
-                                : "outline"
-                            }
-                            size="sm"
-                            onClick={() => handleTeaTypeFilterChange(option.name)}
-                            className="capitalize"
-                          >
-                            {option.name}
-                          </Button>
-                        ))}
+                    <div className="space-y-6 md:col-span-2">
+                      <div className="space-y-2">
+                        <Label className="font-semibold text-foreground/90">Pure (Unflavored) Tea</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {pureTeaOptions.map((option) => (
+                            <Button
+                              key={option.name}
+                              variant={
+                                filters.teaTypes.includes(option.name)
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                              size="sm"
+                              onClick={() => handleTeaTypeFilterChange(option.name)}
+                              className="capitalize"
+                            >
+                              {option.name}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-semibold text-foreground/90">Flavored Tea</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {flavoredTeaOptions.map((option) => (
+                            <Button
+                              key={option.name}
+                              variant={
+                                filters.teaTypes.includes(option.name)
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                              size="sm"
+                              onClick={() => handleTeaTypeFilterChange(option.name)}
+                              className="capitalize"
+                            >
+                              {option.name}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-semibold text-foreground/90">Herbal Tea</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {herbalTeaOptions.map((option) => (
+                            <Button
+                              key={option.name}
+                              variant={
+                                filters.teaTypes.includes(option.name)
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                              size="sm"
+                              onClick={() => handleTeaTypeFilterChange(option.name)}
+                              className="capitalize"
+                            >
+                              {option.name}
+                            </Button>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </CollapsibleContent>
