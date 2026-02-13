@@ -1,8 +1,6 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from './icons';
-import { Button } from './ui/button';
 
 export function AboutContent() {
   return (
@@ -96,9 +94,9 @@ export function AboutContent() {
               <p className="text-muted-foreground mb-6 max-w-xl mx-auto md:text-lg">
                 We're actively seeking passionate individuals and businesses to help us grow. Whether you're a tea vendor interested in a partnership, a developer with a passion for community-driven apps, or an enthusiast with great ideas, we want to hear from you.
               </p>
-              <Button asChild size="lg">
-                  <Link href="/#contact-section">Get in Touch</Link>
-              </Button>
+              <p className="text-foreground/90 md:text-lg mt-6">
+                Please use the <strong>Contact Us</strong> form below to get in touch.
+              </p>
             </CardContent>
           </Card>
         </div>
