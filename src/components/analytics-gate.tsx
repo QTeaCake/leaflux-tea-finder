@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Icons } from './icons';
 import { useToast } from '@/hooks/use-toast';
 
-const ACCESS_CODE = '2223';
+const ACCESS_CODE = '2051';
 
 export function AnalyticsGate({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
