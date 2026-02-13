@@ -16,8 +16,17 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Icons } from './icons';
 import { format } from 'date-fns';
+import type { TeaShop } from '@/lib/tea-shops';
 
 type Submissions = {
   waitlist: { email: string; submittedAt: string }[];
@@ -27,9 +36,12 @@ type Submissions = {
 
 type Props = {
   submissions: Submissions;
+  teaShops: TeaShop[];
 };
 
-export function SubmissionsContent({ submissions }: Props) {
+export function SubmissionsContent({ submissions, teaShops }: Props) {
+  const sortedTeaShops = [...teaShops].sort((a, b) => a.name.localeCompare(b.name));
+  
   return (
     <section className="w-full py-12 md:py-20 lg:py-24 bg-background">
       <div className="container mx-auto px-4 md:px-6">
@@ -93,9 +105,30 @@ export function SubmissionsContent({ submissions }: Props) {
           <Card>
               <CardHeader>
                 <CardTitle>Shop Suggestion Submissions</CardTitle>
-                <CardDescription>New tea shops suggested by your users.</CardDescription>
+                <CardDescription>New tea shops suggested by your users. Use the dropdown to see shops already in the system.</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-8">
+                <div>
+                  <h4 className="font-medium mb-2 text-foreground">Currently Indexed Shops ({teaShops.length})</h4>
+                  <Select>
+                    <SelectTrigger className="w-full md:w-[300px]">
+                      <SelectValue placeholder="View existing shops..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {sortedTeaShops.length > 0 ? (
+                          sortedTeaShops.map((shop) => (
+                            <SelectItem key={shop.id} value={shop.name}>
+                              {shop.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="none" disabled>No shops available</SelectItem>
+                        )}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Table>
                   <TableHeader>
                     <TableRow>
