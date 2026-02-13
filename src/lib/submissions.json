@@ -2,6 +2,12 @@
   "waitlist": [],
   "contact": [
     {
+      "name": "Anastatius Mayo",
+      "email": "mayo.anastatius@gmail.com",
+      "message": "keep it up",
+      "submittedAt": "2026-02-13T17:12:46.367Z"
+    },
+    {
       "name": "Test User",
       "email": "test@example.com",
       "message": "This is a test submission to confirm the form is working.",

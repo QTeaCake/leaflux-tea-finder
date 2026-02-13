@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -38,6 +39,23 @@ type Props = {
   submissions: Submissions;
   teaShops: TeaShop[];
 };
+
+// This component ensures date formatting only happens on the client,
+// after hydration, to prevent a server-client mismatch.
+function ClientFormattedDate({ dateString }: { dateString: string }) {
+  const [formattedDate, setFormattedDate] = useState('');
+
+  useEffect(() => {
+    // new Date() can be different on server and client, causing a hydration error.
+    // By running this in useEffect, we ensure it only runs on the client.
+    setFormattedDate(format(new Date(dateString), "PPP p"));
+  }, [dateString]);
+
+  // Render nothing on the server and initial client render.
+  // The date will appear after the component mounts on the client.
+  return <>{formattedDate}</>;
+}
+
 
 export function SubmissionsContent({ submissions, teaShops }: Props) {
   const sortedTeaShops = [...teaShops].sort((a, b) => a.name.localeCompare(b.name));
@@ -84,7 +102,9 @@ export function SubmissionsContent({ submissions, teaShops }: Props) {
                     {submissions.contact.length > 0 ? (
                       submissions.contact.map((s, i) => (
                         <TableRow key={i}>
-                          <TableCell className="font-medium whitespace-nowrap">{format(new Date(s.submittedAt), "PPP p")}</TableCell>
+                          <TableCell className="font-medium whitespace-nowrap">
+                            <ClientFormattedDate dateString={s.submittedAt} />
+                          </TableCell>
                           <TableCell>{s.name}</TableCell>
                           <TableCell>{s.email}</TableCell>
                           <TableCell>{s.message}</TableCell>
@@ -142,7 +162,9 @@ export function SubmissionsContent({ submissions, teaShops }: Props) {
                     {submissions.suggestions.length > 0 ? (
                       submissions.suggestions.map((s, i) => (
                         <TableRow key={i}>
-                          <TableCell className="font-medium whitespace-nowrap">{format(new Date(s.submittedAt), "PPP p")}</TableCell>
+                          <TableCell className="font-medium whitespace-nowrap">
+                             <ClientFormattedDate dateString={s.submittedAt} />
+                          </TableCell>
                           <TableCell>{s.shopName}</TableCell>
                           <TableCell>{s.shopLocation}</TableCell>
                           <TableCell>{s.notes}</TableCell>
@@ -177,7 +199,9 @@ export function SubmissionsContent({ submissions, teaShops }: Props) {
                     {submissions.waitlist.length > 0 ? (
                       submissions.waitlist.map((s, i) => (
                         <TableRow key={i}>
-                          <TableCell className="font-medium whitespace-nowrap">{format(new Date(s.submittedAt), "PPP p")}</TableCell>
+                          <TableCell className="font-medium whitespace-nowrap">
+                             <ClientFormattedDate dateString={s.submittedAt} />
+                          </TableCell>
                           <TableCell>{s.email}</TableCell>
                         </TableRow>
                       ))
