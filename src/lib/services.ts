@@ -25,7 +25,7 @@ type ShopSuggestionSubmission = {
   submittedAt: string;
 };
 
-type Submissions = {
+export type Submissions = {
   waitlist: WaitlistSubmission[];
   contact: ContactSubmission[];
   suggestions: ShopSuggestionSubmission[];
@@ -149,4 +149,19 @@ export async function addShopSuggestionSubmission(data: { shopName: string; shop
 
 export async function getSubmissions(): Promise<Submissions> {
   return readSubmissions();
+}
+
+export async function deleteSubmission(type: keyof Submissions, submittedAt: string) {
+  const submissions = await readSubmissions();
+  
+  if (!submissions[type]) {
+    throw new Error('Invalid submission type.');
+  }
+
+  const list = submissions[type] as (WaitlistSubmission | ContactSubmission | ShopSuggestionSubmission)[];
+  
+  // @ts-ignore
+  submissions[type] = list.filter(s => s.submittedAt !== submittedAt);
+  
+  await writeSubmissions(submissions);
 }

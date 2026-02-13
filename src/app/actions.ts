@@ -2,7 +2,9 @@
 'use server';
 
 import { z } from 'zod';
-import { addWaitlistSubmission, addContactSubmission, addShopSuggestionSubmission, logAnalyticsClick as logClickService } from '@/lib/services';
+import { addWaitlistSubmission, addContactSubmission, addShopSuggestionSubmission, logAnalyticsClick as logClickService, deleteSubmission } from '@/lib/services';
+import type { Submissions } from '@/lib/services';
+import { revalidatePath } from 'next/cache';
 
 const waitlistSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -99,5 +101,16 @@ export async function logAnalyticsClick(type: 'shop' | 'teaType' | 'offering' | 
   } catch (error) {
     // Fail silently on analytics errors, not critical for user
     console.error('Failed to log analytics click:', error);
+  }
+}
+
+export async function deleteSubmissionAction(type: keyof Submissions, submittedAt: string) {
+  try {
+    await deleteSubmission(type, submittedAt);
+    revalidatePath('/submissions');
+    return { message: 'Submission deleted successfully.' };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Could not delete submission.';
+    return { errors: { _form: [message] } };
   }
 }

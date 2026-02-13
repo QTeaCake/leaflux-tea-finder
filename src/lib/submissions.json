@@ -2,6 +2,10 @@
   "waitlist": [
     {
       "email": "mayo.anastatius@gmail.com",
+      "submittedAt": "2026-02-13T17:24:08.649Z"
+    },
+    {
+      "email": "mayo.anastatius@gmail.com",
       "submittedAt": "2026-02-13T17:19:04.372Z"
     },
     {
@@ -17,6 +21,12 @@
     {
       "name": "Anastatius Mayo",
       "email": "mayo.anastatius@gmail.com",
+      "message": "keep it up gg",
+      "submittedAt": "2026-02-13T17:24:37.185Z"
+    },
+    {
+      "name": "Anastatius Mayo",
+      "email": "mayo.anastatius@gmail.com",
       "message": "keep it up",
       "submittedAt": "2026-02-13T17:12:46.367Z"
     },
@@ -28,6 +38,12 @@
     }
   ],
   "suggestions": [
+    {
+      "shopName": "Anastatius Mayo",
+      "shopLocation": "6925 Forestwood Dr",
+      "notes": "wh",
+      "submittedAt": "2026-02-13T17:24:48.645Z"
+    },
     {
       "shopName": "Anastatius Mayo",
       "shopLocation": "6925 Forestwood Dr",
