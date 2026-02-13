@@ -1,6 +1,8 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from './icons';
+import { Button } from './ui/button';
 
 export function AboutContent() {
   return (
@@ -81,6 +83,26 @@ export function AboutContent() {
             </CardContent>
           </Card>
         </div>
+
+        <div className="mt-16 lg:mt-24 max-w-4xl mx-auto">
+          <Card className="text-center shadow-lg p-6 lg:p-8 border-accent/50 bg-card">
+            <CardHeader className="p-0 items-center">
+              <div className="bg-accent/10 p-3 rounded-lg w-fit mb-4">
+                  <Icons.handshake className="h-10 w-10 text-accent" />
+              </div>
+              <CardTitle className="font-headline text-3xl">Join Our Journey</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0 pt-4">
+              <p className="text-muted-foreground mb-6 max-w-xl mx-auto md:text-lg">
+                We're actively seeking passionate individuals and businesses to help us grow. Whether you're a tea vendor interested in a partnership, a developer with a passion for community-driven apps, or an enthusiast with great ideas, we want to hear from you.
+              </p>
+              <Button asChild size="lg">
+                  <Link href="/#contact-section">Get in Touch</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
       </div>
     </section>
   );
