@@ -19,6 +19,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { RecommendationsTool } from './recommendations-tool';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 type Filters = {
   offerings: string[];
@@ -222,6 +223,13 @@ export function TeaFinder() {
           </p>
         </div>
         
+        <Alert>
+          <Icons.mapPin className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Geographic Note:</strong> This pre-alpha version is currently limited to select areas in Ohio, Indiana, Illinois, and Michigan. Support for more areas is coming soon!
+          </AlertDescription>
+        </Alert>
+
         {!userLocation ? (
              <Card className="shadow-lg animate-in fade-in-50">
                 <CardHeader>
@@ -407,9 +415,6 @@ export function TeaFinder() {
             <div className="text-center">
                 <p className="text-sm text-muted-foreground mt-4">
                     We attempt to use your browser's location. If the map is wrong, or you want to search elsewhere, please enter a location.
-                </p>
-                <p className="text-xs text-muted-foreground mt-2 italic">
-                    Note: This pre-alpha version is currently limited to select areas in Ohio, Indiana, Illinois, and Michigan.
                 </p>
             </div>
 
