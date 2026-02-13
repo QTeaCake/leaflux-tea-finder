@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/collapsible";
 import { RecommendationsTool } from './recommendations-tool';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { logAnalyticsClick } from '@/app/actions';
 
 type Filters = {
   offerings: string[];
@@ -102,7 +103,8 @@ export function TeaFinder() {
 
   const handleLocationSearch = useCallback(async () => {
     if (!locationInput) return;
-
+    
+    logAnalyticsClick('location', locationInput);
     setLocationError(null);
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
@@ -133,6 +135,7 @@ export function TeaFinder() {
   }, [locationInput]);
 
   const handleFilterChange = useCallback((offering: string) => {
+    logAnalyticsClick('offering', offering);
     setFilters(prev => {
       const newOfferings = prev.offerings.includes(offering)
         ? prev.offerings.filter(o => o !== offering)
@@ -142,6 +145,7 @@ export function TeaFinder() {
   }, []);
 
   const handleTeaTypeFilterChange = useCallback((teaType: string) => {
+    logAnalyticsClick('teaType', teaType);
     setFilters(prev => {
       const newTeaTypes = prev.teaTypes.includes(teaType)
         ? prev.teaTypes.filter(t => t !== teaType)
@@ -340,12 +344,13 @@ export function TeaFinder() {
                         <Button
                           variant={filters.ethical ? "secondary" : "outline"}
                           size="sm"
-                          onClick={() =>
+                          onClick={() => {
+                            logAnalyticsClick('ethical', 'toggle');
                             setFilters((prev) => ({
                               ...prev,
                               ethical: !prev.ethical,
-                            }))
-                          }
+                            }));
+                          }}
                         >
                           <Icons.ethical className="mr-2 h-4 w-4" />
                           Ethical Sourcing
@@ -447,7 +452,10 @@ export function TeaFinder() {
               <div className="lg:col-span-4 h-[60vh] lg:h-[80vh] overflow-y-auto pr-2">
                   <ShopList 
                   shops={filteredShops} 
-                  onSelectShop={setSelectedShop}
+                  onSelectShop={(shop) => {
+                      logAnalyticsClick('shop', shop.id);
+                      setSelectedShop(shop);
+                  }}
                   onHoverShop={setHoveredShopId}
                   hoveredShopId={hoveredShopId}
                   />
@@ -457,7 +465,10 @@ export function TeaFinder() {
                   apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
                   shops={filteredShops}
                   center={mapCenter}
-                  onSelectShop={setSelectedShop}
+                  onSelectShop={(shop) => {
+                      logAnalyticsClick('shop', shop.id);
+                      setSelectedShop(shop);
+                  }}
                   onHoverShop={setHoveredShopId}
                   hoveredShopId={hoveredShopId}
                   />

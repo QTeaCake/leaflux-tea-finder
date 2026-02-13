@@ -2,7 +2,7 @@
 'use server';
 
 import { z } from 'zod';
-import { addWaitlistSubmission, addContactSubmission, addShopSuggestionSubmission } from '@/lib/services';
+import { addWaitlistSubmission, addContactSubmission, addShopSuggestionSubmission, logAnalyticsClick as logClickService } from '@/lib/services';
 
 const waitlistSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -90,5 +90,14 @@ export async function submitShopSuggestion(prevState: any, formData: FormData) {
     return {
       errors: { _form: ['Could not save submission. Please try again.'] },
     };
+  }
+}
+
+export async function logAnalyticsClick(type: 'shop' | 'teaType' | 'offering' | 'ethical' | 'website' | 'directions' | 'location', value: string) {
+  try {
+    await logClickService(type, value);
+  } catch (error) {
+    // Fail silently on analytics errors, not critical for user
+    console.error('Failed to log analytics click:', error);
   }
 }

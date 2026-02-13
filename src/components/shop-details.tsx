@@ -15,6 +15,7 @@ import { Separator } from './ui/separator';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { PraiseButton } from './praise-button';
+import { logAnalyticsClick } from '@/app/actions';
 
 type Props = {
   shop: TeaShop | null;
@@ -123,7 +124,14 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, pr
             <h3 className="font-headline text-lg">Contact & More Info</h3>
             <p className="text-muted-foreground">{shop.contact.phone}</p>
             <Button asChild variant="link" className="p-0 h-auto">
-              <a href={shop.contact.website} target="_blank" rel="noopener noreferrer">{shop.contact.website}</a>
+              <a 
+                href={shop.contact.website} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={() => logAnalyticsClick('website', shop.id)}
+              >
+                {shop.contact.website}
+              </a>
             </Button>
           </div>
 
@@ -132,6 +140,7 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, pr
               href={`https://www.google.com/maps/dir/?api=1&destination=${shop.location.lat},${shop.location.lng}`} 
               target="_blank" 
               rel="noopener noreferrer"
+              onClick={() => logAnalyticsClick('directions', shop.id)}
             >
               Get Directions
             </a>
