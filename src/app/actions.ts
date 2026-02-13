@@ -2,6 +2,7 @@
 'use server';
 
 import { z } from 'zod';
+import { addWaitlistSubmission, addContactSubmission, addShopSuggestionSubmission } from '@/lib/services';
 
 const waitlistSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -18,12 +19,16 @@ export async function signUpForWaitlist(prevState: any, formData: FormData) {
     };
   }
 
-  // Simulate saving to a database
-  console.log('New waitlist signup:', validatedFields.data.email);
-
-  return {
-    message: 'Thank you for joining the waitlist!',
-  };
+  try {
+    await addWaitlistSubmission(validatedFields.data.email);
+    return {
+      message: 'Thank you for joining the waitlist!',
+    };
+  } catch (error) {
+    return {
+      errors: { _form: ['Could not save submission. Please try again.'] },
+    };
+  }
 }
 
 const contactSchema = z.object({
@@ -45,12 +50,16 @@ export async function submitContactForm(prevState: any, formData: FormData) {
     };
   }
 
-  // Simulate sending an email or saving to a database
-  console.log('New contact form submission:', validatedFields.data);
-
-  return {
-    message: 'Thank you for your message! We will get back to you soon.',
-  };
+  try {
+    await addContactSubmission(validatedFields.data);
+    return {
+      message: 'Thank you for your message! We will get back to you soon.',
+    };
+  } catch (error) {
+    return {
+      errors: { _form: ['Could not save submission. Please try again.'] },
+    };
+  }
 }
 
 const suggestShopSchema = z.object({
@@ -72,10 +81,14 @@ export async function submitShopSuggestion(prevState: any, formData: FormData) {
     };
   }
 
-  // Simulate saving to a database for review
-  console.log('New shop suggestion:', validatedFields.data);
-
-  return {
-    message: 'Thank you for your suggestion! It will be reviewed shortly.',
-  };
+  try {
+    await addShopSuggestionSubmission(validatedFields.data);
+    return {
+      message: 'Thank you for your suggestion! It will be reviewed shortly.',
+    };
+  } catch (error) {
+    return {
+      errors: { _form: ['Could not save submission. Please try again.'] },
+    };
+  }
 }

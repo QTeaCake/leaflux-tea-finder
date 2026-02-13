@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from './icons';
 import { SuggestShopForm } from './suggest-shop-form';
 import { AnalyticsGate } from './analytics-gate';
+import { SubmissionsGate } from './submissions-gate';
+import { Button } from './ui/button';
 
 export function Footer() {
   return (
@@ -60,7 +62,16 @@ export function Footer() {
           <p className="font-headline text-lg font-semibold">LeafLux's Tea Finder</p>
         </div>
         <div className="flex items-center gap-4">
-          <AnalyticsGate />
+          <SubmissionsGate>
+            <Button variant="ghost" size="sm">
+              Submissions
+            </Button>
+          </SubmissionsGate>
+          <AnalyticsGate>
+            <Button variant="ghost" size="sm">
+              For Business
+            </Button>
+          </AnalyticsGate>
           <p className="text-sm text-primary-foreground/80">&copy; {new Date().getFullYear()} LeafLux. All rights reserved.</p>
         </div>
       </div>

@@ -17,9 +17,9 @@ import { Label } from '@/components/ui/label';
 import { Icons } from './icons';
 import { useToast } from '@/hooks/use-toast';
 
-const ACCESS_CODE = '2223';
+const ACCESS_CODE = '1234';
 
-export function AnalyticsGate({ children }: { children: React.ReactNode }) {
+export function SubmissionsGate({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
@@ -31,10 +31,10 @@ export function AnalyticsGate({ children }: { children: React.ReactNode }) {
       setError('');
       toast({
         title: 'Access Granted',
-        description: 'Redirecting to the analytics dashboard...',
+        description: 'Redirecting to submissions dashboard...',
       });
       setIsOpen(false);
-      router.push('/analytics');
+      router.push('/submissions');
     } else {
       setError('Invalid access code. Please try again.');
     }
@@ -48,11 +48,11 @@ export function AnalyticsGate({ children }: { children: React.ReactNode }) {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="font-headline flex items-center gap-2">
-            <Icons.analytics className="h-5 w-5 text-primary" />
-            Business Analytics
+            <Icons.inbox className="h-5 w-5 text-primary" />
+            View Submissions
           </DialogTitle>
           <DialogDescription>
-            Enter the access code to view the analytics dashboard.
+            Enter the access code to view form submissions.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
