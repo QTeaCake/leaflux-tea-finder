@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -21,6 +21,7 @@ type WaitlistFormValues = z.infer<typeof waitlistSchema>;
 export function WaitlistForm() {
   const { toast } = useToast();
   const [state, formAction] = useActionState(signUpForWaitlist, null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<WaitlistFormValues>({
     resolver: zodResolver(waitlistSchema),
@@ -28,19 +29,31 @@ export function WaitlistForm() {
   });
 
   useEffect(() => {
-    if (state?.message) {
+    if (!state) return;
+
+    setIsSubmitting(false);
+
+    if (state.message) {
       toast({
         title: 'Success!',
         description: state.message,
       });
       form.reset();
-    }
-    if (state?.errors?.email) {
-      form.setError('email', { type: 'server', message: state.errors.email[0] });
+    } else if (state.errors) {
+      if (state.errors._form) {
+        toast({
+          variant: 'destructive',
+          title: 'Signup Failed',
+          description: state.errors._form[0],
+        });
+      } else if (state.errors.email) {
+        form.setError('email', { type: 'server', message: state.errors.email[0] });
+      }
     }
   }, [state, toast, form]);
 
   const processForm = (data: WaitlistFormValues) => {
+    setIsSubmitting(true);
     const formData = new FormData();
     formData.append('email', data.email);
     formAction(formData);
@@ -66,8 +79,8 @@ export function WaitlistForm() {
             )}
           />
         </div>
-        <Button type="submit" aria-disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? (
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
             <Icons.spinner className="h-4 w-4 animate-spin" />
           ) : (
             'Join'
