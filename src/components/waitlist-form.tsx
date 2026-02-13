@@ -40,11 +40,16 @@ export function WaitlistForm() {
     }
   }, [state, toast, form]);
 
+  const processForm = (data: WaitlistFormValues) => {
+    const formData = new FormData();
+    formData.append('email', data.email);
+    formAction(formData);
+  };
+
   return (
     <Form {...form}>
       <form
-        action={formAction}
-        onSubmit={form.handleSubmit(() => form.trigger().then(isValid => isValid && formAction(new FormData(form.control._formValues.current))))}
+        onSubmit={form.handleSubmit(processForm)}
         className="flex w-full max-w-sm items-start space-x-2"
       >
         <div className="flex-grow">

@@ -47,11 +47,18 @@ export function SuggestShopForm() {
     }
   }, [state, toast, form]);
 
+  const processForm = (data: SuggestShopFormValues) => {
+    const formData = new FormData();
+    formData.append('shopName', data.shopName);
+    formData.append('shopLocation', data.shopLocation);
+    formData.append('notes', data.notes || '');
+    formAction(formData);
+  };
+
   return (
     <Form {...form}>
       <form
-        action={formAction}
-        onSubmit={form.handleSubmit(() => form.trigger().then(isValid => isValid && formAction(new FormData(form.control._formValues.current))))}
+        onSubmit={form.handleSubmit(processForm)}
         className="space-y-4"
       >
         <FormField

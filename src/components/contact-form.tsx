@@ -47,11 +47,18 @@ export function ContactForm() {
     }
   }, [state, toast, form]);
 
+  const processForm = (data: ContactFormValues) => {
+    const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('email', data.email);
+    formData.append('message', data.message);
+    formAction(formData);
+  };
+
   return (
     <Form {...form}>
       <form
-        action={formAction}
-        onSubmit={form.handleSubmit(() => form.trigger().then(isValid => isValid && formAction(new FormData(form.control._formValues.current))))}
+        onSubmit={form.handleSubmit(processForm)}
         className="space-y-4"
       >
         <FormField
