@@ -54,8 +54,9 @@ export function ContactForm() {
         });
         form.reset();
 
-        // Trigger the confirmation email
         const mailCollection = collection(db, 'mail');
+        
+        // Confirmation email to the user
         addDoc(mailCollection, {
             to: [data.email],
             message: {
@@ -74,18 +75,33 @@ export function ContactForm() {
         }).catch(err => {
             console.error("Error sending contact form confirmation email:", err);
         });
+
+        // Notification email to the admin
+        if (process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+            addDoc(mailCollection, {
+                to: [process.env.NEXT_PUBLIC_ADMIN_EMAIL],
+                message: {
+                    subject: `New Contact Submission from ${data.name}`,
+                    html: `
+                        <p>You've received a new contact form submission.</p>
+                        <ul>
+                            <li><strong>Name:</strong> ${data.name}</li>
+                            <li><strong>Email:</strong> ${data.email}</li>
+                        </ul>
+                        <p><strong>Message:</strong></p>
+                        <p>${data.message}</p>
+                    `
+                }
+            }).catch(err => {
+                console.error("Error sending admin notification email for contact form:", err);
+            });
+        }
       })
       .catch((error) => {
         const permissionError = new FirestorePermissionError({
           path: feedbackCollection.path,
           operation: 'create',
           requestResourceData: data,
-        });
-
-        toast({
-          variant: 'destructive',
-          title: 'Submission Failed',
-          description: error.message || 'Your message could not be sent. Please try again later.',
         });
 
         errorEmitter.emit('permission-error', permissionError);

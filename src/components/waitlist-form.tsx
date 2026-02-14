@@ -47,8 +47,9 @@ export function WaitlistForm() {
         });
         form.reset();
 
-        // Trigger the confirmation email
         const mailCollection = collection(db, 'mail');
+        
+        // Confirmation email to the user
         addDoc(mailCollection, {
           to: [data.email],
           message: {
@@ -65,18 +66,25 @@ export function WaitlistForm() {
             console.error("Error sending waitlist confirmation email:", err);
             // We don't show a toast here because the primary action (waitlist signup) was successful.
         });
+
+        // Notification email to the admin
+        if (process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+            addDoc(mailCollection, {
+                to: [process.env.NEXT_PUBLIC_ADMIN_EMAIL],
+                message: {
+                    subject: 'New Waitlist Signup',
+                    html: `<p>New waitlist signup from: ${data.email}</p>`
+                }
+            }).catch(err => {
+                console.error("Error sending admin notification email for waitlist:", err);
+            });
+        }
       })
       .catch((error) => {
         const permissionError = new FirestorePermissionError({
           path: waitlistCollection.path,
           operation: 'create',
           requestResourceData: data,
-        });
-
-        toast({
-          variant: 'destructive',
-          title: 'Signup Failed',
-          description: error.message || 'Could not sign up for the waitlist. Please try again later.',
         });
         
         errorEmitter.emit('permission-error', permissionError);

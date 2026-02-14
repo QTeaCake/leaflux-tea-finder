@@ -53,18 +53,33 @@ export function SuggestShopForm() {
           description: 'Thank you for your suggestion!',
         });
         form.reset();
+
+        // Notification email to the admin
+        if (process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+            const mailCollection = collection(db, 'mail');
+            addDoc(mailCollection, {
+                to: [process.env.NEXT_PUBLIC_ADMIN_EMAIL],
+                message: {
+                    subject: 'New Tea Shop Suggestion',
+                    html: `
+                        <p>You've received a new tea shop suggestion.</p>
+                        <ul>
+                            <li><strong>Shop Name:</strong> ${data.shopName}</li>
+                            <li><strong>Location/Website:</strong> ${data.shopLocation}</li>
+                            <li><strong>Notes:</strong> ${data.notes || 'N/A'}</li>
+                        </ul>
+                    `
+                }
+            }).catch(err => {
+                console.error("Error sending admin notification email for shop suggestion:", err);
+            });
+        }
       })
-      .catch(() => {
+      .catch((error) => {
         const permissionError = new FirestorePermissionError({
           path: suggestionCollection.path,
           operation: 'create',
           requestResourceData: data,
-        });
-
-        toast({
-          variant: 'destructive',
-          title: 'Submission Failed',
-          description: 'Your suggestion could not be sent. Please try again later.',
         });
         
         errorEmitter.emit('permission-error', permissionError);
