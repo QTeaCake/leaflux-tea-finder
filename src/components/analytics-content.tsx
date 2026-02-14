@@ -34,7 +34,7 @@ const processChartData = (
   if (!data) return [];
   return Object.entries(data)
     .map(([key, value]) => ({
-      name: nameMapping ? nameMapping[key] || key : key,
+      name: nameMapping ? nameMapping[key] || key : key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
       clicks: value,
     }))
     .sort((a, b) => b.clicks - a.clicks)
@@ -113,7 +113,7 @@ export function AnalyticsContent({ teaShops, apiKey }: AnalyticsContentProps) {
   const websiteClickData = processChartData(analyticsData?.websiteClicks, shopNameMap);
   const teaTypeClickData = processChartData(analyticsData?.teaTypeClicks);
   const offeringClickData = processChartData({
-      ...analyticsData?.offeringClicks,
+      ...(analyticsData?.offeringClicks || {}),
       'Ethical Sourcing': analyticsData?.ethicalClicks || 0
   });
   const locationSearchData = processChartData(analyticsData?.locationSearches);
@@ -210,7 +210,7 @@ export function AnalyticsContent({ teaShops, apiKey }: AnalyticsContentProps) {
                   <TableBody>
                     {locationSearchData.map(item => (
                       <TableRow key={item.name}>
-                        <TableCell className="font-medium capitalize">{item.name}</TableCell>
+                        <TableCell className="font-medium">{item.name}</TableCell>
                         <TableCell className="text-right">{item.clicks}</TableCell>
                       </TableRow>
                     ))}

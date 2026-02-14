@@ -82,7 +82,7 @@ export function TeaFinder() {
 
     const analyticsRef = doc(db, 'analytics', 'data');
     let fieldToIncrement: string | null = null;
-    const sanitizedValue = value.replace(/[.#$[\]]/g, '_');
+    const sanitizedValue = value.replace(/[.#$[\]\s]/g, '_');
 
     switch (type) {
       case 'shop':
