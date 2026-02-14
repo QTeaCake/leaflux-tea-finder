@@ -1,9 +1,3 @@
 {
-  "shopClicks": {},
-  "teaTypeClicks": {},
-  "offeringClicks": {},
-  "ethicalClicks": 0,
-  "websiteClicks": {},
-  "directionsClicks": {},
-  "locationSearches": {}
+  "note": "This file is no longer used. Analytics data is now stored in Firebase Firestore."
 }

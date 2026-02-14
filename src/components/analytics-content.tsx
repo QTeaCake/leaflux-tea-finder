@@ -8,28 +8,30 @@ import type { TeaShop } from '@/lib/tea-shops';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-
+import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { Skeleton } from './ui/skeleton';
 
 type AnalyticsData = {
-  shopClicks: Record<string, number>;
-  teaTypeClicks: Record<string, number>;
-  offeringClicks: Record<string, number>;
-  ethicalClicks: number;
-  websiteClicks: Record<string, number>;
-  directionsClicks: Record<string, number>;
-  locationSearches: Record<string, number>;
+  shopClicks?: Record<string, number>;
+  teaTypeClicks?: Record<string, number>;
+  offeringClicks?: Record<string, number>;
+  ethicalClicks?: number;
+  websiteClicks?: Record<string, number>;
+  directionsClicks?: Record<string, number>;
+  locationSearches?: Record<string, number>;
 };
 
 type AnalyticsContentProps = {
-  analyticsData: AnalyticsData;
   teaShops: TeaShop[];
   apiKey: string | undefined;
 };
 
 const processChartData = (
-  data: Record<string, number>,
+  data: Record<string, number> | undefined,
   nameMapping?: Record<string, string>
 ) => {
+  if (!data) return [];
   return Object.entries(data)
     .map(([key, value]) => ({
       name: nameMapping ? nameMapping[key] || key : key,
@@ -39,24 +41,49 @@ const processChartData = (
     .slice(0, 7); // Show top 7
 };
 
-export function AnalyticsContent({ analyticsData, teaShops, apiKey }: AnalyticsContentProps) {
-    const shopNameMap = useMemo(() => Object.fromEntries(teaShops.map(s => [s.id, s.name])), [teaShops]);
+export function AnalyticsContent({ teaShops, apiKey }: AnalyticsContentProps) {
+  const db = useFirestore();
+  const analyticsRef = useMemoFirebase(() => db ? doc(db, 'analytics', 'data') : null, [db]);
+  const { data: analyticsData, isLoading } = useDoc<AnalyticsData>(analyticsRef);
 
-    const shopClickData = processChartData(analyticsData.shopClicks, shopNameMap);
-    const websiteClickData = processChartData(analyticsData.websiteClicks, shopNameMap);
-    const teaTypeClickData = processChartData(analyticsData.teaTypeClicks);
-    const offeringClickData = processChartData({
-        ...analyticsData.offeringClicks,
-        'Ethical Sourcing': analyticsData.ethicalClicks
-    });
-    const locationSearchData = processChartData(analyticsData.locationSearches);
+  const shopNameMap = useMemo(() => Object.fromEntries(teaShops.map(s => [s.id, s.name])), [teaShops]);
 
-    const chartConfig = {
-        clicks: {
-          label: "Clicks",
-          color: "hsl(var(--primary))",
-        },
-    } satisfies import('@/components/ui/chart').ChartConfig;
+  const shopClickData = processChartData(analyticsData?.shopClicks, shopNameMap);
+  const websiteClickData = processChartData(analyticsData?.websiteClicks, shopNameMap);
+  const teaTypeClickData = processChartData(analyticsData?.teaTypeClicks);
+  const offeringClickData = processChartData({
+      ...analyticsData?.offeringClicks,
+      'Ethical Sourcing': analyticsData?.ethicalClicks || 0
+  });
+  const locationSearchData = processChartData(analyticsData?.locationSearches);
+
+  const chartConfig = {
+      clicks: {
+        label: "Clicks",
+        color: "hsl(var(--primary))",
+      },
+  } satisfies import('@/components/ui/chart').ChartConfig;
+
+  const renderChart = (data: {name: string, clicks: number}[], title: string, description: string) => (
+    <Card className="shadow-lg">
+      <CardHeader>
+        <CardTitle className="font-headline text-2xl">{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? <Skeleton className="h-[200px] w-full" /> : data.length > 0 ? (
+          <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+              <BarChart accessibilityLayer data={data}>
+                  <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} tickFormatter={(value) => value.slice(0, 15) + (value.length > 15 ? '...' : '')} />
+                  <YAxis />
+                  <Tooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="clicks" fill="var(--color-clicks)" radius={4} />
+              </BarChart>
+          </ChartContainer>
+        ) : <p className="text-muted-foreground">No data yet.</p>}
+      </CardContent>
+    </Card>
+  );
       
   return (
     <section className="w-full py-12 md:py-20 lg:py-24 bg-background">
@@ -74,85 +101,18 @@ export function AnalyticsContent({ analyticsData, teaShops, apiKey }: AnalyticsC
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="font-headline text-2xl">Most Clicked Shops</CardTitle>
-              <CardDescription>Top shops selected by users in the list.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {shopClickData.length > 0 ? (
-                <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-                    <BarChart accessibilityLayer data={shopClickData}>
-                        <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} tickFormatter={(value) => value.slice(0, 15) + (value.length > 15 ? '...' : '')} />
-                        <YAxis />
-                        <Tooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="clicks" fill="var(--color-clicks)" radius={4} />
-                    </BarChart>
-                </ChartContainer>
-              ) : <p className="text-muted-foreground">No shop click data yet.</p>}
-            </CardContent>
-          </Card>
-           <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="font-headline text-2xl">Most Clicked Website Links</CardTitle>
-              <CardDescription>Direct traffic sent to shop websites. A key metric for monetization.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {websiteClickData.length > 0 ? (
-                <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-                    <BarChart accessibilityLayer data={websiteClickData}>
-                        <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} tickFormatter={(value) => value.slice(0, 15) + (value.length > 15 ? '...' : '')} />
-                        <YAxis />
-                        <Tooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="clicks" fill="var(--color-clicks)" radius={4} />
-                    </BarChart>
-                </ChartContainer>
-              ) : <p className="text-muted-foreground">No website click data yet.</p>}
-            </CardContent>
-          </Card>
-           <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="font-headline text-2xl">Popular Filters: Tea Types</CardTitle>
-              <CardDescription>Which types of tea are users most interested in finding?</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {teaTypeClickData.length > 0 ? (
-                <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-                    <BarChart accessibilityLayer data={teaTypeClickData}>
-                        <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} />
-                        <YAxis />
-                        <Tooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="clicks" fill="var(--color-clicks)" radius={4} />
-                    </BarChart>
-                </ChartContainer>
-              ) : <p className="text-muted-foreground">No filter data yet.</p>}
-            </CardContent>
-          </Card>
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="font-headline text-2xl">Popular Filters: Offerings</CardTitle>
-              <CardDescription>User interest in shop offerings and values.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {offeringClickData.length > 0 ? (
-                 <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-                    <BarChart accessibilityLayer data={offeringClickData}>
-                        <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} />
-                        <YAxis />
-                        <Tooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="clicks" fill="var(--color-clicks)" radius={4} />
-                    </BarChart>
-                </ChartContainer>
-              ) : <p className="text-muted-foreground">No filter data yet.</p>}
-            </CardContent>
-          </Card>
+          {renderChart(shopClickData, "Most Clicked Shops", "Top shops selected by users in the list.")}
+          {renderChart(websiteClickData, "Most Clicked Website Links", "Direct traffic sent to shop websites. A key metric for monetization.")}
+          {renderChart(teaTypeClickData, "Popular Filters: Tea Types", "Which types of tea are users most interested in finding?")}
+          {renderChart(offeringClickData, "Popular Filters: Offerings", "User interest in shop offerings and values.")}
+          
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="font-headline text-2xl">User Interest by Location (Demand)</CardTitle>
               <CardDescription>Top locations searched by users, indicating regional demand.</CardDescription>
             </CardHeader>
             <CardContent>
-              {locationSearchData.length > 0 ? (
+              {isLoading ? <Skeleton className="h-48 w-full" /> : locationSearchData.length > 0 ? (
                  <Table>
                   <TableHeader>
                     <TableRow>

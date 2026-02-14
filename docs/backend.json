@@ -112,7 +112,7 @@
           "description": "The email address of the user joining the waitlist.",
           "format": "email"
         },
-        "submissionTimestamp": {
+        "submittedAt": {
           "type": "string",
           "description": "The date and time when the user submitted their waitlist request.",
           "format": "date-time"
@@ -121,7 +121,7 @@
       "required": [
         "id",
         "email",
-        "submissionTimestamp"
+        "submittedAt"
       ]
     },
     "FeedbackSubmission": {
@@ -134,35 +134,61 @@
           "type": "string",
           "description": "Unique identifier for the FeedbackSubmission entity."
         },
-        "senderEmail": {
+        "name": {
+            "type": "string",
+            "description": "The name of the user who submitted the feedback."
+        },
+        "email": {
           "type": "string",
           "description": "The email address of the user who submitted the feedback, if provided.",
           "format": "email"
-        },
-        "subject": {
-          "type": "string",
-          "description": "A brief subject line summarizing the feedback or inquiry."
         },
         "message": {
           "type": "string",
           "description": "The full text of the user's feedback or inquiry."
         },
-        "submissionTimestamp": {
+        "submittedAt": {
           "type": "string",
           "description": "The date and time when the feedback was submitted.",
           "format": "date-time"
-        },
-        "status": {
-          "type": "string",
-          "description": "The current processing status of the feedback (e.g., 'new', 'read', 'in-progress', 'resolved')."
         }
       },
       "required": [
         "id",
+        "name",
+        "email",
         "message",
-        "submissionTimestamp",
-        "status"
+        "submittedAt"
       ]
+    },
+    "ShopSuggestionSubmission": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "ShopSuggestionSubmission",
+        "type": "object",
+        "description": "Represents a user's suggestion for a new tea shop.",
+        "properties": {
+            "id": { "type": "string", "description": "Unique identifier for the entity." },
+            "shopName": { "type": "string", "description": "The name of the suggested shop." },
+            "shopLocation": { "type": "string", "description": "The address or website of the shop." },
+            "notes": { "type": "string", "description": "Additional notes from the user." },
+            "submittedAt": { "type": "string", "format": "date-time", "description": "Timestamp of submission." }
+        },
+        "required": ["id", "shopName", "shopLocation", "submittedAt"]
+    },
+    "AnalyticsData": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "AnalyticsData",
+        "type": "object",
+        "description": "Stores aggregated analytics data for user engagement.",
+        "properties": {
+            "shopClicks": { "type": "object", "description": "A map of shop IDs to click counts." },
+            "teaTypeClicks": { "type": "object", "description": "A map of tea types to click counts." },
+            "offeringClicks": { "type": "object", "description": "A map of offerings to click counts." },
+            "ethicalClicks": { "type": "number", "description": "Total clicks on the ethical sourcing filter." },
+            "websiteClicks": { "type": "object", "description": "A map of shop IDs to website link click counts." },
+            "directionsClicks": { "type": "object", "description": "A map of shop IDs to directions link click counts." },
+            "locationSearches": { "type": "object", "description": "A map of searched locations to counts." }
+        }
     }
   },
   "auth": {
@@ -222,6 +248,33 @@
         }
       },
       {
+        "path": "/shopSuggestionSubmissions/{shopSuggestionId}",
+        "definition": {
+            "entityName": "ShopSuggestionSubmission",
+            "schema": {
+                "$ref": "#/backend/entities/ShopSuggestionSubmission"
+            },
+            "description": "Collection for user-submitted tea shop suggestions. Anyone can create an entry, but only admins can read or delete them.",
+            "params": [
+                {
+                    "name": "shopSuggestionId",
+                    "description": "The unique identifier for a specific shop suggestion."
+                }
+            ]
+        }
+      },
+      {
+        "path": "/analytics/data",
+        "definition": {
+            "entityName": "AnalyticsData",
+            "schema": {
+                "$ref": "#/backend/entities/AnalyticsData"
+            },
+            "description": "A singleton document to store aggregated analytics data. It is publicly updatable (to allow for incrementing counters from the client) but only readable by administrators to protect the full dataset.",
+            "params": []
+        }
+      },
+      {
         "path": "/roles_admin/{adminUid}",
         "definition": {
           "entityName": "AdminRole",
@@ -238,6 +291,6 @@
         }
       }
     ],
-    "reasoning": "The recommended Firestore data structure for 'LeafLux's Tea Finder' prioritizes secure, scalable, and debuggable access patterns by adhering to the core design principles of Authorization Independence and Structural Segregation.\n\n**Authorization Independence:**\nThis design achieves Authorization Independence by ensuring that all authorization checks are self-contained within the document being accessed or rely on a global roles collection. Specifically:\n1.  **`teaShops` Collection:** Access to `teaShops` documents for public reading does not depend on any other document's data. Admin write access is determined by checking the `/roles_admin/{adminUid}` collection, an atomic and independent lookup. This eliminates the need for `get()` calls to parent documents or related entities for authorization.\n2.  **`waitlistEntries` and `feedbackSubmissions` Collections:** User submissions (create operations) are entirely independent, not requiring any prior authorization checks on related documents. Admin read/update access is again managed through the independent `/roles_admin/{adminUid}` collection. This ensures that a single write operation to a document in these collections doesn't break atomic operations due to `get()` calls in security rules.\n3.  **No Hierarchical Authorization:** Since there are no deeply nested subcollections whose access inherently depends on a parent document's specific fields (like `ownerId` or `members`), there's no need for denormalization of authorization fields *within* nested data. All authorization context is either intrinsic to the document (e.g., `request.auth.uid` matches the document's ID in a private collection if one existed) or globally available (via `roles_admin`).\n\n**QAPs (Rules are not Filters):**\nThe structure supports secure `list` operations (QAPs) through Structural Segregation and clear access modeling:\n1.  **`/teaShops`:** This collection has a homogeneous security posture, being publicly readable by all users (authenticated or anonymous). This allows for efficient `list` queries without requiring server-side filtering by security rules. Rules can simply `allow read: if true;`, enabling clients to query and filter `teaShops` directly within their security context.\n2.  **`/waitlistEntries` and `/feedbackSubmissions`:** These collections are designed for public write access but restricted admin read access. This segregation ensures that `list` operations on these collections can be securely restricted to administrators (`allow read: if exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));`). Clients (non-admins) will not be able to `list` these documents, preventing accidental data exposure and enforcing the intended privacy. The collection structure itself acts as the primary filter for unauthorized users, supporting QAPs.\n\nIn summary, the design employs dedicated top-level collections for each entity type, clearly segregating data by its security posture (publicly readable, publicly writable/admin readable). Admin roles are managed in a separate collection, `roles_admin`, ensuring that all authorization decisions are simple, explicit, and do not introduce dependencies that could compromise atomicity or debuggability."
+    "reasoning": "The recommended Firestore data structure for 'LeafLux's Tea Finder' prioritizes secure, scalable, and debuggable access patterns by adhering to the core design principles of Authorization Independence and Structural Segregation.\n\n**Authorization Independence:**\nThis design achieves Authorization Independence by ensuring that all authorization checks are self-contained within the document being accessed or rely on a global roles collection. Specifically:\n1.  **`teaShops` Collection:** Access to `teaShops` documents for public reading does not depend on any other document's data. Admin write access is determined by checking the `/roles_admin/{adminUid}` collection, an atomic and independent lookup. This eliminates the need for `get()` calls to parent documents or related entities for authorization.\n2.  **`waitlistEntries`, `feedbackSubmissions`, and `shopSuggestionSubmissions` Collections:** User submissions (create operations) are entirely independent, not requiring any prior authorization checks on related documents. Admin read/update access is again managed through the independent `/roles_admin/{adminUid}` collection. This ensures that a single write operation to a document in these collections doesn't break atomic operations due to `get()` calls in security rules.\n3.  **No Hierarchical Authorization:** Since there are no deeply nested subcollections whose access inherently depends on a parent document's specific fields (like `ownerId` or `members`), there's no need for denormalization of authorization fields *within* nested data. All authorization context is either intrinsic to the document (e.g., `request.auth.uid` matches the document's ID in a private collection if one existed) or globally available (via `roles_admin`).\n\n**QAPs (Rules are not Filters):**\nThe structure supports secure `list` operations (QAPs) through Structural Segregation and clear access modeling:\n1.  **`/teaShops`:** This collection has a homogeneous security posture, being publicly readable by all users (authenticated or anonymous). This allows for efficient `list` queries without requiring server-side filtering by security rules. Rules can simply `allow read: if true;`, enabling clients to query and filter `teaShops` directly within their security context.\n2.  **`/waitlistEntries`, `feedbackSubmissions`, and `shopSuggestionSubmissions`:** These collections are designed for public write access but restricted admin read access. This segregation ensures that `list` operations on these collections can be securely restricted to administrators (`allow read: if exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));`). Clients (non-admins) will not be able to `list` these documents, preventing accidental data exposure and enforcing the intended privacy. The collection structure itself acts as the primary filter for unauthorized users, supporting QAPs.\n\nIn summary, the design employs dedicated top-level collections for each entity type, clearly segregating data by its security posture (publicly readable, publicly writable/admin readable). Admin roles are managed in a separate collection, `roles_admin`, ensuring that all authorization decisions are simple, explicit, and do not introduce dependencies that could compromise atomicity or debuggability."
   }
 }

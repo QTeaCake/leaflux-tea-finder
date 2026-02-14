@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -34,61 +34,112 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Icons } from './icons';
 import { format } from 'date-fns';
-import type { TeaShop } from '@/lib/tea-shops';
-import type { Submissions } from '@/lib/services';
+import { teaShops as allTeaShops, TeaShop } from '@/lib/tea-shops';
 import { useToast } from '@/hooks/use-toast';
-import { deleteSubmissionAction } from '@/app/actions';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, doc, deleteDoc, orderBy, query, Timestamp } from 'firebase/firestore';
+import { Skeleton } from './ui/skeleton';
 
-
-type Props = {
-  submissions: Submissions;
-  teaShops: TeaShop[];
+export type WaitlistSubmission = {
+  id: string;
+  email: string;
+  submittedAt: Timestamp;
 };
+
+export type ContactSubmission = {
+  id:string;
+  name: string;
+  email: string;
+  message: string;
+  submittedAt: Timestamp;
+};
+
+export type ShopSuggestionSubmission = {
+  id: string;
+  shopName: string;
+  shopLocation: string;
+  notes?: string;
+  submittedAt: Timestamp;
+};
+
 
 // This component ensures date formatting only happens on the client,
 // after hydration, to prevent a server-client mismatch.
-function ClientFormattedDate({ dateString }: { dateString: string }) {
+function ClientFormattedDate({ date }: { date: Timestamp | Date }) {
   const [formattedDate, setFormattedDate] = useState('');
 
   useEffect(() => {
     // new Date() can be different on server and client, causing a hydration error.
     // By running this in useEffect, we ensure it only runs on the client.
-    setFormattedDate(format(new Date(dateString), "PPP p"));
-  }, [dateString]);
+    const dateObj = date instanceof Timestamp ? date.toDate() : date;
+    setFormattedDate(format(dateObj, "PPP p"));
+  }, [date]);
 
   // Render nothing on the server and initial client render.
   // The date will appear after the component mounts on the client.
-  return <>{formattedDate}</>;
+  return <>{formattedDate || <Skeleton className="h-4 w-36" />}</>;
 }
 
 
-export function SubmissionsContent({ submissions, teaShops }: Props) {
-  const sortedTeaShops = [...teaShops].sort((a, b) => a.name.localeCompare(b.name));
+export function SubmissionsContent() {
+  const sortedTeaShops = [...allTeaShops].sort((a, b) => a.name.localeCompare(b.name));
   const [isPending, startTransition] = useTransition();
-  const { toast } = useToast();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{type: 'waitlist' | 'contact' | 'suggestions', id: string} | null>(null);
 
-  const handleDelete = (type: 'waitlist' | 'contact' | 'suggestions', submittedAt: string) => {
+  const { toast } = useToast();
+  const db = useFirestore();
+
+  const waitlistQuery = useMemoFirebase(() => db ? query(collection(db, 'waitlistEntries'), orderBy('submittedAt', 'desc')) : null, [db]);
+  const contactQuery = useMemoFirebase(() => db ? query(collection(db, 'feedbackSubmissions'), orderBy('submittedAt', 'desc')) : null, [db]);
+  const suggestionsQuery = useMemoFirebase(() => db ? query(collection(db, 'shopSuggestionSubmissions'), orderBy('submittedAt', 'desc')) : null, [db]);
+
+  const { data: waitlist, isLoading: loadingWaitlist } = useCollection<WaitlistSubmission>(waitlistQuery);
+  const { data: contact, isLoading: loadingContact } = useCollection<ContactSubmission>(contactQuery);
+  const { data: suggestions, isLoading: loadingSuggestions } = useCollection<ShopSuggestionSubmission>(suggestionsQuery);
+
+  const isLoading = loadingWaitlist || loadingContact || loadingSuggestions;
+
+  const handleDelete = () => {
+    if (!itemToDelete || !db) return;
+    const { type, id } = itemToDelete;
+
     startTransition(async () => {
-      const result = await deleteSubmissionAction(type, submittedAt);
-      if (result?.errors?._form) {
-        toast({
-            variant: 'destructive',
-            title: 'Error Deleting Submission',
-            description: result.errors._form[0],
-        });
-      } else {
+        let collectionName = '';
+        if (type === 'waitlist') collectionName = 'waitlistEntries';
+        else if (type === 'contact') collectionName = 'feedbackSubmissions';
+        else if (type === 'suggestions') collectionName = 'shopSuggestionSubmissions';
+
+        if (!collectionName) return;
+
+      try {
+        await deleteDoc(doc(db, collectionName, id));
         toast({
             title: 'Submission Deleted',
             description: 'The entry has been removed.',
         });
+      } catch (error) {
+        console.error('Error deleting document:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Error Deleting Submission',
+            description: 'Could not delete submission.',
+        });
+      } finally {
+        setDialogOpen(false);
+        setItemToDelete(null);
       }
     });
   };
+
+  const openDeleteDialog = (type: 'waitlist' | 'contact' | 'suggestions', id: string) => {
+    setItemToDelete({ type, id });
+    setDialogOpen(true);
+  }
   
   return (
     <section className="w-full py-12 md:py-20 lg:py-24 bg-background">
@@ -105,11 +156,32 @@ export function SubmissionsContent({ submissions, teaShops }: Props) {
           </p>
         </div>
 
+        <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete this submission.
+                </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setItemToDelete(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                    disabled={isPending}
+                    className={buttonVariants({ variant: "destructive" })}
+                    onClick={handleDelete}
+                >
+                    {isPending ? <Icons.spinner className="animate-spin" /> : "Delete"}
+                </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
         <Tabs defaultValue="contact" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="contact">Contact Us ({submissions.contact.length})</TabsTrigger>
-            <TabsTrigger value="suggestions">Shop Suggestions ({submissions.suggestions.length})</TabsTrigger>
-            <TabsTrigger value="waitlist">Waitlist ({submissions.waitlist.length})</TabsTrigger>
+            <TabsTrigger value="contact">Contact Us ({contact?.length ?? 0})</TabsTrigger>
+            <TabsTrigger value="suggestions">Shop Suggestions ({suggestions?.length ?? 0})</TabsTrigger>
+            <TabsTrigger value="waitlist">Waitlist ({waitlist?.length ?? 0})</TabsTrigger>
           </TabsList>
           
           <TabsContent value="contact">
@@ -130,41 +202,21 @@ export function SubmissionsContent({ submissions, teaShops }: Props) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {submissions.contact.length > 0 ? (
-                      submissions.contact.map((s) => (
-                        <TableRow key={s.submittedAt}>
+                    {isLoading ? (
+                      <TableRow><TableCell colSpan={5} className="h-24 text-center"><Icons.spinner className="h-6 w-6 animate-spin mx-auto" /></TableCell></TableRow>
+                    ) : contact && contact.length > 0 ? (
+                      contact.map((s) => (
+                        <TableRow key={s.id}>
                           <TableCell className="font-medium whitespace-nowrap">
-                            <ClientFormattedDate dateString={s.submittedAt} />
+                            <ClientFormattedDate date={s.submittedAt} />
                           </TableCell>
                           <TableCell>{s.name}</TableCell>
                           <TableCell>{s.email}</TableCell>
                           <TableCell>{s.message}</TableCell>
                           <TableCell className="text-right">
-                             <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" disabled={isPending}>
-                                  <Icons.trash className="h-4 w-4 text-destructive" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete this submission.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    disabled={isPending}
-                                    className={buttonVariants({ variant: "destructive" })}
-                                    onClick={() => handleDelete('contact', s.submittedAt)}
-                                  >
-                                    {isPending ? <Icons.spinner className="animate-spin" /> : "Delete"}
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                            <Button variant="ghost" size="icon" disabled={isPending} onClick={() => openDeleteDialog('contact', s.id)}>
+                                <Icons.trash className="h-4 w-4 text-destructive" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))
@@ -187,7 +239,7 @@ export function SubmissionsContent({ submissions, teaShops }: Props) {
               </CardHeader>
               <CardContent className="space-y-8">
                 <div>
-                  <h4 className="font-medium mb-2 text-foreground">Currently Indexed Shops ({teaShops.length})</h4>
+                  <h4 className="font-medium mb-2 text-foreground">Currently Indexed Shops ({allTeaShops.length})</h4>
                   <Select>
                     <SelectTrigger className="w-full md:w-[300px]">
                       <SelectValue placeholder="View existing shops..." />
@@ -218,41 +270,21 @@ export function SubmissionsContent({ submissions, teaShops }: Props) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {submissions.suggestions.length > 0 ? (
-                      submissions.suggestions.map((s) => (
-                        <TableRow key={s.submittedAt}>
+                     {isLoading ? (
+                      <TableRow><TableCell colSpan={5} className="h-24 text-center"><Icons.spinner className="h-6 w-6 animate-spin mx-auto" /></TableCell></TableRow>
+                    ) : suggestions && suggestions.length > 0 ? (
+                      suggestions.map((s) => (
+                        <TableRow key={s.id}>
                           <TableCell className="font-medium whitespace-nowrap">
-                             <ClientFormattedDate dateString={s.submittedAt} />
+                             <ClientFormattedDate date={s.submittedAt} />
                           </TableCell>
                           <TableCell>{s.shopName}</TableCell>
                           <TableCell>{s.shopLocation}</TableCell>
                           <TableCell>{s.notes}</TableCell>
                            <TableCell className="text-right">
-                             <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" disabled={isPending}>
-                                  <Icons.trash className="h-4 w-4 text-destructive" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete this submission.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    disabled={isPending}
-                                    className={buttonVariants({ variant: "destructive" })}
-                                    onClick={() => handleDelete('suggestions', s.submittedAt)}
-                                  >
-                                    {isPending ? <Icons.spinner className="animate-spin" /> : "Delete"}
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                             <Button variant="ghost" size="icon" disabled={isPending} onClick={() => openDeleteDialog('suggestions', s.id)}>
+                                <Icons.trash className="h-4 w-4 text-destructive" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))
@@ -283,39 +315,19 @@ export function SubmissionsContent({ submissions, teaShops }: Props) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {submissions.waitlist.length > 0 ? (
-                      submissions.waitlist.map((s) => (
-                        <TableRow key={s.submittedAt}>
+                     {isLoading ? (
+                      <TableRow><TableCell colSpan={3} className="h-24 text-center"><Icons.spinner className="h-6 w-6 animate-spin mx-auto" /></TableCell></TableRow>
+                    ) : waitlist && waitlist.length > 0 ? (
+                      waitlist.map((s) => (
+                        <TableRow key={s.id}>
                           <TableCell className="font-medium whitespace-nowrap">
-                             <ClientFormattedDate dateString={s.submittedAt} />
+                             <ClientFormattedDate date={s.submittedAt} />
                           </TableCell>
                           <TableCell>{s.email}</TableCell>
                           <TableCell className="text-right">
-                             <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" disabled={isPending}>
-                                  <Icons.trash className="h-4 w-4 text-destructive" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete this submission.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    disabled={isPending}
-                                    className={buttonVariants({ variant: "destructive" })}
-                                    onClick={() => handleDelete('waitlist', s.submittedAt)}
-                                  >
-                                    {isPending ? <Icons.spinner className="animate-spin" /> : "Delete"}
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                            <Button variant="ghost" size="icon" disabled={isPending} onClick={() => openDeleteDialog('waitlist', s.id)}>
+                                <Icons.trash className="h-4 w-4 text-destructive" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))

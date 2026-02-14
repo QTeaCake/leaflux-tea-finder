@@ -1,11 +1,12 @@
 'use client';
 
-import { useActionState, useEffect, useTransition } from 'react';
+import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-import { submitShopSuggestion } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,8 +24,8 @@ type SuggestShopFormValues = z.infer<typeof suggestShopSchema>;
 
 export function SuggestShopForm() {
   const { toast } = useToast();
-  const [state, formAction, isPending] = useActionState(submitShopSuggestion, null);
-  const [, startTransition] = useTransition();
+  const db = useFirestore();
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<SuggestShopFormValues>({
     resolver: zodResolver(suggestShopSchema),
@@ -35,47 +36,37 @@ export function SuggestShopForm() {
     },
   });
 
-  useEffect(() => {
-    if (!state) return;
-    
-    if (state.message) {
-      toast({
-        title: 'Success!',
-        description: state.message,
-      });
-      form.reset();
-    } else if (state.errors) {
-       if (state.errors._form) {
+  const onSubmit = (data: SuggestShopFormValues) => {
+    if (!db) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Firestore is not available.' });
+        return;
+    }
+    startTransition(async () => {
+      try {
+        await addDoc(collection(db, 'shopSuggestionSubmissions'), {
+          ...data,
+          submittedAt: serverTimestamp(),
+        });
+        toast({
+          title: 'Success!',
+          description: 'Thank you for your suggestion!',
+        });
+        form.reset();
+      } catch (error: any) {
+        console.error('Shop suggestion error:', error);
         toast({
           variant: 'destructive',
           title: 'Submission Failed',
-          description: state.errors._form[0],
-        });
-      } else {
-        Object.entries(state.errors).forEach(([key, value]) => {
-          form.setError(key as keyof SuggestShopFormValues, {
-            type: 'server',
-            message: (value as string[])[0],
-          });
+          description: error.message || 'An unexpected error occurred.',
         });
       }
-    }
-  }, [state, toast, form]);
-
-  const processForm = (data: SuggestShopFormValues) => {
-    const formData = new FormData();
-    formData.append('shopName', data.shopName);
-    formData.append('shopLocation', data.shopLocation);
-    formData.append('notes', data.notes || '');
-    startTransition(() => {
-      formAction(formData);
     });
   };
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(processForm)}
+        onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4"
       >
         <FormField
@@ -85,7 +76,7 @@ export function SuggestShopForm() {
             <FormItem>
               <FormLabel>Tea Shop Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., The Cozy Cup" {...field} />
+                <Input placeholder="e.g., The Cozy Cup" {...field} disabled={isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -98,7 +89,7 @@ export function SuggestShopForm() {
             <FormItem>
               <FormLabel>Address or Website</FormLabel>
               <FormControl>
-                <Input placeholder="123 Tea Lane or www.teashop.com" {...field} />
+                <Input placeholder="123 Tea Lane or www.teashop.com" {...field} disabled={isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -111,7 +102,7 @@ export function SuggestShopForm() {
             <FormItem>
               <FormLabel>Additional Notes (Optional)</FormLabel>
               <FormControl>
-                <Textarea placeholder="What makes this shop special?" {...field} />
+                <Textarea placeholder="What makes this shop special?" {...field} disabled={isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>

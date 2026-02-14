@@ -1,11 +1,12 @@
 'use client';
 
-import { useActionState, useEffect, useTransition } from 'react';
+import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-import { submitContactForm } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,8 +24,8 @@ type ContactFormValues = z.infer<typeof contactSchema>;
 
 export function ContactForm() {
   const { toast } = useToast();
-  const [state, formAction, isPending] = useActionState(submitContactForm, null);
-  const [, startTransition] = useTransition();
+  const db = useFirestore();
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
@@ -35,47 +36,37 @@ export function ContactForm() {
     },
   });
 
-  useEffect(() => {
-    if (!state) return; // Initial state is null, do nothing
-
-    if (state.message) {
-      toast({
-        title: 'Success!',
-        description: state.message,
-      });
-      form.reset();
-    } else if (state.errors) {
-      if (state.errors._form) {
+  const onSubmit = (data: ContactFormValues) => {
+    if (!db) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Firestore is not available.' });
+        return;
+    }
+    startTransition(async () => {
+      try {
+        await addDoc(collection(db, 'feedbackSubmissions'), {
+          ...data,
+          submittedAt: serverTimestamp(),
+        });
+        toast({
+          title: 'Success!',
+          description: "Your message has been sent.",
+        });
+        form.reset();
+      } catch (error: any) {
+        console.error('Contact form submission error:', error);
         toast({
           variant: 'destructive',
           title: 'Submission Failed',
-          description: state.errors._form[0],
+          description: error.message || 'An unexpected error occurred.',
         });
-      } else {
-         Object.entries(state.errors).forEach(([key, value]) => {
-            form.setError(key as keyof ContactFormValues, {
-                type: 'server',
-                message: (value as string[])[0]
-            });
-         });
       }
-    }
-  }, [state, toast, form]);
-
-  const processForm = (data: ContactFormValues) => {
-    const formData = new FormData();
-    formData.append('name', data.name);
-    formData.append('email', data.email);
-    formData.append('message', data.message);
-    startTransition(() => {
-      formAction(formData);
     });
   };
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(processForm)}
+        onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4"
       >
         <FormField
@@ -85,7 +76,7 @@ export function ContactForm() {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="Your Name" {...field} />
+                <Input placeholder="Your Name" {...field} disabled={isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -98,7 +89,7 @@ export function ContactForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="your.email@example.com" {...field} />
+                <Input placeholder="your.email@example.com" {...field} disabled={isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -111,7 +102,7 @@ export function ContactForm() {
             <FormItem>
               <FormLabel>Message</FormLabel>
               <FormControl>
-                <Textarea placeholder="Your message..." {...field} />
+                <Textarea placeholder="Your message..." {...field} disabled={isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>

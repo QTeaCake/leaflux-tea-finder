@@ -15,7 +15,8 @@ import { Separator } from './ui/separator';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { PraiseButton } from './praise-button';
-import { logAnalyticsClick } from '@/app/actions';
+import { useFirestore } from '@/firebase';
+import { doc, setDoc, increment } from 'firebase/firestore';
 
 type Props = {
   shop: TeaShop | null;
@@ -28,6 +29,26 @@ type Props = {
 
 export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, praisedShops }: Props) {
   const [newTag, setNewTag] = useState('');
+  const db = useFirestore();
+
+  const logAnalyticsClick = (type: string, value: string) => {
+    if (!db) return;
+    const analyticsRef = doc(db, 'analytics', 'data');
+    let fieldToIncrement: string | null = null;
+    switch (type) {
+      case 'website':
+        fieldToIncrement = `websiteClicks.${value}`;
+        break;
+      case 'directions':
+        fieldToIncrement = `directionsClicks.${value}`;
+        break;
+    }
+
+    if (fieldToIncrement) {
+      setDoc(analyticsRef, { [fieldToIncrement]: increment(1) }, { merge: true })
+        .catch((error) => console.error("Error logging analytics: ", error));
+    }
+  };
 
   if (!shop) return null;
 

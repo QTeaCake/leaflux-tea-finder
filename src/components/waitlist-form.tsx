@@ -1,11 +1,12 @@
 'use client';
 
-import { useActionState, useEffect, useTransition } from 'react';
+import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-import { signUpForWaitlist } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -20,48 +21,45 @@ type WaitlistFormValues = z.infer<typeof waitlistSchema>;
 
 export function WaitlistForm() {
   const { toast } = useToast();
-  const [state, formAction, isPending] = useActionState(signUpForWaitlist, null);
-  const [, startTransition] = useTransition();
+  const db = useFirestore();
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<WaitlistFormValues>({
     resolver: zodResolver(waitlistSchema),
     defaultValues: { email: '' },
   });
 
-  useEffect(() => {
-    if (!state) return;
-
-    if (state.message) {
-      toast({
-        title: 'Success!',
-        description: state.message,
-      });
-      form.reset();
-    } else if (state.errors) {
-      if (state.errors._form) {
+  const onSubmit = (data: WaitlistFormValues) => {
+    if (!db) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Firestore is not available.' });
+        return;
+    }
+    startTransition(async () => {
+      try {
+        await addDoc(collection(db, 'waitlistEntries'), {
+          email: data.email,
+          submittedAt: serverTimestamp(),
+        });
+        toast({
+          title: 'Success!',
+          description: "You've been added to the waitlist.",
+        });
+        form.reset();
+      } catch (error: any) {
+        console.error('Waitlist signup error:', error);
         toast({
           variant: 'destructive',
           title: 'Signup Failed',
-          description: state.errors._form[0],
+          description: error.message || 'An unexpected error occurred.',
         });
-      } else if (state.errors.email) {
-        form.setError('email', { type: 'server', message: state.errors.email[0] });
       }
-    }
-  }, [state, toast, form]);
-
-  const processForm = (data: WaitlistFormValues) => {
-    const formData = new FormData();
-    formData.append('email', data.email);
-    startTransition(() => {
-      formAction(formData);
     });
   };
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(processForm)}
+        onSubmit={form.handleSubmit(onSubmit)}
         className="flex w-full max-w-sm items-start space-x-2"
       >
         <div className="flex-grow">
@@ -71,7 +69,7 @@ export function WaitlistForm() {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input placeholder="your.email@example.com" {...field} />
+                  <Input placeholder="your.email@example.com" {...field} disabled={isPending}/>
                 </FormControl>
                 <FormMessage className="mt-2" />
               </FormItem>

@@ -20,7 +20,8 @@ import {
 } from "@/components/ui/collapsible";
 import { RecommendationsTool } from './recommendations-tool';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { logAnalyticsClick } from '@/app/actions';
+import { useFirestore } from '@/firebase';
+import { doc, setDoc, increment } from 'firebase/firestore';
 
 type Filters = {
   offerings: string[];
@@ -74,6 +75,38 @@ export function TeaFinder() {
   const [isLocating, setIsLocating] = useState(true);
   const [praisedShops, setPraisedShops] = useState<string[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const db = useFirestore();
+
+  const logAnalyticsClick = useCallback((type: string, value: string) => {
+    if (!db) return;
+
+    const analyticsRef = doc(db, 'analytics', 'data');
+    let fieldToIncrement: string | null = null;
+    const sanitizedValue = value.replace(/[.#$[\]]/g, '_');
+
+    switch (type) {
+      case 'shop':
+        fieldToIncrement = `shopClicks.${sanitizedValue}`;
+        break;
+      case 'ethical':
+        fieldToIncrement = 'ethicalClicks';
+        break;
+      case 'offering':
+        fieldToIncrement = `offeringClicks.${sanitizedValue}`;
+        break;
+      case 'teaType':
+        fieldToIncrement = `teaTypeClicks.${sanitizedValue}`;
+        break;
+      case 'location':
+        fieldToIncrement = `locationSearches.${sanitizedValue.toLowerCase()}`;
+        break;
+    }
+
+    if (fieldToIncrement) {
+      setDoc(analyticsRef, { [fieldToIncrement]: increment(1) }, { merge: true })
+        .catch(error => console.error("Error logging analytics: ", error));
+    }
+  }, [db]);
 
   useEffect(() => {
     setIsClient(true);
@@ -132,7 +165,7 @@ export function TeaFinder() {
       setLocationError("There was an error searching for the location.");
       setUserLocation(null);
     }
-  }, [locationInput]);
+  }, [locationInput, logAnalyticsClick]);
 
   const handleFilterChange = useCallback((offering: string) => {
     logAnalyticsClick('offering', offering);
@@ -142,7 +175,7 @@ export function TeaFinder() {
         : [...prev.offerings, offering];
       return { ...prev, offerings: newOfferings };
     });
-  }, []);
+  }, [logAnalyticsClick]);
 
   const handleTeaTypeFilterChange = useCallback((teaType: string) => {
     logAnalyticsClick('teaType', teaType);
@@ -152,7 +185,7 @@ export function TeaFinder() {
         : [...prev.teaTypes, teaType];
       return { ...prev, teaTypes: newTeaTypes };
     });
-  }, []);
+  }, [logAnalyticsClick]);
 
   const handlePraise = useCallback((shopId: string) => {
     if (praisedShops.includes(shopId)) {

@@ -12,19 +12,21 @@
  * - `/teaShops`: Publicly-readable information about tea shops.
  * - `/waitlistEntries`: Private submissions from a public waitlist form.
  * - `/feedbackSubmissions`: Private feedback messages from a public contact form.
+ * - `/shopSuggestionSubmissions`: Private shop suggestions from a public form.
+ * - `/analytics`: A collection containing a single document for aggregated, publicly-writable analytics data.
  * - `/roles_admin`: A private collection listing the UIDs of users with administrative privileges.
  *
  * ## Key Security Decisions
  * - **Admin-Gated Writes**: All write operations (create, update, delete) on core application data like `/teaShops` are restricted to administrators.
- * - **Public Submissions**: The `/waitlistEntries` and `/feedbackSubmissions` collections are intentionally open for creation by anyone (including unauthenticated users) to support public website forms.
- * - **Private Data Protection**: Reading or listing user-submitted data in `/waitlistEntries` and `/feedbackSubmissions` is strictly forbidden for non-administrative users.
+ * - **Public Submissions**: The `/waitlistEntries`, `/feedbackSubmissions`, and `/shopSuggestionSubmissions` collections are intentionally open for creation by anyone (including unauthenticated users) to support public website forms.
+ * - **Private Data Protection**: Reading or listing user-submitted data in the submissions collections is strictly forbidden for non-administrative users.
  * - **Role Management Security**: The `/roles_admin` collection, which defines who is an admin, is read-only within these rules. This prevents a compromised admin account from granting administrative privileges to other users via the client API. Role management should be performed out-of-band (e.g., via the Firebase Console or a trusted server environment).
  *
  * ## Denormalization for Authorization
  * The primary denormalization strategy is the `/roles_admin/{adminUid}` collection. Instead of checking a custom claim or a field on a user document, this structure allows for a direct, efficient `exists()` check to determine if a user has administrative rights. This makes authorization logic for admin-only actions clean, fast, and independent of other data structures.
  *
  * ## Structural Segregation
- * This ruleset strictly segregates public and private data into separate collections. For example, `/teaShops` is a fully public collection, while `/waitlistEntries` is write-only for the public and read-only for admins. This separation is more secure and performant than co-mingling public and private documents in the same collection, as it simplifies rules for list operations and prevents accidental data leakage.
+ * This ruleset strictly segregates public and private data into separate collections. This separation is more secure and performant than co-mingling public and private documents in the same collection, as it simplifies rules for list operations and prevents accidental data leakage.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -80,6 +82,32 @@ service cloud.firestore {
       allow create: if true;
       allow update: if isAdmin() && resource != null;
       allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Rules for user-submitted shop suggestions.
+     * @path /shopSuggestionSubmissions/{shopSuggestionId}
+     * @principle Public Create, Admin-Only Manage. Allows any user to suggest a shop, but restricts reading and management to administrators.
+     */
+    match /shopSuggestionSubmissions/{shopSuggestionId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if true;
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Rules for analytics data.
+     * @path /analytics/data
+     * @principle Public Write, Admin-Only Read. Allows any client to log analytics events (e.g., clicks) by updating a central document, while restricting access to view the aggregated data to administrators. This is a common pattern for client-side metrics collection.
+     */
+    match /analytics/{docId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if true;
+      allow update: if true;
+      allow delete: if isAdmin();
     }
 
     /**
