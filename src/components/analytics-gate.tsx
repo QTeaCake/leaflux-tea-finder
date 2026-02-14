@@ -21,7 +21,8 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export function AnalyticsGate({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [code, setCode] = useState('');
+  const [email, setEmail] = useState('mayo.anastatius@gmail.com');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
   const { toast } = useToast();
@@ -33,9 +34,7 @@ export function AnalyticsGate({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Use the user's actual email address for authentication.
-    const adminEmail = 'mayo.anastatius@gmail.com';
-    signInWithEmailAndPassword(auth, adminEmail, code)
+    signInWithEmailAndPassword(auth, email, password)
       .then(() => {
         setError('');
         toast({
@@ -48,7 +47,7 @@ export function AnalyticsGate({ children }: { children: React.ReactNode }) {
       .catch((authError) => {
         console.error('AnalyticsGate Auth Error:', authError);
         if (['auth/wrong-password', 'auth/user-not-found', 'auth/invalid-credential'].includes(authError.code)) {
-            setError('Invalid access code. Please try again.');
+            setError('Invalid email or password. Please try again.');
         } else {
             setError('An authentication error occurred. Please try again.');
         }
@@ -67,19 +66,31 @@ export function AnalyticsGate({ children }: { children: React.ReactNode }) {
             Business Analytics
           </DialogTitle>
           <DialogDescription>
-            Enter the access code to view the analytics dashboard.
+            Enter your admin credentials to view the analytics dashboard.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="access-code" className="text-right">
-              Code
+            <Label htmlFor="email" className="text-right">
+              Email
             </Label>
             <Input
-              id="access-code"
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="password" className="text-right">
+              Password
+            </Label>
+            <Input
+              id="password"
               type="password"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="col-span-3"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
