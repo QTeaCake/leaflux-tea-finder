@@ -122,7 +122,7 @@ service cloud.firestore {
      * which is a safe read operation used by the app to determine UI visibility.
      */
     match /roles_admin/{adminUid} {
-      allow get: if request.auth.uid == adminUid;
+      allow get: if request.auth != null;
       allow list: if false;
       allow create: if false;
       allow update: if false;
