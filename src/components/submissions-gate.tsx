@@ -34,8 +34,8 @@ export function SubmissionsGate({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Assume a hardcoded admin email and use the "code" as the password.
-    const adminEmail = 'admin@example.com';
+    // Use the user's actual email address for authentication.
+    const adminEmail = 'mayo.anastatius@gmail.com';
     signInWithEmailAndPassword(auth, adminEmail, code)
       .then(() => {
         setError('');
