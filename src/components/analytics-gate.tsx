@@ -16,8 +16,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Icons } from './icons';
 import { useToast } from '@/hooks/use-toast';
-
-const ACCESS_CODE = '2051';
+import { useAuth } from '@/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export function AnalyticsGate({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,19 +25,34 @@ export function AnalyticsGate({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState('');
   const router = useRouter();
   const { toast } = useToast();
+  const auth = useAuth();
 
   const handleAccess = () => {
-    if (code === ACCESS_CODE) {
-      setError('');
-      toast({
-        title: 'Access Granted',
-        description: 'Redirecting to the analytics dashboard...',
-      });
-      setIsOpen(false);
-      router.push('/analytics');
-    } else {
-      setError('Invalid access code. Please try again.');
+    if (!auth) {
+      setError('Authentication service is not available. Please try again later.');
+      return;
     }
+
+    // Assume a hardcoded admin email and use the "code" as the password.
+    const adminEmail = 'admin@example.com';
+    signInWithEmailAndPassword(auth, adminEmail, code)
+      .then(() => {
+        setError('');
+        toast({
+          title: 'Access Granted',
+          description: 'Redirecting to the analytics dashboard...',
+        });
+        setIsOpen(false);
+        router.push('/analytics');
+      })
+      .catch((authError) => {
+        console.error('AnalyticsGate Auth Error:', authError);
+        if (['auth/wrong-password', 'auth/user-not-found', 'auth/invalid-credential'].includes(authError.code)) {
+            setError('Invalid access code. Please try again.');
+        } else {
+            setError('An authentication error occurred. Please try again.');
+        }
+      });
   };
 
   return (
