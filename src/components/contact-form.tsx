@@ -4,7 +4,7 @@ import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useFirestore } from '@/firebase';
+import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
@@ -41,25 +41,34 @@ export function ContactForm() {
         toast({ variant: 'destructive', title: 'Error', description: 'Firestore is not available.' });
         return;
     }
-    startTransition(async () => {
-      try {
-        await addDoc(collection(db, 'feedbackSubmissions'), {
-          ...data,
-          submittedAt: serverTimestamp(),
-        });
+    startTransition(() => {
+      const feedbackCollection = collection(db, 'feedbackSubmissions');
+      addDoc(feedbackCollection, {
+        ...data,
+        submittedAt: serverTimestamp(),
+      })
+      .then(() => {
         toast({
           title: 'Success!',
           description: "Your message has been sent.",
         });
         form.reset();
-      } catch (error: any) {
-        console.error('Contact form submission error:', error);
+      })
+      .catch(() => {
+        const permissionError = new FirestorePermissionError({
+          path: feedbackCollection.path,
+          operation: 'create',
+          requestResourceData: data,
+        });
+
         toast({
           variant: 'destructive',
           title: 'Submission Failed',
-          description: error.message || 'An unexpected error occurred.',
+          description: 'Your message could not be sent. Please try again later.',
         });
-      }
+
+        errorEmitter.emit('permission-error', permissionError);
+      });
     });
   };
 

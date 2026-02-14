@@ -4,7 +4,7 @@ import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useFirestore } from '@/firebase';
+import { useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
@@ -34,25 +34,34 @@ export function WaitlistForm() {
         toast({ variant: 'destructive', title: 'Error', description: 'Firestore is not available.' });
         return;
     }
-    startTransition(async () => {
-      try {
-        await addDoc(collection(db, 'waitlistEntries'), {
-          email: data.email,
-          submittedAt: serverTimestamp(),
-        });
+    startTransition(() => {
+      const waitlistCollection = collection(db, 'waitlistEntries');
+      addDoc(waitlistCollection, {
+        email: data.email,
+        submittedAt: serverTimestamp(),
+      })
+      .then(() => {
         toast({
           title: 'Success!',
           description: "You've been added to the waitlist.",
         });
         form.reset();
-      } catch (error: any) {
-        console.error('Waitlist signup error:', error);
+      })
+      .catch(() => {
+        const permissionError = new FirestorePermissionError({
+          path: waitlistCollection.path,
+          operation: 'create',
+          requestResourceData: data,
+        });
+
         toast({
           variant: 'destructive',
           title: 'Signup Failed',
-          description: error.message || 'An unexpected error occurred.',
+          description: 'Could not sign up for the waitlist. Please try again later.',
         });
-      }
+        
+        errorEmitter.emit('permission-error', permissionError);
+      });
     });
   };
 
