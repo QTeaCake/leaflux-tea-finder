@@ -113,12 +113,16 @@ service cloud.firestore {
     /**
      * @description Rules for the collection that defines administrative users.
      * @path /roles_admin/{adminUid}
-     * @allow (get) An admin's client-side code checks if they have admin privileges.
+     * @allow (get) An admin's client-side code checks if they have admin privileges. An individual user can also check their own role.
      * @deny (create, update, delete) An admin attempts to grant or revoke admin privileges for another user through the client app.
-     * @principle Secure Role Management. This collection is the source of truth for admin status. It is made read-only by security rules to prevent privilege escalation from a compromised client. Admin roles should only be managed from a trusted environment like a server or the Firebase Console.
+     * @principle Secure Role Management. This collection is the source of truth for admin status.
+     * It is made read-only by security rules to prevent privilege escalation from a compromised client.
+     * Admin roles should only be managed from a trusted environment like a server or the Firebase Console.
+     * The `get` rule allows a logged-in user to check if their own UID exists in this collection,
+     * which is a safe read operation used by the app to determine UI visibility.
      */
     match /roles_admin/{adminUid} {
-      allow get: if isAdmin();
+      allow get: if isAdmin() || request.auth.uid == adminUid;
       allow list: if isAdmin();
       allow create: if false;
       allow update: if false;

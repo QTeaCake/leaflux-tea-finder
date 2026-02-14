@@ -38,9 +38,9 @@ import {
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Icons } from './icons';
 import { format } from 'date-fns';
-import { teaShops as allTeaShops, TeaShop } from '@/lib/tea-shops';
+import { teaShops as allTeaShops } from '@/lib/tea-shops';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore, useCollection, useMemoFirebase, useUser } from '@/firebase';
+import { useFirestore, useCollection, useDoc, useMemoFirebase, useUser } from '@/firebase';
 import { collection, doc, deleteDoc, orderBy, query, Timestamp } from 'firebase/firestore';
 import { Skeleton } from './ui/skeleton';
 
@@ -84,6 +84,53 @@ function ClientFormattedDate({ date }: { date: Timestamp | Date }) {
   return <>{formattedDate || <Skeleton className="h-4 w-36" />}</>;
 }
 
+function AdminAccessDenied({ uid }: { uid: string }) {
+  return (
+    <section className="w-full py-12 md:py-20 lg:py-24 bg-background">
+      <div className="container mx-auto px-4 md:px-6">
+        <Card className="max-w-3xl mx-auto shadow-lg border-destructive">
+          <CardHeader>
+            <CardTitle className="font-headline text-2xl flex items-center gap-3">
+              <Icons.logo className="h-7 w-7 text-destructive" />
+              Admin Access Required
+            </CardTitle>
+            <CardDescription>
+              You are signed in, but your account does not have administrative privileges to view this page.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <p className="text-muted-foreground">
+              To fix this, you must grant your user account admin rights in your Firestore database. This is a secure, one-time setup step required by the app's security rules.
+            </p>
+            <div>
+              <h4 className="font-semibold text-foreground mb-2">Your User ID (UID)</h4>
+              <div className="p-3 bg-muted rounded-md font-mono text-sm break-all">
+                {uid}
+              </div>
+               <p className="text-xs text-muted-foreground mt-1">This is the unique identifier for your account.</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-foreground mb-2">Instructions</h4>
+              <ol className="list-decimal list-inside space-y-3 text-muted-foreground">
+                <li>Go to your project's <strong>Firestore Database</strong> in the Firebase Console.</li>
+                <li>At the top of the data panel, click <strong>+ Start collection</strong>.</li>
+                <li>For the Collection ID, enter exactly: <code className="font-mono bg-muted p-1 rounded text-foreground">roles_admin</code></li>
+                <li>
+                  For the first document, paste your UID from above into the <strong>Document ID</strong> field.
+                </li>
+                <li>You can leave the fields for the document empty. Click <strong>Save</strong>.</li>
+              </ol>
+            </div>
+            <p className="text-sm text-muted-foreground pt-2">
+              Once you have created this document, please refresh this page. The app will then recognize you as an admin.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+  );
+}
+
 
 export function SubmissionsContent() {
   const sortedTeaShops = [...allTeaShops].sort((a, b) => a.name.localeCompare(b.name));
@@ -93,18 +140,26 @@ export function SubmissionsContent() {
 
   const { toast } = useToast();
   const db = useFirestore();
-  const { user, isUserLoading: isAuthLoading } = useUser(); // Get user and auth loading state
+  const { user, isUserLoading: isAuthLoading } = useUser();
 
-  // Queries will only be created if db and user are available
-  const waitlistQuery = useMemoFirebase(() => db && user ? query(collection(db, 'waitlistEntries'), orderBy('submittedAt', 'desc')) : null, [db, user]);
-  const contactQuery = useMemoFirebase(() => db && user ? query(collection(db, 'feedbackSubmissions'), orderBy('submittedAt', 'desc')) : null, [db, user]);
-  const suggestionsQuery = useMemoFirebase(() => db && user ? query(collection(db, 'shopSuggestionSubmissions'), orderBy('submittedAt', 'desc')) : null, [db, user]);
+  // 1. Check for admin role
+  const adminRoleRef = useMemoFirebase(
+    () => (db && user ? doc(db, 'roles_admin', user.uid) : null),
+    [db, user]
+  );
+  const { data: adminRole, isLoading: isAdminLoading } = useDoc(adminRoleRef);
+  const isConfirmedAdmin = !!adminRole;
+
+  // 2. Make data queries dependent on being a confirmed admin
+  const waitlistQuery = useMemoFirebase(() => db && isConfirmedAdmin ? query(collection(db, 'waitlistEntries'), orderBy('submittedAt', 'desc')) : null, [db, isConfirmedAdmin]);
+  const contactQuery = useMemoFirebase(() => db && isConfirmedAdmin ? query(collection(db, 'feedbackSubmissions'), orderBy('submittedAt', 'desc')) : null, [db, isConfirmedAdmin]);
+  const suggestionsQuery = useMemoFirebase(() => db && isConfirmedAdmin ? query(collection(db, 'shopSuggestionSubmissions'), orderBy('submittedAt', 'desc')) : null, [db, isConfirmedAdmin]);
 
   const { data: waitlist, isLoading: loadingWaitlist } = useCollection<WaitlistSubmission>(waitlistQuery);
   const { data: contact, isLoading: loadingContact } = useCollection<ContactSubmission>(contactQuery);
   const { data: suggestions, isLoading: loadingSuggestions } = useCollection<ShopSuggestionSubmission>(suggestionsQuery);
-
-  const isLoading = isAuthLoading || loadingWaitlist || loadingContact || loadingSuggestions;
+  
+  const pageIsLoading = isAuthLoading || (user && isAdminLoading);
 
   const handleDelete = () => {
     if (!itemToDelete || !db) return;
@@ -143,8 +198,18 @@ export function SubmissionsContent() {
     setDialogOpen(true);
   }
 
-  // If user is not authenticated after loading, show an access denied message.
-  if (!isAuthLoading && !user) {
+  if (pageIsLoading) {
+    return (
+      <section className="w-full py-12 md:py-20 lg:py-24 bg-background">
+        <div className="container mx-auto px-4 md:px-6 text-center">
+            <Icons.spinner className="h-10 w-10 animate-spin mx-auto text-primary" />
+            <h1 className="font-headline text-2xl font-bold mt-4">Verifying Access...</h1>
+        </div>
+      </section>
+    )
+  }
+
+  if (!user) {
     return (
         <section className="w-full py-12 md:py-20 lg:py-24 bg-background">
             <div className="container mx-auto px-4 md:px-6 text-center">
@@ -153,6 +218,10 @@ export function SubmissionsContent() {
             </div>
         </section>
     )
+  }
+
+  if (!isConfirmedAdmin) {
+      return <AdminAccessDenied uid={user.uid} />;
   }
   
   return (
@@ -216,7 +285,7 @@ export function SubmissionsContent() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {isLoading ? (
+                    {loadingContact ? (
                       <TableRow><TableCell colSpan={5} className="h-24 text-center"><Icons.spinner className="h-6 w-6 animate-spin mx-auto" /></TableCell></TableRow>
                     ) : contact && contact.length > 0 ? (
                       contact.map((s) => (
@@ -284,7 +353,7 @@ export function SubmissionsContent() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                     {isLoading ? (
+                     {loadingSuggestions ? (
                       <TableRow><TableCell colSpan={5} className="h-24 text-center"><Icons.spinner className="h-6 w-6 animate-spin mx-auto" /></TableCell></TableRow>
                     ) : suggestions && suggestions.length > 0 ? (
                       suggestions.map((s) => (
@@ -329,7 +398,7 @@ export function SubmissionsContent() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                     {isLoading ? (
+                     {loadingWaitlist ? (
                       <TableRow><TableCell colSpan={3} className="h-24 text-center"><Icons.spinner className="h-6 w-6 animate-spin mx-auto" /></TableCell></TableRow>
                     ) : waitlist && waitlist.length > 0 ? (
                       waitlist.map((s) => (
