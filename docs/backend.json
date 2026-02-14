@@ -1,0 +1,243 @@
+{
+  "entities": {
+    "TeaShop": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "TeaShop",
+      "type": "object",
+      "description": "Represents an authentic tea shop with detailed information for discovery and filtering.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the TeaShop entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the tea shop."
+        },
+        "address": {
+          "type": "string",
+          "description": "The physical street address of the tea shop."
+        },
+        "latitude": {
+          "type": "number",
+          "description": "The geographical latitude coordinate of the tea shop's location."
+        },
+        "longitude": {
+          "type": "number",
+          "description": "The geographical longitude coordinate of the tea shop's location."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description or overview of the tea shop and its ambiance."
+        },
+        "contactEmail": {
+          "type": "string",
+          "description": "The primary email address for contacting the tea shop.",
+          "format": "email"
+        },
+        "contactPhone": {
+          "type": "string",
+          "description": "The primary phone number for contacting the tea shop."
+        },
+        "websiteUrl": {
+          "type": "string",
+          "description": "The official website URL of the tea shop.",
+          "format": "uri"
+        },
+        "offersLooseLeafTea": {
+          "type": "boolean",
+          "description": "Indicates if the tea shop sells loose leaf tea."
+        },
+        "offersTeaware": {
+          "type": "boolean",
+          "description": "Indicates if the tea shop sells teaware (e.g., teapots, cups)."
+        },
+        "offersTeaClasses": {
+          "type": "boolean",
+          "description": "Indicates if the tea shop offers tea classes or workshops."
+        },
+        "hasEthicalSourcingPractices": {
+          "type": "boolean",
+          "description": "Indicates if the tea shop adheres to ethical sourcing practices."
+        },
+        "hasFairTradePractices": {
+          "type": "boolean",
+          "description": "Indicates if the tea shop supports fair trade practices."
+        },
+        "externalLinks": {
+          "type": "array",
+          "description": "An array of URLs to other external pages (e.g., social media, review sites).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the tea shop entry was created in the system.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the tea shop entry was last updated in the system.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "address",
+        "latitude",
+        "longitude",
+        "offersLooseLeafTea",
+        "offersTeaware",
+        "offersTeaClasses",
+        "hasEthicalSourcingPractices",
+        "hasFairTradePractices",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "WaitlistEntry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "WaitlistEntry",
+      "type": "object",
+      "description": "Represents a user's submission to the waitlist for future app features and updates.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the WaitlistEntry entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user joining the waitlist.",
+          "format": "email"
+        },
+        "submissionTimestamp": {
+          "type": "string",
+          "description": "The date and time when the user submitted their waitlist request.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "submissionTimestamp"
+      ]
+    },
+    "FeedbackSubmission": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "FeedbackSubmission",
+      "type": "object",
+      "description": "Represents user feedback or inquiries submitted through the contact section.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the FeedbackSubmission entity."
+        },
+        "senderEmail": {
+          "type": "string",
+          "description": "The email address of the user who submitted the feedback, if provided.",
+          "format": "email"
+        },
+        "subject": {
+          "type": "string",
+          "description": "A brief subject line summarizing the feedback or inquiry."
+        },
+        "message": {
+          "type": "string",
+          "description": "The full text of the user's feedback or inquiry."
+        },
+        "submissionTimestamp": {
+          "type": "string",
+          "description": "The date and time when the feedback was submitted.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current processing status of the feedback (e.g., 'new', 'read', 'in-progress', 'resolved')."
+        }
+      },
+      "required": [
+        "id",
+        "message",
+        "submissionTimestamp",
+        "status"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/teaShops/{teaShopId}",
+        "definition": {
+          "entityName": "TeaShop",
+          "schema": {
+            "$ref": "#/backend/entities/TeaShop"
+          },
+          "description": "Collection of authentic tea shops. This data is publicly readable for discovery and filtering. Creation, updates, and deletion are restricted to administrators. No denormalized authorization fields are required as authorization relies on global admin roles for write operations and public access for read operations.",
+          "params": [
+            {
+              "name": "teaShopId",
+              "description": "The unique identifier for a specific tea shop document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/waitlistEntries/{waitlistEntryId}",
+        "definition": {
+          "entityName": "WaitlistEntry",
+          "schema": {
+            "$ref": "#/backend/entities/WaitlistEntry"
+          },
+          "description": "Collection of waitlist submissions. Any user (authenticated or anonymous) can create an entry. Reading, updating, and deleting these entries is restricted to administrators. Each entry is independent and contains all necessary data for processing; no denormalized authorization fields are needed as read/write access is global for creation and restricted by admin role for management.",
+          "params": [
+            {
+              "name": "waitlistEntryId",
+              "description": "The unique identifier for a specific waitlist entry document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/feedbackSubmissions/{feedbackSubmissionId}",
+        "definition": {
+          "entityName": "FeedbackSubmission",
+          "schema": {
+            "$ref": "#/backend/entities/FeedbackSubmission"
+          },
+          "description": "Collection for user feedback and inquiries. Any user (authenticated or anonymous) can create a submission. Reading, updating (e.g., status changes), and deleting these submissions is restricted to administrators. Each submission is independent; no denormalized authorization fields are required.",
+          "params": [
+            {
+              "name": "feedbackSubmissionId",
+              "description": "The unique identifier for a specific feedback submission document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{adminUid}",
+        "definition": {
+          "entityName": "AdminRole",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Collection to define users with administrative privileges. The existence of a document at this path where `{adminUid}` matches `request.auth.uid` grants admin rights. This collection is used for Database Access Control (DBAC) and ensures authorization independence for administrative actions across other collections. Documents typically contain minimal data, often just a placeholder, as existence is the key.",
+          "params": [
+            {
+              "name": "adminUid",
+              "description": "The Firebase Authentication UID of a user who holds an administrative role."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore data structure for 'LeafLux's Tea Finder' prioritizes secure, scalable, and debuggable access patterns by adhering to the core design principles of Authorization Independence and Structural Segregation.\n\n**Authorization Independence:**\nThis design achieves Authorization Independence by ensuring that all authorization checks are self-contained within the document being accessed or rely on a global roles collection. Specifically:\n1.  **`teaShops` Collection:** Access to `teaShops` documents for public reading does not depend on any other document's data. Admin write access is determined by checking the `/roles_admin/{adminUid}` collection, an atomic and independent lookup. This eliminates the need for `get()` calls to parent documents or related entities for authorization.\n2.  **`waitlistEntries` and `feedbackSubmissions` Collections:** User submissions (create operations) are entirely independent, not requiring any prior authorization checks on related documents. Admin read/update access is again managed through the independent `/roles_admin/{adminUid}` collection. This ensures that a single write operation to a document in these collections doesn't break atomic operations due to `get()` calls in security rules.\n3.  **No Hierarchical Authorization:** Since there are no deeply nested subcollections whose access inherently depends on a parent document's specific fields (like `ownerId` or `members`), there's no need for denormalization of authorization fields *within* nested data. All authorization context is either intrinsic to the document (e.g., `request.auth.uid` matches the document's ID in a private collection if one existed) or globally available (via `roles_admin`).\n\n**QAPs (Rules are not Filters):**\nThe structure supports secure `list` operations (QAPs) through Structural Segregation and clear access modeling:\n1.  **`/teaShops`:** This collection has a homogeneous security posture, being publicly readable by all users (authenticated or anonymous). This allows for efficient `list` queries without requiring server-side filtering by security rules. Rules can simply `allow read: if true;`, enabling clients to query and filter `teaShops` directly within their security context.\n2.  **`/waitlistEntries` and `/feedbackSubmissions`:** These collections are designed for public write access but restricted admin read access. This segregation ensures that `list` operations on these collections can be securely restricted to administrators (`allow read: if exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));`). Clients (non-admins) will not be able to `list` these documents, preventing accidental data exposure and enforcing the intended privacy. The collection structure itself acts as the primary filter for unauthorized users, supporting QAPs.\n\nIn summary, the design employs dedicated top-level collections for each entity type, clearly segregating data by its security posture (publicly readable, publicly writable/admin readable). Admin roles are managed in a separate collection, `roles_admin`, ensuring that all authorization decisions are simple, explicit, and do not introduce dependencies that could compromise atomicity or debuggability."
+  }
+}

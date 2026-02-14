@@ -1,0 +1,100 @@
+/**
+ * @file firestore.rules
+ * @description Security rules for the LeafLux Tea Finder application.
+ *
+ * ## Core Philosophy
+ * This ruleset implements a dual-access security model designed for both public consumption and secure administration.
+ * It segregates data into publicly readable content (Tea Shops) and user-submitted private data (Waitlist Entries, Feedback).
+ * Administrative actions across all collections are controlled by a centralized Role-Based Access Control (RBAC) system.
+ *
+ * ## Data Structure
+ * The data is organized into flat, top-level collections to ensure authorization checks are simple and performant.
+ * - `/teaShops`: Publicly-readable information about tea shops.
+ * - `/waitlistEntries`: Private submissions from a public waitlist form.
+ * - `/feedbackSubmissions`: Private feedback messages from a public contact form.
+ * - `/roles_admin`: A private collection listing the UIDs of users with administrative privileges.
+ *
+ * ## Key Security Decisions
+ * - **Admin-Gated Writes**: All write operations (create, update, delete) on core application data like `/teaShops` are restricted to administrators.
+ * - **Public Submissions**: The `/waitlistEntries` and `/feedbackSubmissions` collections are intentionally open for creation by anyone (including unauthenticated users) to support public website forms.
+ * - **Private Data Protection**: Reading or listing user-submitted data in `/waitlistEntries` and `/feedbackSubmissions` is strictly forbidden for non-administrative users.
+ * - **Role Management Security**: The `/roles_admin` collection, which defines who is an admin, is read-only within these rules. This prevents a compromised admin account from granting administrative privileges to other users via the client API. Role management should be performed out-of-band (e.g., via the Firebase Console or a trusted server environment).
+ *
+ * ## Denormalization for Authorization
+ * The primary denormalization strategy is the `/roles_admin/{adminUid}` collection. Instead of checking a custom claim or a field on a user document, this structure allows for a direct, efficient `exists()` check to determine if a user has administrative rights. This makes authorization logic for admin-only actions clean, fast, and independent of other data structures.
+ *
+ * ## Structural Segregation
+ * This ruleset strictly segregates public and private data into separate collections. For example, `/teaShops` is a fully public collection, while `/waitlistEntries` is write-only for the public and read-only for admins. This separation is more secure and performant than co-mingling public and private documents in the same collection, as it simplifies rules for list operations and prevents accidental data leakage.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for readable and reusable logic
+    function isAdmin() {
+      // An admin is any user whose UID exists as a document in the /roles_admin collection.
+      // This function requires one read operation per check.
+      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /**
+     * @description Rules for the collection of tea shops.
+     * @path /teaShops/{teaShopId}
+     * @allow (get, list) An anonymous user reads tea shop data to display on a public map.
+     * @deny (create) A regular authenticated user attempts to add a new tea shop.
+     * @principle Public Read with Admin-Only Writes. This allows the data to be used by the public-facing application while ensuring data integrity is maintained by trusted administrators.
+     */
+    match /teaShops/{teaShopId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Rules for waitlist submissions.
+     * @path /waitlistEntries/{waitlistEntryId}
+     * @allow (create) An anonymous website visitor submits their email to the waitlist.
+     * @deny (list) An anonymous or regular user attempts to read the list of all emails on the waitlist.
+     * @principle Public Create, Admin-Only Manage. This pattern supports public-facing forms by allowing anyone to create a document, but protects the submitted private data by restricting all read and management operations to administrators.
+     */
+    match /waitlistEntries/{waitlistEntryId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if true;
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Rules for user feedback submissions from a contact form.
+     * @path /feedbackSubmissions/{feedbackSubmissionId}
+     * @allow (create) An anonymous website visitor submits a question through the contact form.
+     * @deny (get) A regular user attempts to read a feedback submission, even if they know the ID.
+     * @principle Public Create, Admin-Only Manage. Similar to the waitlist, this allows anyone to submit feedback while ensuring the content of those submissions remains confidential and is only accessible to administrators for review.
+     */
+    match /feedbackSubmissions/{feedbackSubmissionId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if true;
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Rules for the collection that defines administrative users.
+     * @path /roles_admin/{adminUid}
+     * @allow (get) An admin's client-side code checks if they have admin privileges.
+     * @deny (create, update, delete) An admin attempts to grant or revoke admin privileges for another user through the client app.
+     * @principle Secure Role Management. This collection is the source of truth for admin status. It is made read-only by security rules to prevent privilege escalation from a compromised client. Admin roles should only be managed from a trusted environment like a server or the Firebase Console.
+     */
+    match /roles_admin/{adminUid} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}
