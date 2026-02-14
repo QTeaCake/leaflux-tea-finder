@@ -14,6 +14,7 @@
  * - `/feedbackSubmissions`: Private feedback messages from a public contact form.
  * - `/shopSuggestionSubmissions`: Private shop suggestions from a public form.
  * - `/analytics`: A collection containing a single document for aggregated, publicly-writable analytics data.
+ * - `/mail`: A private queue for sending emails via the Trigger Email extension.
  * - `/roles_admin`: A private collection listing the UIDs of users with administrative privileges.
  *
  * ## Key Security Decisions
@@ -23,7 +24,7 @@
  * - **Role Management Security**: The `/roles_admin` collection, which defines who is an admin, is read-only within these rules. This prevents a compromised admin account from granting administrative privileges to other users via the client API. Role management should be performed out-of-band (e.g., via the Firebase Console or a trusted server environment).
  *
  * ## Denormalization for Authorization
- * The primary denormalization strategy is the `/roles_admin/{adminUid}` collection. Instead of checking a custom claim or a field on a user document, this structure allows for a direct, efficient `exists()` check to determine if a user has administrative rights. This makes authorization logic for admin-only actions clean, fast, and independent of other data structures.
+ * The primary denormalization strategy is the `/roles_admin/{adminUid}` collection. Instead of checking a custom claim or a field on a user document, this structure allows for a direct, `exists()` check to determine if a user has administrative rights. This makes authorization logic for admin-only actions clean, fast, and independent of other data structures.
  *
  * ## Structural Segregation
  * This ruleset strictly segregates public and private data into separate collections. This separation is more secure and performant than co-mingling public and private documents in the same collection, as it simplifies rules for list operations and prevents accidental data leakage.
@@ -111,6 +112,21 @@ service cloud.firestore {
       allow list: if isAdmin() || isBusinessUser();
       allow create: if true;
       allow update: if true;
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Rules for the collection that queues emails for sending.
+     * @path /mail/{mailId}
+     * @allow (create) Any user or process can queue an email to be sent.
+     * @deny (read, list, update, delete) Only admins can manage the mail queue directly.
+     * @principle Public Create, Admin-Only Manage. Allows the application client to trigger emails without exposing the contents of the mail queue to unauthorized users. The extension itself operates with admin privileges to process the queue.
+     */
+    match /mail/{mailId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if true;
+      allow update: if false; // Don't allow updates to emails in queue
       allow delete: if isAdmin();
     }
 

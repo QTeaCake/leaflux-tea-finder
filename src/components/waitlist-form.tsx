@@ -46,8 +46,27 @@ export function WaitlistForm() {
           description: "You've been added to the waitlist.",
         });
         form.reset();
+
+        // Trigger the confirmation email
+        const mailCollection = collection(db, 'mail');
+        addDoc(mailCollection, {
+          to: [data.email],
+          message: {
+            subject: "You're on the LeafLux Waitlist!",
+            html: `
+              <p>Hello,</p>
+              <p>Thank you for your interest in LeafLux! You've been successfully added to our waitlist.</p>
+              <p>We'll notify you as soon as new features, tea discoveries, and events are announced.</p>
+              <p>Stay curious,</p>
+              <p>The LeafLux Team</p>
+            `,
+          },
+        }).catch(err => {
+            console.error("Error sending waitlist confirmation email:", err);
+            // We don't show a toast here because the primary action (waitlist signup) was successful.
+        });
       })
-      .catch(() => {
+      .catch((error) => {
         const permissionError = new FirestorePermissionError({
           path: waitlistCollection.path,
           operation: 'create',
@@ -57,7 +76,7 @@ export function WaitlistForm() {
         toast({
           variant: 'destructive',
           title: 'Signup Failed',
-          description: 'Could not sign up for the waitlist. Please try again later.',
+          description: error.message || 'Could not sign up for the waitlist. Please try again later.',
         });
         
         errorEmitter.emit('permission-error', permissionError);

@@ -53,8 +53,29 @@ export function ContactForm() {
           description: "Your message has been sent.",
         });
         form.reset();
+
+        // Trigger the confirmation email
+        const mailCollection = collection(db, 'mail');
+        addDoc(mailCollection, {
+            to: [data.email],
+            message: {
+                subject: "We've Received Your Message | LeafLux",
+                html: `
+                    <p>Hello ${data.name},</p>
+                    <p>Thank you for contacting us! We've received your message and will get back to you as soon as possible.</p>
+                    <br>
+                    <p><strong>Your message:</strong></p>
+                    <p><em>${data.message}</em></p>
+                    <br>
+                    <p>Best regards,</p>
+                    <p>The LeafLux Team</p>
+                `,
+            },
+        }).catch(err => {
+            console.error("Error sending contact form confirmation email:", err);
+        });
       })
-      .catch(() => {
+      .catch((error) => {
         const permissionError = new FirestorePermissionError({
           path: feedbackCollection.path,
           operation: 'create',
@@ -64,7 +85,7 @@ export function ContactForm() {
         toast({
           variant: 'destructive',
           title: 'Submission Failed',
-          description: 'Your message could not be sent. Please try again later.',
+          description: error.message || 'Your message could not be sent. Please try again later.',
         });
 
         errorEmitter.emit('permission-error', permissionError);

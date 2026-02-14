@@ -189,6 +189,29 @@
             "directionsClicks": { "type": "object", "description": "A map of shop IDs to directions link click counts." },
             "locationSearches": { "type": "object", "description": "A map of searched locations to counts." }
         }
+    },
+    "Mail": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Mail",
+      "type": "object",
+      "description": "Represents an email to be sent by the Trigger Email extension.",
+      "properties": {
+        "to": {
+          "type": "array",
+          "items": { "type": "string", "format": "email" },
+          "description": "An array of recipient email addresses."
+        },
+        "message": {
+          "type": "object",
+          "properties": {
+            "subject": { "type": "string", "description": "The subject line of the email." },
+            "html": { "type": "string", "description": "The HTML content of the email body." },
+            "text": { "type": "string", "description": "The plain text content of the email body." }
+          },
+          "required": ["subject"]
+        }
+      },
+      "required": ["to", "message"]
     }
   },
   "auth": {
@@ -272,6 +295,22 @@
             },
             "description": "A singleton document to store aggregated analytics data. It is publicly updatable (to allow for incrementing counters from the client) but only readable by administrators to protect the full dataset.",
             "params": []
+        }
+      },
+      {
+        "path": "/mail/{mailId}",
+        "definition": {
+            "entityName": "Mail",
+            "schema": {
+                "$ref": "#/backend/entities/Mail"
+            },
+            "description": "Collection for queuing emails to be sent by the 'Trigger Email' extension. Documents are created by application logic and processed by the extension. Read/delete access is admin-only.",
+            "params": [
+                {
+                    "name": "mailId",
+                    "description": "The unique identifier for a specific email job."
+                }
+            ]
         }
       },
       {
