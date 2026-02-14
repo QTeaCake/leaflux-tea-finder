@@ -16,7 +16,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { PraiseButton } from './praise-button';
 import { useFirestore } from '@/firebase';
-import { doc, setDoc, increment } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 type Props = {
   shop: TeaShop | null;
@@ -31,28 +31,16 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, pr
   const [newTag, setNewTag] = useState('');
   const db = useFirestore();
 
-  const logAnalyticsClick = (type: string, value: string) => {
+  const logAnalyticsEvent = (type: string, value: string) => {
     if (!db) return;
-    const analyticsRef = doc(db, 'analytics', 'data');
-    
-    let updatePayload: { [key: string]: any } = {};
-
-    switch (type) {
-      case 'website':
-        // No sanitization needed for shop.id
-        updatePayload = { websiteClicks: { [value]: increment(1) } };
-        break;
-      case 'directions':
-        // No sanitization needed for shop.id
-        updatePayload = { directionsClicks: { [value]: increment(1) } };
-        break;
-    }
-
-    if (Object.keys(updatePayload).length > 0) {
-      setDoc(analyticsRef, updatePayload, { merge: true })
-        .catch((error) => console.error("Error logging analytics: ", error));
-    }
+    const eventsCollection = collection(db, 'analyticsEvents');
+    addDoc(eventsCollection, {
+      type,
+      value,
+      timestamp: serverTimestamp(),
+    }).catch((error) => console.error("Error logging analytics event: ", error));
   };
+
 
   if (!shop) return null;
 
@@ -153,7 +141,7 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, pr
                 href={shop.contact.website} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                onClick={() => logAnalyticsClick('website', shop.id)}
+                onClick={() => logAnalyticsEvent('websiteClick', shop.id)}
               >
                 {shop.contact.website}
               </a>
@@ -165,7 +153,7 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, pr
               href={`https://www.google.com/maps/dir/?api=1&destination=${shop.location.lat},${shop.location.lng}`} 
               target="_blank" 
               rel="noopener noreferrer"
-              onClick={() => logAnalyticsClick('directions', shop.id)}
+              onClick={() => logAnalyticsEvent('directionsClick', shop.id)}
             >
               Get Directions
             </a>
@@ -176,3 +164,5 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, pr
     </Sheet>
   );
 }
+
+    

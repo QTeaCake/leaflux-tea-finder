@@ -21,7 +21,7 @@ import {
 import { RecommendationsTool } from './recommendations-tool';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useFirestore } from '@/firebase';
-import { doc, setDoc, increment } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 type Filters = {
   offerings: string[];
@@ -77,35 +77,14 @@ export function TeaFinder() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const db = useFirestore();
 
-  const logAnalyticsClick = useCallback((type: string, value: string) => {
+  const logAnalyticsEvent = useCallback((type: string, value: string) => {
     if (!db) return;
-
-    const analyticsRef = doc(db, 'analytics', 'data');
-    const sanitizedValue = value.replace(/[.#$[\]\s]/g, '_');
-    let updatePayload: { [key: string]: any } = {};
-
-    switch (type) {
-      case 'shop':
-        updatePayload = { shopClicks: { [sanitizedValue]: increment(1) } };
-        break;
-      case 'ethical':
-        updatePayload = { ethicalClicks: increment(1) };
-        break;
-      case 'offering':
-        updatePayload = { offeringClicks: { [sanitizedValue]: increment(1) } };
-        break;
-      case 'teaType':
-        updatePayload = { teaTypeClicks: { [sanitizedValue]: increment(1) } };
-        break;
-      case 'location':
-        updatePayload = { locationSearches: { [sanitizedValue.toLowerCase()]: increment(1) } };
-        break;
-    }
-
-    if (Object.keys(updatePayload).length > 0) {
-      setDoc(analyticsRef, updatePayload, { merge: true })
-        .catch(error => console.error("Error logging analytics: ", error));
-    }
+    const eventsCollection = collection(db, 'analyticsEvents');
+    addDoc(eventsCollection, {
+      type,
+      value,
+      timestamp: serverTimestamp(),
+    }).catch((error) => console.error("Error logging analytics event: ", error));
   }, [db]);
 
   useEffect(() => {
@@ -137,7 +116,7 @@ export function TeaFinder() {
   const handleLocationSearch = useCallback(async () => {
     if (!locationInput) return;
     
-    logAnalyticsClick('location', locationInput);
+    logAnalyticsEvent('locationSearch', locationInput);
     setLocationError(null);
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
@@ -165,27 +144,27 @@ export function TeaFinder() {
       setLocationError("There was an error searching for the location.");
       setUserLocation(null);
     }
-  }, [locationInput, logAnalyticsClick]);
+  }, [locationInput, logAnalyticsEvent]);
 
   const handleFilterChange = useCallback((offering: string) => {
-    logAnalyticsClick('offering', offering);
+    logAnalyticsEvent('filterClick_offering', offering);
     setFilters(prev => {
       const newOfferings = prev.offerings.includes(offering)
         ? prev.offerings.filter(o => o !== offering)
         : [...prev.offerings, offering];
       return { ...prev, offerings: newOfferings };
     });
-  }, [logAnalyticsClick]);
+  }, [logAnalyticsEvent]);
 
   const handleTeaTypeFilterChange = useCallback((teaType: string) => {
-    logAnalyticsClick('teaType', teaType);
+    logAnalyticsEvent('filterClick_teaType', teaType);
     setFilters(prev => {
       const newTeaTypes = prev.teaTypes.includes(teaType)
         ? prev.teaTypes.filter(t => t !== teaType)
         : [...prev.teaTypes, teaType];
       return { ...prev, teaTypes: newTeaTypes };
     });
-  }, [logAnalyticsClick]);
+  }, [logAnalyticsEvent]);
 
   const handlePraise = useCallback((shopId: string) => {
     if (praisedShops.includes(shopId)) {
@@ -378,7 +357,7 @@ export function TeaFinder() {
                           variant={filters.ethical ? "secondary" : "outline"}
                           size="sm"
                           onClick={() => {
-                            logAnalyticsClick('ethical', 'toggle');
+                            logAnalyticsEvent('filterClick_ethical', String(!filters.ethical));
                             setFilters((prev) => ({
                               ...prev,
                               ethical: !prev.ethical,
@@ -486,7 +465,7 @@ export function TeaFinder() {
                   <ShopList 
                   shops={filteredShops} 
                   onSelectShop={(shop) => {
-                      logAnalyticsClick('shop', shop.id);
+                      logAnalyticsEvent('shopClick', shop.id);
                       setSelectedShop(shop);
                   }}
                   onHoverShop={setHoveredShopId}
@@ -499,7 +478,7 @@ export function TeaFinder() {
                   shops={filteredShops}
                   center={mapCenter}
                   onSelectShop={(shop) => {
-                      logAnalyticsClick('shop', shop.id);
+                      logAnalyticsEvent('shopClick', shop.id);
                       setSelectedShop(shop);
                   }}
                   onHoverShop={setHoveredShopId}
@@ -528,3 +507,5 @@ export function TeaFinder() {
     </section>
   );
 }
+
+    

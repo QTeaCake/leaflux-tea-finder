@@ -13,7 +13,8 @@
  * - `/waitlistEntries`: Private submissions from a public waitlist form.
  * - `/feedbackSubmissions`: Private feedback messages from a public contact form.
  * - `/shopSuggestionSubmissions`: Private shop suggestions from a public form.
- * - `/analytics`: A collection containing a single document for aggregated, publicly-writable analytics data.
+ * - `/analytics`: DEPRECATED. This collection contains a single document for aggregated analytics data. It is no longer written to.
+ * - `/analyticsEvents`: A write-only collection where each document is a single user interaction event, streamed to BigQuery.
  * - `/mail`: A private queue for sending emails via the Trigger Email extension.
  * - `/roles_admin`: A private collection listing the UIDs of users with administrative privileges.
  *
@@ -103,16 +104,29 @@ service cloud.firestore {
     }
 
     /**
-     * @description Rules for analytics data.
+     * @description DEPRECATED: Rules for historical analytics data.
      * @path /analytics/data
-     * @principle Public Write, Role-Based Read. Allows any client to log analytics events by updating a central document, while restricting access to view the aggregated data to administrators or business users.
+     * @principle Role-Based Read. Allows administrators or business users to read the old dashboard data. No new writes are allowed.
      */
     match /analytics/{docId} {
       allow get: if isAdmin() || isBusinessUser();
       allow list: if isAdmin() || isBusinessUser();
-      allow create: if true;
-      allow update: if true;
+      allow create: if false;
+      allow update: if false;
       allow delete: if isAdmin();
+    }
+    
+    /**
+     * @description Rules for the analytics event stream for BigQuery.
+     * @path /analyticsEvents/{analyticsEventId}
+     * @principle Write-Only. Allows any client to log analytics events, but no one can read, update, or delete them from the client-side. This protects the integrity and privacy of the raw event stream.
+     */
+    match /analyticsEvents/{analyticsEventId} {
+        allow get: if false;
+        allow list: if false;
+        allow create: if true;
+        allow update: if false;
+        allow delete: if false;
     }
 
     /**
@@ -165,3 +179,5 @@ service cloud.firestore {
     }
   }
 }
+
+    

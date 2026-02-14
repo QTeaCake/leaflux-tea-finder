@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useFirestore, useDoc, useMemoFirebase, useUser } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from './ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 type AnalyticsData = {
   shopClicks?: Record<string, number>;
@@ -187,6 +188,14 @@ export function AnalyticsContent({ teaShops, apiKey }: AnalyticsContentProps) {
           </p>
         </div>
 
+        <Alert variant="default" className="mb-12 border-accent">
+          <Icons.ai className="h-5 w-5 text-accent" />
+          <AlertTitle className="font-headline">Analytics Have Leveled Up!</AlertTitle>
+          <AlertDescription>
+            This dashboard now shows only historical data. Since the 'Stream Collections to BigQuery' extension is active, all new analytics events are being sent directly to BigQuery for much more powerful analysis. Please use the Google Cloud Console to query your data.
+          </AlertDescription>
+        </Alert>
+
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
           {renderChart(shopClickData, "Most Clicked Shops", "Top shops selected by users in the list.")}
           {renderChart(websiteClickData, "Most Clicked Website Links", "Direct traffic sent to shop websites. A key metric for monetization.")}
@@ -233,3 +242,5 @@ export function AnalyticsContent({ teaShops, apiKey }: AnalyticsContentProps) {
     </section>
   );
 }
+
+    

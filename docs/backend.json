@@ -175,11 +175,33 @@
         },
         "required": ["id", "shopName", "shopLocation", "submittedAt"]
     },
+    "AnalyticsEvent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AnalyticsEvent",
+      "type": "object",
+      "description": "Represents a single user interaction event to be streamed to BigQuery.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The type of event (e.g., 'shopClick', 'filterChange', 'websiteClick')."
+        },
+        "value": {
+          "type": "string",
+          "description": "The value associated with the event (e.g., a shop ID, a filter name)."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The server-side timestamp when the event was recorded."
+        }
+      },
+      "required": ["type", "value", "timestamp"]
+    },
     "AnalyticsData": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "title": "AnalyticsData",
         "type": "object",
-        "description": "Stores aggregated analytics data for user engagement.",
+        "description": "DEPRECATED: Stores aggregated analytics data for the simple in-app dashboard. New events are logged to the `analyticsEvents` collection for BigQuery.",
         "properties": {
             "shopClicks": { "type": "object", "description": "A map of shop IDs to click counts." },
             "teaTypeClicks": { "type": "object", "description": "A map of tea types to click counts." },
@@ -287,14 +309,30 @@
         }
       },
       {
-        "path": "/analytics/data",
+        "path": "/analytics/{docId}",
         "definition": {
             "entityName": "AnalyticsData",
             "schema": {
                 "$ref": "#/backend/entities/AnalyticsData"
             },
-            "description": "A singleton document to store aggregated analytics data. It is publicly updatable (to allow for incrementing counters from the client) but only readable by administrators to protect the full dataset.",
+            "description": "DEPRECATED: A singleton document to store aggregated analytics data for the simple in-app dashboard. New events are now logged to the `analyticsEvents` collection for streaming to BigQuery.",
             "params": []
+        }
+      },
+      {
+        "path": "/analyticsEvents/{analyticsEventId}",
+        "definition": {
+          "entityName": "AnalyticsEvent",
+          "schema": {
+            "$ref": "#/backend/entities/AnalyticsEvent"
+          },
+          "description": "Collection for individual user interaction events to be streamed to BigQuery. Any client can create documents, but reading/deleting is restricted to prevent data tampering or exposure.",
+          "params": [
+            {
+              "name": "analyticsEventId",
+              "description": "The unique identifier for a specific analytics event document."
+            }
+          ]
         }
       },
       {
@@ -349,3 +387,5 @@
     "reasoning": "The recommended Firestore data structure for 'LeafLux's Tea Finder' prioritizes secure, scalable, and debuggable access patterns by adhering to the core design principles of Authorization Independence and Structural Segregation.\n\n**Authorization Independence:**\nThis design achieves Authorization Independence by ensuring that all authorization checks are self-contained within the document being accessed or rely on a global roles collection. Specifically:\n1.  **`teaShops` Collection:** Access to `teaShops` documents for public reading does not depend on any other document's data. Admin write access is determined by checking the `/roles_admin/{adminUid}` collection, an atomic and independent lookup. This eliminates the need for `get()` calls to parent documents or related entities for authorization.\n2.  **`waitlistEntries`, `feedbackSubmissions`, and `shopSuggestionSubmissions` Collections:** User submissions (create operations) are entirely independent, not requiring any prior authorization checks on related documents. Admin read/update access is again managed through the independent `/roles_admin/{adminUid}` collection. This ensures that a single write operation to a document in these collections doesn't break atomic operations due to `get()` calls in security rules.\n3.  **No Hierarchical Authorization:** Since there are no deeply nested subcollections whose access inherently depends on a parent document's specific fields (like `ownerId` or `members`), there's no need for denormalization of authorization fields *within* nested data. All authorization context is either intrinsic to the document (e.g., `request.auth.uid` matches the document's ID in a private collection if one existed) or globally available (via `roles_admin`).\n\n**QAPs (Rules are not Filters):**\nThe structure supports secure `list` operations (QAPs) through Structural Segregation and clear access modeling:\n1.  **`/teaShops`:** This collection has a homogeneous security posture, being publicly readable by all users (authenticated or anonymous). This allows for efficient `list` queries without requiring server-side filtering by security rules. Rules can simply `allow read: if true;`, enabling clients to query and filter `teaShops` directly within their security context.\n2.  **`/waitlistEntries`, `feedbackSubmissions`, and `shopSuggestionSubmissions`:** These collections are designed for public write access but restricted admin read access. This segregation ensures that `list` operations on these collections can be securely restricted to administrators (`allow read: if exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));`). Clients (non-admins) will not be able to `list` these documents, preventing accidental data exposure and enforcing the intended privacy. The collection structure itself acts as the primary filter for unauthorized users, supporting QAPs.\n\nIn summary, the design employs dedicated top-level collections for each entity type, clearly segregating data by its security posture (publicly readable, publicly writable/admin readable). Admin roles are managed in a separate collection, `roles_admin`, ensuring that all authorization decisions are simple, explicit, and do not introduce dependencies that could compromise atomicity or debuggability."
   }
 }
+
+    
