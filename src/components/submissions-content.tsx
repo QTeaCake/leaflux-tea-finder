@@ -40,7 +40,7 @@ import { Icons } from './icons';
 import { format } from 'date-fns';
 import { teaShops as allTeaShops, TeaShop } from '@/lib/tea-shops';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase, useUser } from '@/firebase';
 import { collection, doc, deleteDoc, orderBy, query, Timestamp } from 'firebase/firestore';
 import { Skeleton } from './ui/skeleton';
 
@@ -93,16 +93,18 @@ export function SubmissionsContent() {
 
   const { toast } = useToast();
   const db = useFirestore();
+  const { user, isUserLoading: isAuthLoading } = useUser(); // Get user and auth loading state
 
-  const waitlistQuery = useMemoFirebase(() => db ? query(collection(db, 'waitlistEntries'), orderBy('submittedAt', 'desc')) : null, [db]);
-  const contactQuery = useMemoFirebase(() => db ? query(collection(db, 'feedbackSubmissions'), orderBy('submittedAt', 'desc')) : null, [db]);
-  const suggestionsQuery = useMemoFirebase(() => db ? query(collection(db, 'shopSuggestionSubmissions'), orderBy('submittedAt', 'desc')) : null, [db]);
+  // Queries will only be created if db and user are available
+  const waitlistQuery = useMemoFirebase(() => db && user ? query(collection(db, 'waitlistEntries'), orderBy('submittedAt', 'desc')) : null, [db, user]);
+  const contactQuery = useMemoFirebase(() => db && user ? query(collection(db, 'feedbackSubmissions'), orderBy('submittedAt', 'desc')) : null, [db, user]);
+  const suggestionsQuery = useMemoFirebase(() => db && user ? query(collection(db, 'shopSuggestionSubmissions'), orderBy('submittedAt', 'desc')) : null, [db, user]);
 
   const { data: waitlist, isLoading: loadingWaitlist } = useCollection<WaitlistSubmission>(waitlistQuery);
   const { data: contact, isLoading: loadingContact } = useCollection<ContactSubmission>(contactQuery);
   const { data: suggestions, isLoading: loadingSuggestions } = useCollection<ShopSuggestionSubmission>(suggestionsQuery);
 
-  const isLoading = loadingWaitlist || loadingContact || loadingSuggestions;
+  const isLoading = isAuthLoading || loadingWaitlist || loadingContact || loadingSuggestions;
 
   const handleDelete = () => {
     if (!itemToDelete || !db) return;
@@ -139,6 +141,18 @@ export function SubmissionsContent() {
   const openDeleteDialog = (type: 'waitlist' | 'contact' | 'suggestions', id: string) => {
     setItemToDelete({ type, id });
     setDialogOpen(true);
+  }
+
+  // If user is not authenticated after loading, show an access denied message.
+  if (!isAuthLoading && !user) {
+    return (
+        <section className="w-full py-12 md:py-20 lg:py-24 bg-background">
+            <div className="container mx-auto px-4 md:px-6 text-center">
+                <h1 className="font-headline text-3xl font-bold mb-4">Access Denied</h1>
+                <p className="text-muted-foreground">You must be logged in to view this page. Please use the "Submissions" button in the footer.</p>
+            </div>
+        </section>
+    )
   }
   
   return (
