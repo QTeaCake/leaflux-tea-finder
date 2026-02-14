@@ -21,7 +21,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export function AnalyticsGate({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [email, setEmail] = useState('mayo.anastatius@gmail.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
@@ -31,6 +31,10 @@ export function AnalyticsGate({ children }: { children: React.ReactNode }) {
   const handleAccess = () => {
     if (!auth) {
       setError('Authentication service is not available. Please try again later.');
+      return;
+    }
+    if (!email) {
+      setError('Please enter an email address.');
       return;
     }
 
@@ -66,7 +70,7 @@ export function AnalyticsGate({ children }: { children: React.ReactNode }) {
             Business Analytics
           </DialogTitle>
           <DialogDescription>
-            Enter your admin credentials to view the analytics dashboard.
+            Enter your business credentials to view the analytics dashboard.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -80,6 +84,7 @@ export function AnalyticsGate({ children }: { children: React.ReactNode }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="col-span-3"
+              placeholder="business@example.com"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">

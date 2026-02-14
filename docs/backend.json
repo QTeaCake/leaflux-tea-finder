@@ -289,6 +289,22 @@
             }
           ]
         }
+      },
+      {
+        "path": "/roles_business/{businessUid}",
+        "definition": {
+          "entityName": "BusinessRole",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Collection to define users with business-level privileges, primarily for viewing analytics. The existence of a document here grants access to specific business dashboards. This role is separate from the admin role.",
+          "params": [
+            {
+              "name": "businessUid",
+              "description": "The Firebase Authentication UID of a user who holds a business role."
+            }
+          ]
+        }
       }
     ],
     "reasoning": "The recommended Firestore data structure for 'LeafLux's Tea Finder' prioritizes secure, scalable, and debuggable access patterns by adhering to the core design principles of Authorization Independence and Structural Segregation.\n\n**Authorization Independence:**\nThis design achieves Authorization Independence by ensuring that all authorization checks are self-contained within the document being accessed or rely on a global roles collection. Specifically:\n1.  **`teaShops` Collection:** Access to `teaShops` documents for public reading does not depend on any other document's data. Admin write access is determined by checking the `/roles_admin/{adminUid}` collection, an atomic and independent lookup. This eliminates the need for `get()` calls to parent documents or related entities for authorization.\n2.  **`waitlistEntries`, `feedbackSubmissions`, and `shopSuggestionSubmissions` Collections:** User submissions (create operations) are entirely independent, not requiring any prior authorization checks on related documents. Admin read/update access is again managed through the independent `/roles_admin/{adminUid}` collection. This ensures that a single write operation to a document in these collections doesn't break atomic operations due to `get()` calls in security rules.\n3.  **No Hierarchical Authorization:** Since there are no deeply nested subcollections whose access inherently depends on a parent document's specific fields (like `ownerId` or `members`), there's no need for denormalization of authorization fields *within* nested data. All authorization context is either intrinsic to the document (e.g., `request.auth.uid` matches the document's ID in a private collection if one existed) or globally available (via `roles_admin`).\n\n**QAPs (Rules are not Filters):**\nThe structure supports secure `list` operations (QAPs) through Structural Segregation and clear access modeling:\n1.  **`/teaShops`:** This collection has a homogeneous security posture, being publicly readable by all users (authenticated or anonymous). This allows for efficient `list` queries without requiring server-side filtering by security rules. Rules can simply `allow read: if true;`, enabling clients to query and filter `teaShops` directly within their security context.\n2.  **`/waitlistEntries`, `feedbackSubmissions`, and `shopSuggestionSubmissions`:** These collections are designed for public write access but restricted admin read access. This segregation ensures that `list` operations on these collections can be securely restricted to administrators (`allow read: if exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));`). Clients (non-admins) will not be able to `list` these documents, preventing accidental data exposure and enforcing the intended privacy. The collection structure itself acts as the primary filter for unauthorized users, supporting QAPs.\n\nIn summary, the design employs dedicated top-level collections for each entity type, clearly segregating data by its security posture (publicly readable, publicly writable/admin readable). Admin roles are managed in a separate collection, `roles_admin`, ensuring that all authorization decisions are simple, explicit, and do not introduce dependencies that could compromise atomicity or debuggability."

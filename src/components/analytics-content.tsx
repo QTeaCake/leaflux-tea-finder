@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from './icons';
 import { AnalyticsMap } from './analytics-map';
@@ -8,7 +8,7 @@ import type { TeaShop } from '@/lib/tea-shops';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { useFirestore, useDoc, useMemoFirebase, useUser } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from './ui/skeleton';
 
@@ -41,10 +41,71 @@ const processChartData = (
     .slice(0, 7); // Show top 7
 };
 
+function AccessDenied({ uid }: { uid: string }) {
+  return (
+    <section className="w-full py-12 md:py-20 lg:py-24 bg-background">
+      <div className="container mx-auto px-4 md:px-6">
+        <Card className="max-w-3xl mx-auto shadow-lg border-destructive">
+          <CardHeader>
+            <CardTitle className="font-headline text-2xl flex items-center gap-3">
+              <Icons.logo className="h-7 w-7 text-destructive" />
+              Access Required
+            </CardTitle>
+            <CardDescription>
+              You are signed in, but your account does not have privileges to view this page.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <p className="text-muted-foreground">
+              To view this dashboard, you must have either an 'Admin' or 'Business' role. Please ask an administrator to grant your user account the appropriate rights in the Firestore database.
+            </p>
+            <div>
+              <h4 className="font-semibold text-foreground mb-2">Your User ID (UID)</h4>
+              <div className="p-3 bg-muted rounded-md font-mono text-sm break-all">
+                {uid}
+              </div>
+               <p className="text-xs text-muted-foreground mt-1">This is the unique identifier for your account.</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-foreground mb-2">Instructions for Admin</h4>
+              <ol className="list-decimal list-inside space-y-3 text-muted-foreground">
+                <li>Go to the project's <strong>Firestore Database</strong> in the Firebase Console.</li>
+                <li>To grant admin access, create a document in the <code className="font-mono bg-muted p-1 rounded text-foreground">roles_admin</code> collection with this UID as the Document ID.</li>
+                <li>To grant business access, create a document in the <code className="font-mono bg-muted p-1 rounded text-foreground">roles_business</code> collection with this UID as the Document ID.</li>
+              </ol>
+            </div>
+            <p className="text-sm text-muted-foreground pt-2">
+              Once this is done, please refresh this page.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+  );
+}
+
 export function AnalyticsContent({ teaShops, apiKey }: AnalyticsContentProps) {
   const db = useFirestore();
-  const analyticsRef = useMemoFirebase(() => db ? doc(db, 'analytics', 'data') : null, [db]);
-  const { data: analyticsData, isLoading } = useDoc<AnalyticsData>(analyticsRef);
+  const { user, isUserLoading: isAuthLoading } = useUser();
+
+  // 1. Check for roles
+  const adminRoleRef = useMemoFirebase(() => (db && user ? doc(db, 'roles_admin', user.uid) : null), [db, user]);
+  const businessRoleRef = useMemoFirebase(() => (db && user ? doc(db, 'roles_business', user.uid) : null), [db, user]);
+  
+  const { data: adminRole, isLoading: isAdminLoading } = useDoc(adminRoleRef);
+  const { data: businessRole, isLoading: isBusinessLoading } = useDoc(businessRoleRef);
+
+  const isConfirmedAdmin = !!adminRole;
+  const isConfirmedBusinessUser = !!businessRole;
+  const isAuthorized = isConfirmedAdmin || isConfirmedBusinessUser;
+
+  // 2. Make analytics query dependent on authorization
+  const analyticsRef = useMemoFirebase(() => (db && isAuthorized ? doc(db, 'analytics', 'data') : null), [db, isAuthorized]);
+  const { data: analyticsData, isLoading: loadingAnalytics } = useDoc<AnalyticsData>(analyticsRef);
+  
+  const pageIsLoading = isAuthLoading || (user && (isAdminLoading || isBusinessLoading));
+
+  const isLoading = pageIsLoading || (isAuthorized && loadingAnalytics);
 
   const shopNameMap = useMemo(() => Object.fromEntries(teaShops.map(s => [s.id, s.name])), [teaShops]);
 
@@ -63,6 +124,32 @@ export function AnalyticsContent({ teaShops, apiKey }: AnalyticsContentProps) {
         color: "hsl(var(--primary))",
       },
   } satisfies import('@/components/ui/chart').ChartConfig;
+
+  if (pageIsLoading) {
+    return (
+      <section className="w-full py-12 md:py-20 lg:py-24 bg-background">
+        <div className="container mx-auto px-4 md:px-6 text-center">
+            <Icons.spinner className="h-10 w-10 animate-spin mx-auto text-primary" />
+            <h1 className="font-headline text-2xl font-bold mt-4">Verifying Access...</h1>
+        </div>
+      </section>
+    )
+  }
+
+  if (!user) {
+    return (
+        <section className="w-full py-12 md:py-20 lg:py-24 bg-background">
+            <div className="container mx-auto px-4 md:px-6 text-center">
+                <h1 className="font-headline text-3xl font-bold mb-4">Access Denied</h1>
+                <p className="text-muted-foreground">You must be logged in to view this page. Please use the "For Business" button in the footer.</p>
+            </div>
+        </section>
+    )
+  }
+  
+  if (!isAuthorized) {
+      return <AccessDenied uid={user.uid} />;
+  }
 
   const renderChart = (data: {name: string, clicks: number}[], title: string, description: string) => (
     <Card className="shadow-lg">
