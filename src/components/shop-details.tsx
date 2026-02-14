@@ -34,18 +34,22 @@ export function ShopDetails({ shop, isOpen, onOpenChange, onPraise, onAddTag, pr
   const logAnalyticsClick = (type: string, value: string) => {
     if (!db) return;
     const analyticsRef = doc(db, 'analytics', 'data');
-    let fieldToIncrement: string | null = null;
+    
+    let updatePayload: { [key: string]: any } = {};
+
     switch (type) {
       case 'website':
-        fieldToIncrement = `websiteClicks.${value}`;
+        // No sanitization needed for shop.id
+        updatePayload = { websiteClicks: { [value]: increment(1) } };
         break;
       case 'directions':
-        fieldToIncrement = `directionsClicks.${value}`;
+        // No sanitization needed for shop.id
+        updatePayload = { directionsClicks: { [value]: increment(1) } };
         break;
     }
 
-    if (fieldToIncrement) {
-      setDoc(analyticsRef, { [fieldToIncrement]: increment(1) }, { merge: true })
+    if (Object.keys(updatePayload).length > 0) {
+      setDoc(analyticsRef, updatePayload, { merge: true })
         .catch((error) => console.error("Error logging analytics: ", error));
     }
   };

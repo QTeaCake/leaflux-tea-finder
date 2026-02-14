@@ -81,29 +81,29 @@ export function TeaFinder() {
     if (!db) return;
 
     const analyticsRef = doc(db, 'analytics', 'data');
-    let fieldToIncrement: string | null = null;
     const sanitizedValue = value.replace(/[.#$[\]\s]/g, '_');
+    let updatePayload: { [key: string]: any } = {};
 
     switch (type) {
       case 'shop':
-        fieldToIncrement = `shopClicks.${sanitizedValue}`;
+        updatePayload = { shopClicks: { [sanitizedValue]: increment(1) } };
         break;
       case 'ethical':
-        fieldToIncrement = 'ethicalClicks';
+        updatePayload = { ethicalClicks: increment(1) };
         break;
       case 'offering':
-        fieldToIncrement = `offeringClicks.${sanitizedValue}`;
+        updatePayload = { offeringClicks: { [sanitizedValue]: increment(1) } };
         break;
       case 'teaType':
-        fieldToIncrement = `teaTypeClicks.${sanitizedValue}`;
+        updatePayload = { teaTypeClicks: { [sanitizedValue]: increment(1) } };
         break;
       case 'location':
-        fieldToIncrement = `locationSearches.${sanitizedValue.toLowerCase()}`;
+        updatePayload = { locationSearches: { [sanitizedValue.toLowerCase()]: increment(1) } };
         break;
     }
 
-    if (fieldToIncrement) {
-      setDoc(analyticsRef, { [fieldToIncrement]: increment(1) }, { merge: true })
+    if (Object.keys(updatePayload).length > 0) {
+      setDoc(analyticsRef, updatePayload, { merge: true })
         .catch(error => console.error("Error logging analytics: ", error));
     }
   }, [db]);
