@@ -1,38 +1,50 @@
 # LeafLux's Tea Finder
 
-This is a Next.js application built with Firebase Studio that helps users discover authentic tea shops.
+LeafLux is a high-end discovery platform for authentic tea shops, built with Next.js and Firebase. It helps users bridge the gap between "tea deserts" and thriving tea oases through intelligent mapping and AI-powered recommendations.
 
-## Features
+## 🚀 Features
 
-- **Nearby Tea Shop Discovery**: Find tea shops based on your location.
-- **Advanced Filtering**: Filter shops by offerings like loose leaf tea, teaware, tea classes, and ethical sourcing practices.
-- **Interactive Map**: Visualize shop locations on a map.
-- **Personalized Recommendations**: Get AI-powered tea recommendations based on your preferences.
-- **Waitlist & Contact**: Sign up for updates and send feedback.
+- **Nearby Discovery**: Find tea shops within a custom radius based on your geolocation.
+- **Advanced Filtering**: Filter by specific tea types (Oolong, Matcha, Pu-erh, etc.) and offerings (Loose leaf, teaware, classes).
+- **AI Tea Sommelier**: Get personalized brewing and shop recommendations powered by Genkit and Gemini 2.5 Flash.
+- **Automated Communication**: Integrated "Trigger Email" extension for instant waitlist and contact form confirmations.
+- **Enterprise Analytics**: Real-time event streaming to Google BigQuery for deep market analysis.
+- **Business Dashboard**: Historical analytics visualization for shop clicks, website traffic, and regional demand.
+- **Community Driven**: Users can suggest new shops and "praise" their favorites.
 
-## Getting Started
+## 🛠 Tech Stack
 
-First, install the dependencies:
-```bash
-npm install
-```
+- **Framework**: Next.js 15 (App Router)
+- **Styling**: Tailwind CSS + Shadcn/UI
+- **Database/Auth**: Firebase Firestore & Firebase Auth
+- **AI**: Genkit 1.x with Gemini 2.5 Flash
+- **Maps**: Google Maps Platform (JavaScript API & Geocoding)
+- **Backend Automation**: Firebase Extensions (Trigger Email, Stream to BigQuery)
+- **Deployment**: Firebase App Hosting
 
-Then, run the development server:
-```bash
-npm run dev
-```
+## 📁 Project Structure
 
-Open [http://localhost:9002](http://localhost:9002) with your browser to see the result.
+- `src/app/`: Application routes and page layouts.
+- `src/components/`: Reusable UI components and feature-specific logic.
+- `src/lib/`: Data definitions (`tea-shops.ts`) and utility functions.
+- `src/ai/`: Genkit flows and AI prompt definitions.
+- `src/firebase/`: Client-side Firebase SDK initialization and hooks.
+- `docs/`: Backend schemas and architectural documentation.
 
-### Google Maps API Key
+## 🚦 Getting Started
 
-This project uses the Google Maps API to display shop locations. To enable the map feature, you need to provide a Google Maps API key.
-
-1.  Create a `.env.local` file in the root of the project.
-2.  Add your API key to the file:
-
+1.  **Install dependencies**:
+    ```bash
+    npm install
     ```
-    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSyC6r59ETVjJAnpYzBC5KdOHF6ZpFeQ-Qco
+2.  **Environment Setup**: Create a `.env.local` and add:
+    ```
+    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_key_here
+    NEXT_PUBLIC_ADMIN_EMAIL=your_email_here
+    ```
+3.  **Run development server**:
+    ```bash
+    npm run dev
     ```
 
-You can get an API key from the [Google Cloud Console](https://console.cloud.google.com/google/maps-apis/overview). You will need to enable the "Maps JavaScript API", "Places API", and "Geocoding API".
+Open [http://localhost:9002](http://localhost:9002) to view the app.
