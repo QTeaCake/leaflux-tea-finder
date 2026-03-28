@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import Image from 'next/image';
 import { teaShops as allShops, TeaShop, Offering, TeaType } from '@/lib/tea-shops';
 import { getDistance } from '@/lib/utils';
 import { ShopList } from './shop-list';
@@ -126,7 +125,7 @@ export function TeaFinder() {
           <Icons.logo className="h-4 w-4" />
           <AlertTitle>API Key Missing</AlertTitle>
           <AlertDescription>
-            Please add <code>NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> to your <code>.env</code> file.
+            Please add <code>NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> to your Environment Variables.
           </AlertDescription>
         </Alert>
       );
@@ -146,33 +145,21 @@ export function TeaFinder() {
             <Alert variant="destructive">
               <Icons.logo className="h-4 w-4" />
               <AlertTitle>Google Maps API Action Required</AlertTitle>
-              <AlertDescription className="mt-2 space-y-3">
-                <p>Google has denied the request. This is usually due to one of these common setup issues:</p>
-                <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li>
-                    <strong>Billing Not Linked:</strong> Even for the free tier, Google requires a valid credit card linked to your project.
-                    <br />
-                    <a href="https://console.cloud.google.com/billing" target="_blank" rel="noopener noreferrer" className="underline font-medium text-destructive">Link Billing Account</a>
-                  </li>
-                  <li>
-                    <strong>Geocoding API Disabled:</strong> You must manually enable this specific API in the library.
-                    <br />
-                    <a href="https://console.cloud.google.com/apis/library/geocoding-backend.googleapis.com" target="_blank" rel="noopener noreferrer" className="underline font-medium text-destructive">Enable Geocoding API</a>
-                  </li>
-                </ul>
+              <AlertDescription className="mt-2">
+                Google has denied the request. Please ensure Billing is active and the Geocoding API is enabled in your Google Cloud Console.
               </AlertDescription>
             </Alert>
           );
         } else if (data.status === 'ZERO_RESULTS') {
           setLocationError(`Could not find location: "${locationInput}". Please try a more specific address or zip code.`);
         } else {
-          setLocationError(`Google Maps Error: ${data.status}. Please check your API configuration.`);
+          setLocationError(`Google Maps Error: ${data.status}`);
         }
         setUserLocation(null);
       }
     } catch (error) {
       console.error("Error geocoding:", error);
-      setLocationError("There was an error searching for the location. Please check your internet connection.");
+      setLocationError("There was an error searching for the location.");
       setUserLocation(null);
     }
   }, [locationInput, logAnalyticsEvent]);
@@ -251,29 +238,15 @@ export function TeaFinder() {
 
   if (!isClient || isLocating) {
     return (
-      <section id="finder" className="w-full py-12 md:py-20 bg-background">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <Icons.spinner className="h-10 w-10 animate-spin text-primary" />
-            <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-primary">
-              Finding Tea Shops Near You...
-            </h2>
-            <p className="max-w-[700px] text-muted-foreground md:text-xl">
-              Please wait while we pinpoint your location to bring you the best local tea experiences.
-            </p>
-          </div>
-          <div className="mt-12 grid gap-8 md:grid-cols-3">
-            <Skeleton className="h-64" />
-            <Skeleton className="h-64" />
-            <Skeleton className="h-64" />
-          </div>
-        </div>
-      </section>
+      <div className="container mx-auto px-4 py-20 flex flex-col items-center justify-center space-y-4">
+        <Icons.spinner className="h-10 w-10 animate-spin text-primary" />
+        <h2 className="font-headline text-3xl font-bold text-primary">Pinpointing Location...</h2>
+      </div>
     );
   }
 
   const searchInputGroup = (
-    <div className="flex flex-col sm:flex-row gap-2 w-full">
+    <div className="flex flex-col sm:flex-row gap-2 w-full max-w-lg">
         <Input 
             placeholder="Enter an address, city, or zip code" 
             value={locationInput}
@@ -284,9 +257,9 @@ export function TeaFinder() {
                     handleLocationSearch();
                 }
             }}
-            className="flex-grow bg-white h-12 shadow-sm border-primary/20"
+            className="flex-grow bg-white h-12"
         />
-        <Button onClick={handleLocationSearch} size="lg" className="w-full sm:w-auto shadow-md">
+        <Button onClick={handleLocationSearch} size="lg" className="h-12 bg-primary">
             <Icons.search className="mr-2 h-4 w-4" />
             Search
         </Button>
@@ -294,44 +267,28 @@ export function TeaFinder() {
   );
 
   return (
-    <section id="finder" className="w-full">
+    <div className="w-full">
       {!userLocation && (
-        <div className="w-full bg-gradient-to-r from-[#fdf8f5] to-[#f3eef8] py-16 md:py-24 mb-12 border-b">
+        <div className="w-full bg-gradient-to-r from-[#fdf8f5] to-[#f3eef8] py-16 md:py-24 border-b">
           <div className="container mx-auto px-4 md:px-6">
-            <div className="flex flex-col md:flex-row items-center gap-12">
-              <div className="w-full md:w-[40%] flex justify-center order-first md:order-last">
-                <Image 
-                  src="/chammy-logo.png" 
-                  alt="QTeaCake mascot Chammy" 
-                  width={300} 
-                  height={300} 
-                  className="w-[200px] md:w-[300px] h-auto drop-shadow-2xl animate-in zoom-in duration-700"
-                  priority
-                />
-              </div>
-              
-              <div className="w-full md:w-[60%] space-y-6">
-                <div className="space-y-4">
-                  <p className="text-secondary font-bold tracking-widest uppercase text-sm">Your Tea Community</p>
-                  <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-primary leading-[1.1]">
-                    Discover Authentic Tea Shops Near You
-                  </h1>
-                  <p className="max-w-[600px] text-foreground/80 md:text-xl leading-relaxed">
-                    Tired of searching for quality loose-leaf tea? QTeaCake maps the best local tea shops so you never have to settle for tea bags again. Whether you're a seasoned gongfu brewer or just starting your tea journey, we'll help you find your perfect cup.
-                  </p>
-                </div>
-                
-                <div className="w-full max-w-lg pt-4">
-                  {locationError && <div className="mb-4">{locationError}</div>}
-                  {searchInputGroup}
-                </div>
+            <div className="max-w-4xl space-y-6">
+              <p className="text-secondary font-bold uppercase tracking-widest text-sm">YOUR TEA COMMUNITY</p>
+              <h1 className="font-headline text-5xl md:text-7xl font-bold tracking-tight text-primary leading-[1.1]">
+                Discover Authentic Tea Shops Near You
+              </h1>
+              <p className="max-w-2xl text-foreground/80 md:text-xl leading-relaxed">
+                Tired of searching for quality loose-leaf tea? QTeaCake maps the best local tea shops so you never have to settle for tea bags again. Whether you're a seasoned gongfu brewer or just starting your tea journey, we'll help you find your perfect cup.
+              </p>
+              <div className="pt-6">
+                {locationError && <p className="text-muted-foreground mb-4">{locationError}</p>}
+                {searchInputGroup}
               </div>
             </div>
           </div>
         </div>
       )}
 
-      <div className="container mx-auto px-4 md:px-6 space-y-8 mb-16">
+      <div className="container mx-auto px-4 md:px-6 space-y-8 mt-12 mb-16">
         <Alert className="border-secondary/20 bg-secondary/5">
           <Icons.mapPin className="h-4 w-4 text-secondary" />
           <AlertDescription>
@@ -340,41 +297,32 @@ export function TeaFinder() {
         </Alert>
 
         {userLocation && (
-          <Card className="shadow-lg animate-in slide-in-from-top-4 duration-500 border-primary/10">
-              <CardHeader>
-                  <CardTitle className="font-headline text-2xl flex items-center gap-2 text-primary">
-                  <Icons.mapPin className="h-6 w-6" />
-                  Update Your Location
-                  </CardTitle>
-              </CardHeader>
-              <CardContent>
-                  {locationError && <div className="mb-4">{locationError}</div>}
-                  {searchInputGroup}
-              </CardContent>
-          </Card>
-        )}
-            
-        {userLocation && (
-        <>
-            <Card className="shadow-lg border-primary/10">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div className="space-y-4">
+                <h2 className="font-headline text-3xl font-bold text-primary">Nearby Results</h2>
+                {searchInputGroup}
+              </div>
+              <RecommendationsTool nearbyShops={filteredShops} />
+            </div>
+
+            <Card className="border-primary/10">
               <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="font-headline text-2xl flex items-center gap-2">
-                    <Icons.filters className="h-6 w-6 text-primary" />
+                <CardHeader className="flex flex-row items-center justify-between py-4">
+                  <CardTitle className="font-headline text-xl flex items-center gap-2">
+                    <Icons.filters className="h-5 w-5 text-primary" />
                     Refine Your Search
                   </CardTitle>
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="icon" className="[&>svg]:transition-transform [&>svg]:duration-200 [&[data-state=open]>svg]:rotate-180">
+                    <Button variant="ghost" size="icon">
                       <Icons.chevronDown className="h-5 w-5" />
-                      <span className="sr-only">Toggle Filters</span>
                     </Button>
                   </CollapsibleTrigger>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                   <div className="space-y-4 mb-8">
                     <Label htmlFor="radius-slider">
-                      Search Radius:{" "}
-                      <span className="font-medium text-foreground">{radius}</span> miles
+                      Search Radius: <span className="font-medium text-foreground">{radius} miles</span>
                     </Label>
                     <Slider
                       id="radius-slider"
@@ -384,110 +332,47 @@ export function TeaFinder() {
                       step={5}
                     />
                   </div>
-                  <CollapsibleContent className="mt-8 grid gap-8 md:grid-cols-2 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95">
+                  <CollapsibleContent className="grid gap-8 md:grid-cols-3">
                     <div className="space-y-4">
                       <Label>Values</Label>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant={filters.ethical ? "secondary" : "outline"}
-                          size="sm"
-                          onClick={() => {
-                            logAnalyticsEvent('filterClick_ethical', String(!filters.ethical));
-                            setFilters((prev) => ({
-                              ...prev,
-                              ethical: !prev.ethical,
-                            }));
-                          }}
-                        >
-                          <Icons.ethical className="mr-2 h-4 w-4" />
-                          Ethical Sourcing
-                        </Button>
-                      </div>
+                      <Button
+                        variant={filters.ethical ? "secondary" : "outline"}
+                        size="sm"
+                        onClick={() => setFilters(p => ({ ...p, ethical: !p.ethical }))}
+                        className="w-full justify-start"
+                      >
+                        <Icons.ethical className="mr-2 h-4 w-4" />
+                        Ethical Sourcing
+                      </Button>
                     </div>
-                    <div className="space-y-4 md:col-span-2">
+                    <div className="space-y-4">
                       <Label>Offerings</Label>
                       <div className="flex flex-wrap gap-2">
-                        {offeringOptions.map((option) => {
-                          const Icon = Icons[option.icon];
-                          return (
-                            <Button
-                              key={option.name}
-                              variant={
-                                filters.offerings.includes(option.name)
-                                  ? "secondary"
-                                  : "outline"
-                              }
-                              size="sm"
-                              onClick={() => handleFilterChange(option.name)}
-                              className="capitalize"
-                            >
-                              <Icon className="mr-2 h-4 w-4" />
-                              {option.name}
-                            </Button>
-                          );
-                        })}
+                        {offeringOptions.map(o => (
+                          <Button
+                            key={o.name}
+                            variant={filters.offerings.includes(o.name) ? "secondary" : "outline"}
+                            size="sm"
+                            onClick={() => handleFilterChange(o.name)}
+                          >
+                            {o.name}
+                          </Button>
+                        ))}
                       </div>
                     </div>
-                    <div className="space-y-6 md:col-span-2">
-                      <div className="space-y-2">
-                        <Label className="font-semibold text-foreground/90">Pure (Unflavored) Tea</Label>
-                        <div className="flex flex-wrap gap-2">
-                          {pureTeaOptions.map((option) => (
-                            <Button
-                              key={option.name}
-                              variant={
-                                filters.teaTypes.includes(option.name)
-                                  ? "secondary"
-                                  : "outline"
-                              }
-                              size="sm"
-                              onClick={() => handleTeaTypeFilterChange(option.name)}
-                              className="capitalize"
-                            >
-                              {option.name}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="font-semibold text-foreground/90">Flavored Tea</Label>
-                        <div className="flex flex-wrap gap-2">
-                          {flavoredTeaOptions.map((option) => (
-                            <Button
-                              key={option.name}
-                              variant={
-                                filters.teaTypes.includes(option.name)
-                                  ? "secondary"
-                                  : "outline"
-                              }
-                              size="sm"
-                              onClick={() => handleTeaTypeFilterChange(option.name)}
-                              className="capitalize"
-                            >
-                              {option.name}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="font-semibold text-foreground/90">Herbal Tea</Label>
-                        <div className="flex flex-wrap gap-2">
-                          {herbalTeaOptions.map((option) => (
-                            <Button
-                              key={option.name}
-                              variant={
-                                filters.teaTypes.includes(option.name)
-                                  ? "secondary"
-                                  : "outline"
-                              }
-                              size="sm"
-                              onClick={() => handleTeaTypeFilterChange(option.name)}
-                              className="capitalize"
-                            >
-                              {option.name}
-                            </Button>
-                          ))}
-                        </div>
+                    <div className="space-y-4">
+                      <Label>Tea Types</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {pureTeaOptions.map(t => (
+                          <Button
+                            key={t.name}
+                            variant={filters.teaTypes.includes(t.name) ? "secondary" : "outline"}
+                            size="sm"
+                            onClick={() => handleTeaTypeFilterChange(t.name)}
+                          >
+                            {t.name}
+                          </Button>
+                        ))}
                       </div>
                     </div>
                   </CollapsibleContent>
@@ -507,7 +392,7 @@ export function TeaFinder() {
                   hoveredShopId={hoveredShopId}
                   />
               </div>
-              <div className="lg:col-span-8 h-[60vh] lg:h-[80vh] rounded-lg overflow-hidden shadow-lg border border-primary/10">
+              <div className="lg:col-span-8 h-[60vh] lg:h-[80vh] rounded-lg overflow-hidden border border-primary/10">
                   <ShopMap
                   apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
                   shops={filteredShops}
@@ -521,25 +406,18 @@ export function TeaFinder() {
                   />
               </div>
             </div>
-
-            <div className="text-center pt-8">
-                <p className="text-sm text-muted-foreground mb-6">
-                    We attempt to use your browser's location. If the map is wrong, or you want to search elsewhere, please enter a location.
-                </p>
-                <RecommendationsTool nearbyShops={filteredShops} />
-            </div>
-
-            <ShopDetails 
-              shop={shopForDetails} 
-              isOpen={!!selectedShop} 
-              onOpenChange={(open) => !open && setSelectedShop(null)}
-              onPraise={handlePraise}
-              onAddTag={handleAddTag}
-              praisedShops={praisedShops}
-            />
-        </>
+          </div>
         )}
+
+        <ShopDetails 
+          shop={shopForDetails} 
+          isOpen={!!selectedShop} 
+          onOpenChange={(open) => !open && setSelectedShop(null)}
+          onPraise={handlePraise}
+          onAddTag={handleAddTag}
+          praisedShops={praisedShops}
+        />
       </div>
-    </section>
+    </div>
   );
 }
