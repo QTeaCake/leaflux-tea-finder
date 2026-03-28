@@ -30,6 +30,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    // Explicitly allow the cloud development origins to prevent CORS/startup loops
+    allowedDevOrigins: [
+      '*.cloudworkstations.dev',
+      '*.firebase-studio.com',
+      'localhost:9002'
+    ],
+  },
 };
 
 export default nextConfig;
