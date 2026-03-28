@@ -65,7 +65,7 @@ const DEFAULT_LOCATION = { lat: 41.0793, lng: -85.1393 }; // Fort Wayne, IN
 export function TeaFinder() {
   const [shopsData, setShopsData] = useState<TeaShop[]>(allShops);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [locationError, setLocationError] = useState<string | null>(null);
+  const [locationError, setLocationError] = useState<React.ReactNode | null>(null);
   const [radius, setRadius] = useState(150); // in miles
   const [filters, setFilters] = useState<Filters>({ offerings: [], teaTypes: [], ethical: false });
   const [selectedShop, setSelectedShop] = useState<TeaShop | null>(null);
@@ -120,7 +120,7 @@ export function TeaFinder() {
     setLocationError(null);
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
-      setLocationError("API Key is missing for geocoding.");
+      setLocationError("API Key is missing for geocoding. Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env file.");
       return;
     }
 
@@ -133,15 +133,22 @@ export function TeaFinder() {
         setUserLocation({ lat, lng });
       } else {
         if (data.status === 'REQUEST_DENIED') {
-          setLocationError('There was an issue with the Google Maps API key. Please check that the Geocoding API is enabled in your Google Cloud project.');
+          setLocationError(
+            <div className="space-y-2">
+              <p><strong>Geocoding Request Denied.</strong> This usually means the "Geocoding API" is not enabled for your API key in the Google Cloud Console.</p>
+              <p className="text-xs">To fix this, go to the Google Cloud Console, select your project, and enable the <strong>Geocoding API</strong> in the API Library.</p>
+            </div>
+          );
+        } else if (data.status === 'ZERO_RESULTS') {
+          setLocationError(`Could not find location: "${locationInput}". Please try a more specific address or zip code.`);
         } else {
-          setLocationError(`Could not find location: "${locationInput}". Please try again.`);
+          setLocationError(`Google Maps Error: ${data.status}. Please check your API configuration.`);
         }
         setUserLocation(null);
       }
     } catch (error) {
       console.error("Error geocoding:", error);
-      setLocationError("There was an error searching for the location.");
+      setLocationError("There was an error searching for the location. Please check your internet connection.");
       setUserLocation(null);
     }
   }, [locationInput, logAnalyticsEvent]);
@@ -215,7 +222,6 @@ export function TeaFinder() {
 
   const shopForDetails = useMemo(() => {
     if (!selectedShop) return null;
-    // We find the shop from filteredShops to ensure distance and other dynamic data is present
     return filteredShops.find(s => s.id === selectedShop.id) || null;
   }, [selectedShop, filteredShops]);
 
@@ -259,47 +265,15 @@ export function TeaFinder() {
           </AlertDescription>
         </Alert>
 
-        {!userLocation ? (
-             <Card className="shadow-lg animate-in fade-in-50">
-                <CardHeader>
-                    <CardTitle className="font-headline text-2xl flex items-center gap-2">
-                    <Icons.mapPin className="h-6 w-6 text-primary" />
-                    Welcome! Set Your Location to Begin
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {locationError && <p className="text-center text-destructive mb-4">{locationError}</p>}
-                    <div className="flex flex-col sm:flex-row gap-2">
-                        <Input 
-                            placeholder="Enter an address, city, or zip code" 
-                            value={locationInput}
-                            onChange={(e) => setLocationInput(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    handleLocationSearch();
-                                }
-                            }}
-                            className="flex-grow"
-                        />
-                        <Button onClick={handleLocationSearch} className="w-full sm:w-auto">
-                            <Icons.search className="mr-2 h-4 w-4" />
-                            Search
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
-        ) : (
-        <>
-            <Card>
+        <Card className="shadow-lg animate-in fade-in-50">
             <CardHeader>
                 <CardTitle className="font-headline text-2xl flex items-center gap-2">
                 <Icons.mapPin className="h-6 w-6 text-primary" />
-                Set Your Location
+                {userLocation ? 'Update Your Location' : 'Welcome! Set Your Location to Begin'}
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                {locationError && <p className="text-center text-destructive mb-4">{locationError}</p>}
+                {locationError && <div className="text-center text-destructive mb-4 p-3 bg-destructive/10 rounded-md border border-destructive/20">{locationError}</div>}
                 <div className="flex flex-col sm:flex-row gap-2">
                     <Input 
                         placeholder="Enter an address, city, or zip code" 
@@ -319,8 +293,10 @@ export function TeaFinder() {
                     </Button>
                 </div>
             </CardContent>
-            </Card>
+        </Card>
             
+        {userLocation && (
+        <>
             <Card className="shadow-lg">
               <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
                 <CardHeader className="flex flex-row items-center justify-between">
@@ -507,5 +483,3 @@ export function TeaFinder() {
     </section>
   );
 }
-
-    
