@@ -7,10 +7,8 @@ QTeaCake is a high-end discovery platform for authentic tea shops, built with Ne
 - **Nearby Discovery**: Find tea shops within a custom radius based on your geolocation.
 - **Advanced Filtering**: Filter by specific tea types (Oolong, Matcha, Pu-erh, etc.) and offerings (Loose leaf, teaware, classes).
 - **AI Tea Sommelier**: Get personalized brewing and shop recommendations powered by Genkit and Gemini 2.5 Flash.
-- **Automated Communication**: Integrated "Trigger Email" extension for instant waitlist and contact form confirmations, including admin notifications.
-- **Enterprise Analytics**: Real-time event streaming to Google BigQuery via the "Stream Collections to BigQuery" extension for deep market analysis.
-- **Business Dashboard**: Historical analytics visualization for shop clicks, website traffic, and regional demand.
-- **Community Driven**: Users can suggest new shops, add custom tags, and "praise" their favorites.
+- **Automated Communication**: Integrated "Trigger Email" extension for instant waitlist and contact form confirmations.
+- **Enterprise Analytics**: Real-time event streaming to Google BigQuery via the "Stream Collections to BigQuery" extension.
 
 ## 🛠 Tech Stack
 
@@ -19,8 +17,6 @@ QTeaCake is a high-end discovery platform for authentic tea shops, built with Ne
 - **Database/Auth**: Firebase Firestore & Firebase Auth
 - **AI**: Genkit 1.x with Gemini 2.5 Flash
 - **Maps**: Google Maps Platform (JavaScript API & Geocoding)
-- **Backend Automation**: Firebase Extensions (Trigger Email, Stream Collections to BigQuery)
-- **Deployment**: Firebase App Hosting or Vercel
 
 ## ⚙️ Environment Variables & API Setup
 
@@ -29,23 +25,13 @@ For security, `.env` files are not synced to GitHub. When deploying to **Vercel*
 | Variable | Description |
 | :--- | :--- |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Your Google Maps Platform API Key |
-| `NEXT_PUBLIC_ADMIN_EMAIL` | The email address that will receive notifications for contact/suggestion forms |
+| `NEXT_PUBLIC_ADMIN_EMAIL` | The email address that will receive notifications |
 
 ### How to get your Google Maps API Key:
 1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
 2. Select your project: **studio-8763188321-d5a29**.
-3. Go to **APIs & Services** > **Library** and ensure **Maps JavaScript API** and **Geocoding API** are enabled.
-4. Go to **APIs & Services** > **Credentials**.
-5. Copy your key from the **API Keys** section.
-
-## 📁 Project Structure
-
-- `src/app/`: Application routes and page layouts.
-- `src/components/`: Reusable UI components and feature-specific logic.
-- `src/lib/`: Data definitions (`tea-shops.ts`) and utility functions.
-- `src/ai/`: Genkit flows and AI prompt definitions.
-- `src/firebase/`: Client-side Firebase SDK initialization, hooks, and error handling.
-- `docs/`: Backend schemas, architectural documentation, and sync guides.
+3. Go to **APIs & Services** > **Credentials**.
+4. Copy your key from the **API Keys** section.
 
 ## 🚦 Getting Started
 
@@ -53,21 +39,14 @@ For security, `.env` files are not synced to GitHub. When deploying to **Vercel*
     ```bash
     npm install
     ```
-2.  **Environment Setup**: Copy `.env.example` to `.env.local` and add your keys:
-    ```bash
-    cp .env.example .env.local
-    ```
-3.  **Run development server**:
+2.  **Run development server**:
     ```bash
     npm run dev
     ```
 
 ## 🔄 Syncing with GitHub
 
-This project is linked to: [https://github.com/QTeaCake/leaflux-tea-finder.git](https://github.com/QTeaCake/leaflux-tea-finder.git)
-
-To sync changes made in Firebase Studio back to your GitHub repository:
+To sync changes back to GitHub:
 1.  Open the **Source Control** tab in the sidebar.
-2.  Stage your changes (click the `+` icon next to "Changes").
-3.  Write a descriptive commit message (e.g., "Rebrand to QTeaCake and update color theme").
-4.  Click the **Commit** button, then click the **...** (three dots) and select **Push** to send changes to GitHub.
+2.  Stage your changes.
+3.  Commit and Push.

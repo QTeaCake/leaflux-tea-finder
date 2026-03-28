@@ -6,13 +6,12 @@ import { getDistance } from '@/lib/utils';
 import { ShopList } from './shop-list';
 import { ShopMap } from './shop-map';
 import { ShopDetails } from './shop-details';
-import { Skeleton } from './ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Label } from './ui/label';
-import { Slider } from './ui/slider';
 import { Icons } from './icons';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Label } from './ui/label';
+import { Slider } from './ui/slider';
 import {
   Collapsible,
   CollapsibleContent,
@@ -44,20 +43,6 @@ const pureTeaOptions: { name: TeaType }[] = [
     { name: 'yellow' },
     { name: 'puerh' },
     { name: 'matcha' },
-];
-
-const flavoredTeaOptions: { name: TeaType }[] = [
-    { name: 'jasmine' },
-    { name: 'earl grey' },
-    { name: 'chai' },
-];
-
-const herbalTeaOptions: { name: TeaType }[] = [
-    { name: 'herbal' },
-    { name: 'rooibos' },
-    { name: 'chamomile' },
-    { name: 'mint' },
-    { name: 'mate' },
 ];
 
 const DEFAULT_LOCATION = { lat: 41.0793, lng: -85.1393 }; // Fort Wayne, IN
@@ -119,19 +104,7 @@ export function TeaFinder() {
     logAnalyticsEvent('locationSearch', locationInput);
     setLocationError(null);
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!apiKey) {
-      setLocationError(
-        <Alert variant="destructive">
-          <Icons.logo className="h-4 w-4" />
-          <AlertTitle>API Key Missing</AlertTitle>
-          <AlertDescription>
-            Please add <code>NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> to your Environment Variables.
-          </AlertDescription>
-        </Alert>
-      );
-      return;
-    }
-
+    
     try {
       const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(locationInput)}&components=country:US&key=${apiKey}`);
       const data = await response.json();
@@ -140,21 +113,7 @@ export function TeaFinder() {
         const { lat, lng } = data.results[0].geometry.location;
         setUserLocation({ lat, lng });
       } else {
-        if (data.status === 'REQUEST_DENIED' || data.error_message?.includes('billing')) {
-          setLocationError(
-            <Alert variant="destructive">
-              <Icons.logo className="h-4 w-4" />
-              <AlertTitle>Google Maps API Action Required</AlertTitle>
-              <AlertDescription className="mt-2">
-                Google has denied the request. Please ensure Billing is active and the Geocoding API is enabled in your Google Cloud Console.
-              </AlertDescription>
-            </Alert>
-          );
-        } else if (data.status === 'ZERO_RESULTS') {
-          setLocationError(`Could not find location: "${locationInput}". Please try a more specific address or zip code.`);
-        } else {
-          setLocationError(`Google Maps Error: ${data.status}`);
-        }
+        setLocationError(`Could not find location: "${locationInput}".`);
         setUserLocation(null);
       }
     } catch (error) {
@@ -164,47 +123,23 @@ export function TeaFinder() {
     }
   }, [locationInput, logAnalyticsEvent]);
 
-  const handleFilterChange = useCallback((offering: string) => {
-    logAnalyticsEvent('filterClick_offering', offering);
-    setFilters(prev => {
-      const newOfferings = prev.offerings.includes(offering)
+  const handleFilterChange = (offering: string) => {
+    setFilters(prev => ({
+      ...prev,
+      offerings: prev.offerings.includes(offering)
         ? prev.offerings.filter(o => o !== offering)
-        : [...prev.offerings, offering];
-      return { ...prev, offerings: newOfferings };
-    });
-  }, [logAnalyticsEvent]);
+        : [...prev.offerings, offering],
+    }));
+  };
 
-  const handleTeaTypeFilterChange = useCallback((teaType: string) => {
-    logAnalyticsEvent('filterClick_teaType', teaType);
-    setFilters(prev => {
-      const newTeaTypes = prev.teaTypes.includes(teaType)
+  const handleTeaTypeFilterChange = (teaType: string) => {
+    setFilters(prev => ({
+      ...prev,
+      teaTypes: prev.teaTypes.includes(teaType)
         ? prev.teaTypes.filter(t => t !== teaType)
-        : [...prev.teaTypes, teaType];
-      return { ...prev, teaTypes: newTeaTypes };
-    });
-  }, [logAnalyticsEvent]);
-
-  const handlePraise = useCallback((shopId: string) => {
-    if (praisedShops.includes(shopId)) {
-        return;
-    }
-    setPraisedShops(prev => [...prev, shopId]);
-  }, [praisedShops]);
-
-  const handleAddTag = useCallback((shopId: string, tag: string) => {
-    setShopsData(currentShops =>
-      currentShops.map(shop => {
-        if (shop.id === shopId) {
-          const newTags = [...(shop.userTags || [])];
-          if (!newTags.includes(tag.toLowerCase())) {
-            newTags.push(tag.toLowerCase());
-          }
-          return { ...shop, userTags: newTags };
-        }
-        return shop;
-      })
-    );
-  }, []);
+        : [...prev.teaTypes, teaType],
+    }));
+  };
 
   const filteredShops = useMemo(() => {
     let baseShops = shopsData;
@@ -219,22 +154,11 @@ export function TeaFinder() {
     return baseShops
       .filter(shop => !filters.ethical || shop.ethical)
       .filter(shop => filters.offerings.length === 0 || filters.offerings.every(f => shop.offerings.includes(f as Offering)))
-      .filter(shop => {
-          const allShopTags = [
-              ...shop.teaTypes,
-              ...(shop.userTags || [])
-          ];
-          return filters.teaTypes.length === 0 || filters.teaTypes.every(t => allShopTags.includes(t as TeaType))
-      })
+      .filter(shop => filters.teaTypes.length === 0 || filters.teaTypes.every(t => shop.teaTypes.includes(t as TeaType)))
       .sort((a, b) => (a.distance ?? 999) - (b.distance ?? 999));
   }, [userLocation, radius, filters, shopsData]);
 
   const mapCenter = useMemo(() => userLocation || DEFAULT_LOCATION, [userLocation]);
-
-  const shopForDetails = useMemo(() => {
-    if (!selectedShop) return null;
-    return filteredShops.find(s => s.id === selectedShop.id) || null;
-  }, [selectedShop, filteredShops]);
 
   if (!isClient || isLocating) {
     return (
@@ -251,12 +175,7 @@ export function TeaFinder() {
             placeholder="Enter an address, city, or zip code" 
             value={locationInput}
             onChange={(e) => setLocationInput(e.target.value)}
-            onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleLocationSearch();
-                }
-            }}
+            onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
             className="flex-grow bg-white h-12"
         />
         <Button onClick={handleLocationSearch} size="lg" className="h-12 bg-primary">
@@ -410,11 +329,11 @@ export function TeaFinder() {
         )}
 
         <ShopDetails 
-          shop={shopForDetails} 
+          shop={selectedShop} 
           isOpen={!!selectedShop} 
           onOpenChange={(open) => !open && setSelectedShop(null)}
           onPraise={handlePraise}
-          onAddTag={handleAddTag}
+          onAddTag={() => {}}
           praisedShops={praisedShops}
         />
       </div>
