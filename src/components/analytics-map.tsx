@@ -3,6 +3,8 @@
 import { APIProvider, Map, useMap } from '@vis.gl/react-google-maps';
 import type { TeaShop } from '@/lib/tea-shops';
 import { useEffect, useMemo } from 'react';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Icons } from './icons';
 
 type Props = {
   shops: TeaShop[];

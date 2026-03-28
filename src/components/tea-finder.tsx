@@ -475,6 +475,7 @@ export function TeaFinder() {
                 <p className="text-sm text-muted-foreground mt-4">
                     We attempt to use your browser's location. If the map is wrong, or you want to search elsewhere, please enter a location.
                 </p>
+                <RecommendationsTool nearbyShops={filteredShops} />
             </div>
 
             <ShopDetails 
