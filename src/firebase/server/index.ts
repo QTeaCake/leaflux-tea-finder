@@ -1,14 +1,2 @@
-import { initializeApp, getApp, getApps } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-import { firebaseConfig } from '../config';
-
-function getDb() {
-  if (getApps().length === 0) {
-    initializeApp({
-      projectId: firebaseConfig.projectId,
-    });
-  }
-  return getFirestore();
-}
-
-export const db = getDb();
+// This file has been removed to prevent build errors. 
+// Server-side firebase-admin is not required for this prototype.

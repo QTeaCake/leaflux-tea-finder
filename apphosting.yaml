@@ -2,6 +2,9 @@
 # https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:
+  # The Node.js runtime version to use.
+  # nodejs20 is a stable choice for Next.js 15.
+  runtime: nodejs20
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
