@@ -22,14 +22,21 @@ QTeaCake is a high-end discovery platform for authentic tea shops, built with Ne
 - **Backend Automation**: Firebase Extensions (Trigger Email, Stream Collections to BigQuery)
 - **Deployment**: Firebase App Hosting or Vercel
 
-## ⚙️ Environment Variables
+## ⚙️ Environment Variables & API Setup
 
 For security, `.env` files are not synced to GitHub. When deploying to **Vercel** or **Firebase App Hosting**, you must manually add these variables in their respective dashboards:
 
 | Variable | Description |
 | :--- | :--- |
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Your Google Maps Platform API Key (Requires Geocoding & Maps JS API enabled) |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Your Google Maps Platform API Key |
 | `NEXT_PUBLIC_ADMIN_EMAIL` | The email address that will receive notifications for contact/suggestion forms |
+
+### How to get your Google Maps API Key:
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Select your project: **studio-8763188321-d5a29**.
+3. Go to **APIs & Services** > **Library** and ensure **Maps JavaScript API** and **Geocoding API** are enabled.
+4. Go to **APIs & Services** > **Credentials**.
+5. Copy your key from the **API Keys** section.
 
 ## 📁 Project Structure
 
