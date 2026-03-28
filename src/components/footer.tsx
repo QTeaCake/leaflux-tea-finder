@@ -1,4 +1,3 @@
-
 import { WaitlistForm } from '@/components/waitlist-form';
 import { ContactForm } from '@/components/contact-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

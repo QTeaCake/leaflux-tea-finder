@@ -299,7 +299,6 @@ export function TeaFinder() {
         <div className="w-full bg-gradient-to-r from-[#fdf8f5] to-[#f3eef8] py-16 md:py-24 mb-12 border-b">
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col md:flex-row items-center gap-12">
-              {/* Mobile: Image on top */}
               <div className="w-full md:w-[40%] flex justify-center order-first md:order-last">
                 <Image 
                   src="/chammy-logo.png" 
