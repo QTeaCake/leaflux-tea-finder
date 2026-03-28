@@ -19,7 +19,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { RecommendationsTool } from './recommendations-tool';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useFirestore } from '@/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -134,10 +134,18 @@ export function TeaFinder() {
       } else {
         if (data.status === 'REQUEST_DENIED') {
           setLocationError(
-            <div className="space-y-2">
-              <p><strong>Geocoding Request Denied.</strong> This usually means the "Geocoding API" is not enabled for your API key in the Google Cloud Console.</p>
-              <p className="text-xs">To fix this, go to the Google Cloud Console, select your project, and enable the <strong>Geocoding API</strong> in the API Library.</p>
-            </div>
+            <Alert variant="destructive">
+              <Icons.logo className="h-4 w-4" />
+              <AlertTitle>Google Maps API Request Denied</AlertTitle>
+              <AlertDescription className="mt-2 space-y-2">
+                <p>This error usually happens for one of two reasons:</p>
+                <ol className="list-decimal list-inside space-y-1 text-sm">
+                  <li><strong>Geocoding API Disabled:</strong> Go to the Google Cloud Console and enable the "Geocoding API".</li>
+                  <li><strong>Billing Required:</strong> Google requires a billing account (even for the free tier). Ensure your project has a valid billing account linked.</li>
+                </ol>
+                <p className="text-xs mt-2 italic">Check your Google Cloud Console for "studio-8763188321-d5a29".</p>
+              </AlertDescription>
+            </Alert>
           );
         } else if (data.status === 'ZERO_RESULTS') {
           setLocationError(`Could not find location: "${locationInput}". Please try a more specific address or zip code.`);
@@ -273,7 +281,7 @@ export function TeaFinder() {
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                {locationError && <div className="text-center text-destructive mb-4 p-3 bg-destructive/10 rounded-md border border-destructive/20">{locationError}</div>}
+                {locationError && <div className="mb-4">{locationError}</div>}
                 <div className="flex flex-col sm:flex-row gap-2">
                     <Input 
                         placeholder="Enter an address, city, or zip code" 
