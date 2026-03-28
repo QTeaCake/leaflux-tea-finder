@@ -159,12 +159,6 @@ export function TeaFinder() {
                     <a href="https://console.cloud.google.com/apis/library/geocoding-backend.googleapis.com" target="_blank" rel="noopener noreferrer" className="underline font-medium text-destructive">Enable Geocoding API</a>
                   </li>
                 </ul>
-                <div className="text-xs bg-destructive/10 p-2 rounded mt-2 border border-destructive/20">
-                  <strong>Project ID:</strong> <code>studio-8763188321-d5a29</code>
-                  <br />
-                  <strong>Status:</strong> {data.status}
-                  {data.error_message && <><br /><strong>Message:</strong> {data.error_message}</>}
-                </div>
               </AlertDescription>
             </Alert>
           );
@@ -260,7 +254,7 @@ export function TeaFinder() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <Icons.spinner className="h-10 w-10 animate-spin text-primary" />
-            <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+            <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-primary">
               Finding Tea Shops Near You...
             </h2>
             <p className="max-w-[700px] text-muted-foreground md:text-xl">
@@ -281,20 +275,20 @@ export function TeaFinder() {
     <section id="finder" className="w-full py-12 md:py-20">
       <div className="container mx-auto px-4 md:px-6 space-y-8">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
-          <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Explore Tea Shops</h2>
+          <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-primary">Explore Tea Shops</h2>
           <p className="max-w-[700px] text-muted-foreground md:text-xl">
             Uncover authentic tea shops nearby and fuel your passion for the perfect cup.
           </p>
         </div>
         
-        <Alert>
-          <Icons.mapPin className="h-4 w-4" />
+        <Alert className="border-secondary/20 bg-secondary/5">
+          <Icons.mapPin className="h-4 w-4 text-secondary" />
           <AlertDescription>
-            <strong>Geographic Note:</strong> This pre-alpha version is currently limited to select areas in Ohio, Indiana, Illinois, and Michigan. Support for more areas is coming soon!
+            <strong>Geographic Note:</strong> This version currently features select areas in Ohio, Indiana, Illinois, Michigan, and New York. Support for more areas is coming soon!
           </AlertDescription>
         </Alert>
 
-        <Card className="shadow-lg animate-in fade-in-50">
+        <Card className="shadow-lg animate-in fade-in-50 border-primary/10">
             <CardHeader>
                 <CardTitle className="font-headline text-2xl flex items-center gap-2">
                 <Icons.mapPin className="h-6 w-6 text-primary" />
@@ -326,7 +320,7 @@ export function TeaFinder() {
             
         {userLocation && (
         <>
-            <Card className="shadow-lg">
+            <Card className="shadow-lg border-primary/10">
               <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="font-headline text-2xl flex items-center gap-2">
@@ -477,7 +471,7 @@ export function TeaFinder() {
                   hoveredShopId={hoveredShopId}
                   />
               </div>
-              <div className="lg:col-span-8 h-[60vh] lg:h-[80vh] rounded-lg overflow-hidden shadow-lg">
+              <div className="lg:col-span-8 h-[60vh] lg:h-[80vh] rounded-lg overflow-hidden shadow-lg border border-primary/10">
                   <ShopMap
                   apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
                   shops={filteredShops}
@@ -492,8 +486,8 @@ export function TeaFinder() {
               </div>
             </div>
 
-            <div className="text-center">
-                <p className="text-sm text-muted-foreground mt-4">
+            <div className="text-center pt-8">
+                <p className="text-sm text-muted-foreground mb-6">
                     We attempt to use your browser's location. If the map is wrong, or you want to search elsewhere, please enter a location.
                 </p>
                 <RecommendationsTool nearbyShops={filteredShops} />

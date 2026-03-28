@@ -1,6 +1,6 @@
-# LeafLux's Tea Finder
+# QTeaCake's Tea Finder
 
-LeafLux is a high-end discovery platform for authentic tea shops, built with Next.js and Firebase. It helps users bridge the gap between "tea deserts" and thriving tea oases through intelligent mapping and AI-powered recommendations.
+QTeaCake is a high-end discovery platform for authentic tea shops, built with Next.js and Firebase. It helps users bridge the gap between "tea deserts" and thriving tea oases through intelligent mapping and AI-powered recommendations.
 
 ## 🚀 Features
 
@@ -54,5 +54,5 @@ This project is linked to: [https://github.com/QTeaCake/leaflux-tea-finder.git](
 To sync changes made in Firebase Studio back to your GitHub repository:
 1.  Open the **Source Control** tab in the sidebar.
 2.  Stage your changes (click the `+` icon next to "Changes").
-3.  Write a descriptive commit message (e.g., "Add New York tea shops and BigQuery streaming").
+3.  Write a descriptive commit message (e.g., "Rebrand to QTeaCake and update color theme").
 4.  Click the **Commit** button, then click the **...** (three dots) and select **Push** to send changes to GitHub.

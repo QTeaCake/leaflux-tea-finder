@@ -11,7 +11,7 @@ export function OrderContent() {
           <div className="bg-primary/10 p-4 rounded-full">
             <Icons.order className="h-12 w-12 text-primary" />
           </div>
-          <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
+          <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-primary">
             Order Tea Online - Coming Soon!
           </h1>
           <p className="max-w-[800px] text-foreground/80 md:text-xl">
@@ -20,16 +20,16 @@ export function OrderContent() {
         </div>
 
         <div className="mt-16 max-w-4xl mx-auto grid gap-8 md:grid-cols-2 lg:gap-12">
-          <div className="flex flex-col items-start p-6 rounded-lg border bg-card">
+          <div className="flex flex-col items-start p-6 rounded-lg border border-primary/10 bg-card">
             <div className="bg-accent/10 p-3 rounded-lg w-fit mb-4">
               <Icons.store className="h-8 w-8 text-accent" />
             </div>
             <h3 className="font-headline text-2xl font-bold mb-2">Support Local Shops</h3>
             <p className="text-muted-foreground">
-              By ordering through LeafLux, you'll be using affiliate links that directly support the authentic, local tea shops you discover on our map. It's a great way to fuel your hobby while strengthening the tea community.
+              By ordering through QTeaCake, you'll be using affiliate links that directly support the authentic, local tea shops you discover on our map. It's a great way to fuel your hobby while strengthening the tea community.
             </p>
           </div>
-          <div className="flex flex-col items-start p-6 rounded-lg border bg-card">
+          <div className="flex flex-col items-start p-6 rounded-lg border border-primary/10 bg-card">
             <div className="bg-accent/10 p-3 rounded-lg w-fit mb-4">
               <Icons.wind className="h-8 w-8 text-accent" />
             </div>
@@ -41,7 +41,7 @@ export function OrderContent() {
         </div>
 
         <div className="mt-20 max-w-2xl mx-auto">
-          <Card className="text-center shadow-lg p-6">
+          <Card className="text-center shadow-lg p-6 border-primary/20">
             <CardHeader className="p-0">
               <div className="flex justify-center">
                 <div className="bg-primary/10 p-3 rounded-lg w-fit">

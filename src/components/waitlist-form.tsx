@@ -53,18 +53,17 @@ export function WaitlistForm() {
         addDoc(mailCollection, {
           to: [data.email],
           message: {
-            subject: "You're on the LeafLux Waitlist!",
+            subject: "You're on the QTeaCake Waitlist!",
             html: `
               <p>Hello,</p>
-              <p>Thank you for your interest in LeafLux! You've been successfully added to our waitlist.</p>
+              <p>Thank you for your interest in QTeaCake! You've been successfully added to our waitlist.</p>
               <p>We'll notify you as soon as new features, tea discoveries, and events are announced.</p>
               <p>Stay curious,</p>
-              <p>The LeafLux Team</p>
+              <p>The QTeaCake Team</p>
             `,
           },
         }).catch(err => {
             console.error("Error sending waitlist confirmation email:", err);
-            // We don't show a toast here because the primary action (waitlist signup) was successful.
         });
 
         // Notification email to the admin

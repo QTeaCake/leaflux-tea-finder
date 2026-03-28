@@ -60,7 +60,7 @@ export function ContactForm() {
         addDoc(mailCollection, {
             to: [data.email],
             message: {
-                subject: "We've Received Your Message | LeafLux",
+                subject: "We've Received Your Message | QTeaCake",
                 html: `
                     <p>Hello ${data.name},</p>
                     <p>Thank you for contacting us! We've received your message and will get back to you as soon as possible.</p>
@@ -69,7 +69,7 @@ export function ContactForm() {
                     <p><em>${data.message}</em></p>
                     <br>
                     <p>Best regards,</p>
-                    <p>The LeafLux Team</p>
+                    <p>The QTeaCake Team</p>
                 `,
             },
         }).catch(err => {

@@ -6,10 +6,11 @@ import { SuggestShopForm } from './suggest-shop-form';
 import { AnalyticsGate } from './analytics-gate';
 import { SubmissionsGate } from './submissions-gate';
 import { Button } from './ui/button';
+import Image from 'next/image';
 
 export function Footer() {
   return (
-    <footer className="bg-primary/80 text-primary-foreground">
+    <footer className="bg-primary text-primary-foreground">
       <div id="contact-section" className="w-full bg-background py-12 md:py-20 border-t">
         <div className="container mx-auto grid gap-12 px-4 md:px-6 lg:grid-cols-3 lg:gap-8">
           <Card className="shadow-lg">
@@ -58,21 +59,27 @@ export function Footer() {
       </div>
       <div className="container mx-auto flex items-center justify-between px-4 py-6 md:px-6">
         <div className="flex items-center gap-2">
-          <Icons.logo className="h-6 w-6" />
-          <p className="font-headline text-lg font-semibold">LeafLux's Tea Finder</p>
+          <Image
+            src="/chammy-logo.png"
+            alt="QTeaCake Logo"
+            width={24}
+            height={24}
+            className="rounded-full brightness-0 invert"
+          />
+          <p className="font-headline text-lg font-semibold">QTeaCake</p>
         </div>
         <div className="flex items-center gap-4">
           <SubmissionsGate>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="hover:bg-primary-foreground hover:text-primary">
               Submissions
             </Button>
           </SubmissionsGate>
           <AnalyticsGate>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="hover:bg-primary-foreground hover:text-primary">
               For Business
             </Button>
           </AnalyticsGate>
-          <p className="text-sm text-primary-foreground/80">&copy; {new Date().getFullYear()} LeafLux. All rights reserved.</p>
+          <p className="text-sm text-primary-foreground/80">&copy; 2026 QTeaCake. All rights reserved.</p>
         </div>
       </div>
     </footer>
