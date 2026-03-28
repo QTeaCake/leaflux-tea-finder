@@ -18,7 +18,6 @@ export function initializeFirebase() {
     if (existingApp.options.apiKey && existingApp.options.apiKey !== "") {
       return getSdks(existingApp);
     }
-    // If the existing app is "broken", we'll continue to re-init with the reliable config.
   }
 
   let firebaseApp: FirebaseApp;
@@ -34,8 +33,6 @@ export function initializeFirebase() {
   } catch (e) {
     // Fallback to the reliable config provided in src/firebase/config.ts
     try {
-      // If we already have apps, we might be in a state where we need to re-init 
-      // with the valid hardcoded config.
       if (getApps().length > 0) {
         firebaseApp = getApp();
       } else {

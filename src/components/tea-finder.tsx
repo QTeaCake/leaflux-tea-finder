@@ -50,7 +50,7 @@ const DEFAULT_LOCATION = { lat: 41.0793, lng: -85.1393 }; // Fort Wayne, IN
 export function TeaFinder() {
   const [shopsData, setShopsData] = useState<TeaShop[]>(allShops);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [locationError, setLocationError] = useState<React.ReactNode | null>(null);
+  const [locationError, setLocationError] = useState<React.Node | null>(null);
   const [radius, setRadius] = useState(150); // in miles
   const [filters, setFilters] = useState<Filters>({ offerings: [], teaTypes: [], ethical: false });
   const [selectedShop, setSelectedShop] = useState<TeaShop | null>(null);
@@ -141,6 +141,13 @@ export function TeaFinder() {
     }));
   };
 
+  const handlePraise = (shopId: string) => {
+    if (!praisedShops.includes(shopId)) {
+      setPraisedShops(prev => [...prev, shopId]);
+      logAnalyticsEvent('praise', shopId);
+    }
+  };
+
   const filteredShops = useMemo(() => {
     let baseShops = shopsData;
 
@@ -191,7 +198,7 @@ export function TeaFinder() {
         <div className="w-full bg-gradient-to-r from-[#fdf8f5] to-[#f3eef8] py-16 md:py-24 border-b">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-4xl space-y-6">
-              <p className="text-secondary font-bold uppercase tracking-widest text-sm">YOUR TEA COMMUNITY</p>
+              <p className="text-secondary font-bold uppercase tracking-widest text-sm">Your Tea Community</p>
               <h1 className="font-headline text-5xl md:text-7xl font-bold tracking-tight text-primary leading-[1.1]">
                 Discover Authentic Tea Shops Near You
               </h1>
