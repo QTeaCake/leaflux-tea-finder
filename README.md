@@ -49,8 +49,10 @@ LeafLux is a high-end discovery platform for authentic tea shops, built with Nex
 
 ## 🔄 Syncing with GitHub
 
+This project is linked to: [https://github.com/QTeaCake/leaflux-tea-finder.git](https://github.com/QTeaCake/leaflux-tea-finder.git)
+
 To sync changes made in Firebase Studio back to your GitHub repository:
 1.  Open the **Source Control** tab in the sidebar.
-2.  Stage your changes (click the `+` icon).
-3.  Write a descriptive commit message (see `docs/CHANGELOG.md` for inspiration).
-4.  Click the **Commit** button, then **Push** to send changes to GitHub.
+2.  Stage your changes (click the `+` icon next to "Changes").
+3.  Write a descriptive commit message (e.g., "Add New York tea shops and BigQuery streaming").
+4.  Click the **Commit** button, then click the **...** (three dots) and select **Push** to send changes to GitHub.
