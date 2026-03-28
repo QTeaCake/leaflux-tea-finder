@@ -20,7 +20,16 @@ QTeaCake is a high-end discovery platform for authentic tea shops, built with Ne
 - **AI**: Genkit 1.x with Gemini 2.5 Flash
 - **Maps**: Google Maps Platform (JavaScript API & Geocoding)
 - **Backend Automation**: Firebase Extensions (Trigger Email, Stream Collections to BigQuery)
-- **Deployment**: Firebase App Hosting
+- **Deployment**: Firebase App Hosting or Vercel
+
+## ⚙️ Environment Variables
+
+For security, `.env` files are not synced to GitHub. When deploying to **Vercel** or **Firebase App Hosting**, you must manually add these variables in their respective dashboards:
+
+| Variable | Description |
+| :--- | :--- |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Your Google Maps Platform API Key (Requires Geocoding & Maps JS API enabled) |
+| `NEXT_PUBLIC_ADMIN_EMAIL` | The email address that will receive notifications for contact/suggestion forms |
 
 ## 📁 Project Structure
 
@@ -37,10 +46,9 @@ QTeaCake is a high-end discovery platform for authentic tea shops, built with Ne
     ```bash
     npm install
     ```
-2.  **Environment Setup**: Create a `.env.local` and add:
-    ```
-    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_key_here
-    NEXT_PUBLIC_ADMIN_EMAIL=your_email_here
+2.  **Environment Setup**: Copy `.env.example` to `.env.local` and add your keys:
+    ```bash
+    cp .env.example .env.local
     ```
 3.  **Run development server**:
     ```bash
