@@ -7,10 +7,10 @@ LeafLux is a high-end discovery platform for authentic tea shops, built with Nex
 - **Nearby Discovery**: Find tea shops within a custom radius based on your geolocation.
 - **Advanced Filtering**: Filter by specific tea types (Oolong, Matcha, Pu-erh, etc.) and offerings (Loose leaf, teaware, classes).
 - **AI Tea Sommelier**: Get personalized brewing and shop recommendations powered by Genkit and Gemini 2.5 Flash.
-- **Automated Communication**: Integrated "Trigger Email" extension for instant waitlist and contact form confirmations.
-- **Enterprise Analytics**: Real-time event streaming to Google BigQuery for deep market analysis.
+- **Automated Communication**: Integrated "Trigger Email" extension for instant waitlist and contact form confirmations, including admin notifications.
+- **Enterprise Analytics**: Real-time event streaming to Google BigQuery via the "Stream Collections to BigQuery" extension for deep market analysis.
 - **Business Dashboard**: Historical analytics visualization for shop clicks, website traffic, and regional demand.
-- **Community Driven**: Users can suggest new shops and "praise" their favorites.
+- **Community Driven**: Users can suggest new shops, add custom tags, and "praise" their favorites.
 
 ## 🛠 Tech Stack
 
@@ -19,7 +19,7 @@ LeafLux is a high-end discovery platform for authentic tea shops, built with Nex
 - **Database/Auth**: Firebase Firestore & Firebase Auth
 - **AI**: Genkit 1.x with Gemini 2.5 Flash
 - **Maps**: Google Maps Platform (JavaScript API & Geocoding)
-- **Backend Automation**: Firebase Extensions (Trigger Email, Stream to BigQuery)
+- **Backend Automation**: Firebase Extensions (Trigger Email, Stream Collections to BigQuery)
 - **Deployment**: Firebase App Hosting
 
 ## 📁 Project Structure
@@ -28,8 +28,8 @@ LeafLux is a high-end discovery platform for authentic tea shops, built with Nex
 - `src/components/`: Reusable UI components and feature-specific logic.
 - `src/lib/`: Data definitions (`tea-shops.ts`) and utility functions.
 - `src/ai/`: Genkit flows and AI prompt definitions.
-- `src/firebase/`: Client-side Firebase SDK initialization and hooks.
-- `docs/`: Backend schemas and architectural documentation.
+- `src/firebase/`: Client-side Firebase SDK initialization, hooks, and error handling.
+- `docs/`: Backend schemas, architectural documentation, and sync guides.
 
 ## 🚦 Getting Started
 
@@ -47,4 +47,10 @@ LeafLux is a high-end discovery platform for authentic tea shops, built with Nex
     npm run dev
     ```
 
-Open [http://localhost:9002](http://localhost:9002) to view the app.
+## 🔄 Syncing with GitHub
+
+To sync changes made in Firebase Studio back to your GitHub repository:
+1.  Open the **Source Control** tab in the sidebar.
+2.  Stage your changes (click the `+` icon).
+3.  Write a descriptive commit message (see `docs/CHANGELOG.md` for inspiration).
+4.  Click the **Commit** button, then **Push** to send changes to GitHub.
