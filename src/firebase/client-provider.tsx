@@ -1,13 +1,20 @@
 'use client';
 
 import React, { useMemo, type ReactNode } from 'react';
-import { FirebaseProvider } from '@/firebase/provider';
-import { initializeFirebase } from '@/firebase/init';
+import { FirebaseProvider } from './provider';
+import { initializeFirebase } from './init';
 
 interface FirebaseClientProviderProps {
   children: ReactNode;
 }
 
+/**
+ * A client-side provider that initializes Firebase and wraps the application
+ * in a context that provides access to Firebase services and the current user.
+ * 
+ * It uses relative imports for internal Firebase files to avoid circular 
+ * dependencies with the main index export.
+ */
 export function FirebaseClientProvider({ children }: FirebaseClientProviderProps) {
   const firebaseServices = useMemo(() => {
     // Initialize Firebase on the client side, once per component mount.
