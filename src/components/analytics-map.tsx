@@ -77,17 +77,30 @@ export function AnalyticsMap({ shops, apiKey }: Props) {
   const center = { lat: 39.8283, lng: -98.5795 };
 
   return (
-    <APIProvider apiKey={apiKey} libraries={['visualization']}>
-      <Map
-        mapId="leaf-lux-analytics-map"
-        style={{ width: '100%', height: '100%' }}
-        defaultCenter={center}
-        defaultZoom={4}
-        gestureHandling={'greedy'}
-        disableDefaultUI={true}
-      >
-        <Heatmap shops={shops} />
-      </Map>
-    </APIProvider>
+    <div className="relative w-full h-full">
+      <APIProvider apiKey={apiKey} libraries={['visualization']}>
+        <Map
+          mapId="leaf-lux-analytics-map"
+          style={{ width: '100%', height: '100%' }}
+          defaultCenter={center}
+          defaultZoom={4}
+          gestureHandling={'greedy'}
+          disableDefaultUI={true}
+        >
+          <Heatmap shops={shops} />
+        </Map>
+      </APIProvider>
+      
+      {/* Visual Troubleshooting Hint Overlay */}
+      <div className="absolute top-2 right-2 pointer-events-none opacity-0 hover:opacity-100 transition-opacity">
+        <Alert className="bg-background/90 backdrop-blur pointer-events-auto border-accent/50 text-[10px] py-1 shadow-lg max-w-[200px]">
+          <Icons.ai className="h-3 w-3 text-accent" />
+          <AlertTitle className="text-[10px] font-bold">Billing Issue?</AlertTitle>
+          <AlertDescription className="text-[9px]">
+            If the map is blank, check your project's billing status and ensure the <strong>Maps JavaScript API</strong> is enabled.
+          </AlertDescription>
+        </Alert>
+      </div>
+    </div>
   );
 }

@@ -120,7 +120,15 @@ export function TeaFinder() {
     setLocationError(null);
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
-      setLocationError("API Key is missing for geocoding. Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env file.");
+      setLocationError(
+        <Alert variant="destructive">
+          <Icons.logo className="h-4 w-4" />
+          <AlertTitle>API Key Missing</AlertTitle>
+          <AlertDescription>
+            Please add <code>NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> to your <code>.env</code> file.
+          </AlertDescription>
+        </Alert>
+      );
       return;
     }
 
@@ -132,18 +140,31 @@ export function TeaFinder() {
         const { lat, lng } = data.results[0].geometry.location;
         setUserLocation({ lat, lng });
       } else {
-        if (data.status === 'REQUEST_DENIED') {
+        if (data.status === 'REQUEST_DENIED' || data.error_message?.includes('billing')) {
           setLocationError(
             <Alert variant="destructive">
               <Icons.logo className="h-4 w-4" />
-              <AlertTitle>Google Maps API Request Denied</AlertTitle>
-              <AlertDescription className="mt-2 space-y-2">
-                <p>This error usually happens for one of two reasons:</p>
-                <ol className="list-decimal list-inside space-y-1 text-sm">
-                  <li><strong>Geocoding API Disabled:</strong> Go to the Google Cloud Console and enable the "Geocoding API".</li>
-                  <li><strong>Billing Required:</strong> Google requires a billing account (even for the free tier). Ensure your project has a valid billing account linked.</li>
-                </ol>
-                <p className="text-xs mt-2 italic">Check your Google Cloud Console for "studio-8763188321-d5a29".</p>
+              <AlertTitle>Google Maps API Action Required</AlertTitle>
+              <AlertDescription className="mt-2 space-y-3">
+                <p>Google has denied the request. This is usually due to one of these common setup issues:</p>
+                <ul className="list-disc list-inside space-y-2 text-sm">
+                  <li>
+                    <strong>Billing Not Linked:</strong> Even for the free tier, Google requires a valid credit card linked to your project.
+                    <br />
+                    <a href="https://console.cloud.google.com/billing" target="_blank" rel="noopener noreferrer" className="underline font-medium text-destructive">Link Billing Account</a>
+                  </li>
+                  <li>
+                    <strong>Geocoding API Disabled:</strong> You must manually enable this specific API in the library.
+                    <br />
+                    <a href="https://console.cloud.google.com/apis/library/geocoding-backend.googleapis.com" target="_blank" rel="noopener noreferrer" className="underline font-medium text-destructive">Enable Geocoding API</a>
+                  </li>
+                </ul>
+                <div className="text-xs bg-destructive/10 p-2 rounded mt-2 border border-destructive/20">
+                  <strong>Project ID:</strong> <code>studio-8763188321-d5a29</code>
+                  <br />
+                  <strong>Status:</strong> {data.status}
+                  {data.error_message && <><br /><strong>Message:</strong> {data.error_message}</>}
+                </div>
               </AlertDescription>
             </Alert>
           );
