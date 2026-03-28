@@ -1,8 +1,12 @@
+
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from './icons';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export function AboutContent() {
+  const chammyMascot = PlaceHolderImages.find(img => img.id === 'chammy-mascot');
+
   return (
     <section className="w-full py-12 md:py-20 lg:py-24 bg-background">
       <div className="container mx-auto px-4 md:px-6">
@@ -29,10 +33,11 @@ export function AboutContent() {
              <Card className="p-4 shadow-lg w-full max-w-xs border-primary/20">
               <div className="relative aspect-square rounded-lg overflow-hidden">
                 <Image
-                  src="/chammy-logo.png"
+                  src={chammyMascot?.imageUrl || "https://images.unsplash.com/photo-1515696955266-4f67e13219e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600"}
                   alt="Chammy, the tea-loving mascot for QTeaCake."
                   fill
                   className="object-cover"
+                  data-ai-hint="tea mascot"
                 />
               </div>
               <p className="text-center text-sm mt-3 text-muted-foreground font-medium">Meet Chammy, our mascot</p>
@@ -76,7 +81,7 @@ export function AboutContent() {
             </CardHeader>
             <CardContent className="p-0 flex-grow">
               <p className="text-muted-foreground">
-                Our vision extends beyond a map. We aim to elevate global tea knowledge, demystifying the rich world of tea—from oolongs to rooibos, gaiwans to matcha. By building the definitive directory for tea shops and exposing 'tea deserts,' we will not only connect communities but also foster a deeper appreciation for this ancient craft, inspiring new shops to open and new hobbyists to begin their journey.
+                Our vision extends beyond a map. We aim to elevate global tea knowledge, demystifying the rich world of tea—from oolongs to rooibos, gaiwans to matcha. By building the definitive directory for tea shops and exposing 'tea deserts', we will not only connect communities but also foster a deeper appreciation for this ancient craft, inspiring new shops to open and new hobbyists to begin their journey.
               </p>
             </CardContent>
           </Card>

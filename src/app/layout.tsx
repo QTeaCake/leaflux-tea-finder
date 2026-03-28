@@ -1,15 +1,18 @@
+
 import type { Metadata } from 'next';
 import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase';
+
+const CHAMMY_LOGO_DATA_URI = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj4KICA8Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxOCIgZmlsbD0iIzNkMjA1NSIvPgogIDxwYXRoIGQ9Ik0xMiAyMiBRIDIwIDEwIDI4IDIyIFEgMjAgMzQgMTIgMjIiIGZpbGw9IiNlOGEwYjQiLz4KICA8Y2lyY2xlIGN4PSIxNyIgY3k9IjE5IiByPSIxLjUiIGZpbGw9IndoaXRlIi8+CiAgPGNpcmNsZSBjeD0iMjMiIGN5PSIxOSIgcj0iMS41IiBmaWxsPSJ3aGl0ZSIvPgogIDxwYXRoIGQ9Ik0xOCAyNSBRIDIwIDI3IDIyIDI1IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4=";
 
 export const metadata: Metadata = {
   title: "QTeaCake",
   description: 'Discover authentic tea shops and personalized recommendations.',
   manifest: '/manifest.json',
   icons: {
-    icon: '/chammy-logo.png',
-    apple: '/chammy-logo.png',
+    icon: CHAMMY_LOGO_DATA_URI,
+    apple: CHAMMY_LOGO_DATA_URI,
   },
 };
 
@@ -29,7 +32,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#3d2055" />
 
-        <link rel="apple-touch-icon" href="/chammy-logo.png" />
+        <link rel="apple-touch-icon" href={CHAMMY_LOGO_DATA_URI} />
         
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

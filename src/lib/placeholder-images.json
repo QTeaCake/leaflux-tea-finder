@@ -11,6 +11,12 @@
       "description": "An elegant, minimalist flat lay of various teaware items.",
       "imageUrl": "https://images.unsplash.com/photo-1597318181433-2c5298f26514?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbWFsaXN0JTIwdGVhd2FyZXxlbnwwfHx8fDE3MTk1ODU4MTR8MA&ixlib=rb-4.0.3&q=80&w=1920",
       "imageHint": "minimalist teaware"
+    },
+    {
+      "id": "chammy-mascot",
+      "description": "A cute tea-themed mascot character.",
+      "imageUrl": "https://images.unsplash.com/photo-1515696955266-4f67e13219e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
+      "imageHint": "tea mascot"
     }
   ]
 }
