@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import Image from 'next/image';
 import { teaShops as allShops, TeaShop, Offering, TeaType } from '@/lib/tea-shops';
 import { getDistance } from '@/lib/utils';
 import { ShopList } from './shop-list';
@@ -271,16 +272,67 @@ export function TeaFinder() {
     );
   }
 
+  const searchInputGroup = (
+    <div className="flex flex-col sm:flex-row gap-2 w-full">
+        <Input 
+            placeholder="Enter an address, city, or zip code" 
+            value={locationInput}
+            onChange={(e) => setLocationInput(e.target.value)}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleLocationSearch();
+                }
+            }}
+            className="flex-grow bg-white h-12 shadow-sm border-primary/20"
+        />
+        <Button onClick={handleLocationSearch} size="lg" className="w-full sm:w-auto shadow-md">
+            <Icons.search className="mr-2 h-4 w-4" />
+            Search
+        </Button>
+    </div>
+  );
+
   return (
-    <section id="finder" className="w-full py-12 md:py-20">
-      <div className="container mx-auto px-4 md:px-6 space-y-8">
-        <div className="flex flex-col items-center justify-center space-y-4 text-center">
-          <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-primary">Explore Tea Shops</h2>
-          <p className="max-w-[700px] text-muted-foreground md:text-xl">
-            Uncover authentic tea shops nearby and fuel your passion for the perfect cup.
-          </p>
+    <section id="finder" className="w-full">
+      {!userLocation && (
+        <div className="w-full bg-gradient-to-r from-[#fdf8f5] to-[#f3eef8] py-16 md:py-24 mb-12 border-b">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              {/* Mobile: Image on top */}
+              <div className="w-full md:w-[40%] flex justify-center order-first md:order-last">
+                <Image 
+                  src="/chammy-logo.png" 
+                  alt="QTeaCake mascot Chammy" 
+                  width={300} 
+                  height={300} 
+                  className="w-[200px] md:w-[300px] h-auto drop-shadow-2xl animate-in zoom-in duration-700"
+                  priority
+                />
+              </div>
+              
+              <div className="w-full md:w-[60%] space-y-6">
+                <div className="space-y-4">
+                  <p className="text-secondary font-bold tracking-widest uppercase text-sm">Your Tea Community</p>
+                  <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-primary leading-[1.1]">
+                    Discover Authentic Tea Shops Near You
+                  </h1>
+                  <p className="max-w-[600px] text-foreground/80 md:text-xl leading-relaxed">
+                    Tired of searching for quality loose-leaf tea? QTeaCake maps the best local tea shops so you never have to settle for tea bags again. Whether you're a seasoned gongfu brewer or just starting your tea journey, we'll help you find your perfect cup.
+                  </p>
+                </div>
+                
+                <div className="w-full max-w-lg pt-4">
+                  {locationError && <div className="mb-4">{locationError}</div>}
+                  {searchInputGroup}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        
+      )}
+
+      <div className="container mx-auto px-4 md:px-6 space-y-8 mb-16">
         <Alert className="border-secondary/20 bg-secondary/5">
           <Icons.mapPin className="h-4 w-4 text-secondary" />
           <AlertDescription>
@@ -288,35 +340,20 @@ export function TeaFinder() {
           </AlertDescription>
         </Alert>
 
-        <Card className="shadow-lg animate-in fade-in-50 border-primary/10">
-            <CardHeader>
-                <CardTitle className="font-headline text-2xl flex items-center gap-2">
-                <Icons.mapPin className="h-6 w-6 text-primary" />
-                {userLocation ? 'Update Your Location' : 'Welcome! Set Your Location to Begin'}
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                {locationError && <div className="mb-4">{locationError}</div>}
-                <div className="flex flex-col sm:flex-row gap-2">
-                    <Input 
-                        placeholder="Enter an address, city, or zip code" 
-                        value={locationInput}
-                        onChange={(e) => setLocationInput(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                e.preventDefault();
-                                handleLocationSearch();
-                            }
-                        }}
-                        className="flex-grow"
-                    />
-                    <Button onClick={handleLocationSearch} className="w-full sm:w-auto">
-                        <Icons.search className="mr-2 h-4 w-4" />
-                        Search
-                    </Button>
-                </div>
-            </CardContent>
-        </Card>
+        {userLocation && (
+          <Card className="shadow-lg animate-in slide-in-from-top-4 duration-500 border-primary/10">
+              <CardHeader>
+                  <CardTitle className="font-headline text-2xl flex items-center gap-2 text-primary">
+                  <Icons.mapPin className="h-6 w-6" />
+                  Update Your Location
+                  </CardTitle>
+              </CardHeader>
+              <CardContent>
+                  {locationError && <div className="mb-4">{locationError}</div>}
+                  {searchInputGroup}
+              </CardContent>
+          </Card>
+        )}
             
         {userLocation && (
         <>
