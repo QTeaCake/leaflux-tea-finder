@@ -13,7 +13,7 @@ export function Footer() {
     <footer className="bg-primary text-primary-foreground">
       <div id="contact-section" className="w-full bg-background py-12 md:py-20 border-t">
         <div className="container mx-auto grid gap-12 px-4 md:px-6 lg:grid-cols-3 lg:gap-8">
-          <Card className="shadow-lg">
+          <Card className="shadow-lg border-primary/10">
             <CardHeader>
               <CardTitle className="font-headline text-3xl flex items-center gap-2 text-foreground">
                 <Icons.list className="h-8 w-8 text-primary" />
@@ -27,7 +27,7 @@ export function Footer() {
               <WaitlistForm />
             </CardContent>
           </Card>
-          <Card className="shadow-lg">
+          <Card className="shadow-lg border-primary/10">
             <CardHeader>
               <CardTitle className="font-headline text-3xl flex items-center gap-2 text-foreground">
                 <Icons.mail className="h-8 w-8 text-primary" />
@@ -41,7 +41,7 @@ export function Footer() {
               <ContactForm />
             </CardContent>
           </Card>
-          <Card className="shadow-lg">
+          <Card className="shadow-lg border-primary/10">
             <CardHeader>
               <CardTitle className="font-headline text-3xl flex items-center gap-2 text-foreground">
                 <Icons.store className="h-8 w-8 text-primary" />
