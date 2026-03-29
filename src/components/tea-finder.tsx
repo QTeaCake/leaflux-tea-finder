@@ -148,28 +148,43 @@ export function TeaFinder() {
     }
   };
 
-  const filteredShops = useMemo(() => {
-    let baseShops = shopsData;
+  const shopsWithDistance = useMemo(() => {
+    if (!userLocation) return shopsData;
+    return shopsData.map(shop => ({
+      ...shop,
+      distance: getDistance(userLocation.lat, userLocation.lng, shop.location.lat, shop.location.lng),
+    })).sort((a, b) => (a.distance ?? 999) - (b.distance ?? 999));
+  }, [userLocation, shopsData]);
 
-    if(userLocation) {
-        baseShops = baseShops.map(shop => ({
-            ...shop,
-            distance: getDistance(userLocation.lat, userLocation.lng, shop.location.lat, shop.location.lng),
-        })).filter(shop => shop.distance <= radius);
-    }
-    
-    return baseShops
-      .filter(shop => !filters.ethical || shop.ethical)
-      .filter(shop => filters.offerings.length === 0 || filters.offerings.every(f => shop.offerings.includes(f as Offering)))
-      .filter(shop => filters.teaTypes.length === 0 || filters.teaTypes.every(t => shop.teaTypes.includes(t as TeaType)))
-      .sort((a, b) => (a.distance ?? 999) - (b.distance ?? 999));
-  }, [userLocation, radius, filters, shopsData]);
+  const filteredShops = useMemo(() => {
+    const applyFilters = (shops: TeaShop[]) =>
+      shops
+        .filter(shop => !filters.ethical || shop.ethical)
+        .filter(shop => filters.offerings.length === 0 || filters.offerings.every(f => shop.offerings.includes(f as Offering)))
+        .filter(shop => filters.teaTypes.length === 0 || filters.teaTypes.every(t => shop.teaTypes.includes(t as TeaType)));
+
+    const withinRadius = shopsWithDistance.filter(shop => (shop.distance ?? 0) <= radius);
+    const filtered = applyFilters(withinRadius);
+    // Always fall back to nearest shops — never show zero results
+    if (filtered.length === 0) return applyFilters(shopsWithDistance);
+    return filtered;
+  }, [shopsWithDistance, radius, filters]);
+
+  const isShowingBeyondRadius = useMemo(() => {
+    const withinRadius = shopsWithDistance.filter(shop => (shop.distance ?? 0) <= radius);
+    const applyFilters = (shops: TeaShop[]) =>
+      shops
+        .filter(shop => !filters.ethical || shop.ethical)
+        .filter(shop => filters.offerings.length === 0 || filters.offerings.every(f => shop.offerings.includes(f as Offering)))
+        .filter(shop => filters.teaTypes.length === 0 || filters.teaTypes.every(t => shop.teaTypes.includes(t as TeaType)));
+    return !!userLocation && applyFilters(withinRadius).length === 0;
+  }, [shopsWithDistance, radius, filters, userLocation]);
 
   const mapCenter = useMemo(() => userLocation || DEFAULT_LOCATION, [userLocation]);
 
-  const isTeaDesert = !!userLocation && !!locationInput && filteredShops.length === 0;
+  const isTeaDesert = !!userLocation && !!locationInput && isShowingBeyondRadius;
 
-  // Log tea desert hits so they show up in analytics
+  // Log tea desert hits silently for analytics
   useEffect(() => {
     if (isTeaDesert) {
       logAnalyticsEvent('teaDesert', locationInput);
@@ -315,19 +330,16 @@ export function TeaFinder() {
               </Collapsible>
             </Card>
 
-            {isTeaDesert ? (
-              <div className="w-full rounded-xl border border-primary/20 bg-card px-8 py-16 text-center space-y-4">
-                <Icons.mapPin className="h-10 w-10 text-muted-foreground mx-auto" />
-                <h2 className="font-headline text-2xl font-bold text-foreground">No shops found nearby</h2>
-                <p className="text-muted-foreground max-w-md mx-auto">
-                  We couldn't find any authentic tea shops near <strong>{locationInput}</strong> within {radius} miles.
-                  Try expanding your radius, or order quality tea online while we continue adding shops to the map.
-                </p>
-                <a href="/order" className="inline-block text-sm underline text-primary font-medium">
-                  Browse tea online →
-                </a>
+            {isShowingBeyondRadius && filteredShops.length > 0 && (
+              <div className="flex items-start gap-3 rounded-lg border border-secondary/30 bg-secondary/5 px-4 py-3 text-sm text-muted-foreground">
+                <Icons.mapPin className="h-4 w-4 mt-0.5 text-secondary shrink-0" />
+                <span>
+                  No shops within {radius} miles of <strong>{locationInput}</strong> — showing the nearest available shops.
+                  Try expanding your radius or{' '}
+                  <a href="/order" className="underline text-primary">order online</a>.
+                </span>
               </div>
-            ) : (
+            )}
             <div className="grid gap-8 lg:grid-cols-12">
               <div className="lg:col-span-4 h-[60vh] lg:h-[80vh] overflow-y-auto pr-2">
                   <ShopList
@@ -354,7 +366,6 @@ export function TeaFinder() {
                   />
               </div>
             </div>
-            )}
           </div>
         )}
 
