@@ -1,15 +1,16 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from './icons';
 import { AnalyticsMap } from './analytics-map';
 import type { TeaShop } from '@/lib/tea-shops';
 import { Bar, BarChart, XAxis, YAxis, Tooltip } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import type { ChartConfig } from '@/components/ui/chart';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useFirestore, useCollection, useMemoFirebase, useDoc, useUser } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
+import { useFirestore, useMemoFirebase, useDoc, useUser } from '@/firebase';
+import { collection, doc, onSnapshot } from 'firebase/firestore';
 import { Skeleton } from './ui/skeleton';
 
 type AnalyticsEvent = {
@@ -80,11 +81,18 @@ export function AnalyticsContent({ teaShops, apiKey }: AnalyticsContentProps) {
   const isAuthorized = !!adminRole || !!businessRole;
   const pageIsLoading = isAuthLoading || (!!user && (isAdminLoading || isBusinessLoading));
 
-  const eventsRef = useMemoFirebase(
-    () => (db && isAuthorized ? collection(db, 'analyticsEvents') : null),
-    [db, isAuthorized]
-  );
-  const { data: events, isLoading: eventsLoading } = useCollection<AnalyticsEvent>(eventsRef);
+  const [events, setEvents] = useState<AnalyticsEvent[] | null>(null);
+  const [eventsLoading, setEventsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!db || !isAuthorized) return;
+    setEventsLoading(true);
+    const unsub = onSnapshot(collection(db, 'analyticsEvents'), (snap) => {
+      setEvents(snap.docs.map(d => d.data() as AnalyticsEvent));
+      setEventsLoading(false);
+    }, () => setEventsLoading(false));
+    return () => unsub();
+  }, [db, isAuthorized]);
 
   const isLoading = pageIsLoading || (isAuthorized && eventsLoading);
 
@@ -107,9 +115,9 @@ export function AnalyticsContent({ teaShops, apiKey }: AnalyticsContentProps) {
     };
   }, [events, shopNameMap]);
 
-  const chartConfig = {
+  const chartConfig: ChartConfig = {
     clicks: { label: 'Count', color: 'hsl(var(--primary))' },
-  } satisfies import('@/components/ui/chart').ChartConfig;
+  };
 
   if (pageIsLoading) {
     return (
