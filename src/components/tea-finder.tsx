@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import Image from 'next/image';
 import { teaShops as allShops, TeaShop, Offering, TeaType } from '@/lib/tea-shops';
 import { getDistance } from '@/lib/utils';
 import { ShopList } from './shop-list';
@@ -200,17 +201,29 @@ export function TeaFinder() {
       {!userLocation && (
         <div className="w-full bg-gradient-to-r from-[#fdf8f5] to-[#f3eef8] py-16 md:py-24 border-b">
           <div className="container mx-auto px-4 md:px-6">
-            <div className="max-w-4xl space-y-6">
-              <p className="text-secondary font-bold uppercase tracking-widest text-sm">Your Tea Community</p>
-              <h1 className="font-headline text-5xl md:text-7xl font-bold tracking-tight text-primary leading-[1.1]">
-                Discover Authentic Tea Shops Near You
-              </h1>
-              <p className="max-w-2xl text-foreground/80 md:text-xl leading-relaxed">
-                Tired of searching for quality loose-leaf tea? QTeaCake maps the best local tea shops so you never have to settle for tea bags again. Whether you're a seasoned gongfu brewer or just starting your tea journey, we'll help you find your perfect cup.
-              </p>
-              <div className="pt-6">
-                {locationError && <p className="text-muted-foreground mb-4">{locationError}</p>}
-                {searchInputGroup}
+            <div className="flex items-center justify-between gap-8">
+              <div className="max-w-2xl space-y-6">
+                <p className="text-secondary font-bold uppercase tracking-widest text-sm">Your Tea Community</p>
+                <h1 className="font-headline text-5xl md:text-7xl font-bold tracking-tight text-primary leading-[1.1]">
+                  Discover Authentic Tea Shops Near You
+                </h1>
+                <p className="text-foreground/80 md:text-xl leading-relaxed">
+                  Tired of searching for quality loose-leaf tea? QTeaCake maps the best local tea shops so you never have to settle for tea bags again. Whether you're a seasoned gongfu brewer or just starting your tea journey, we'll help you find your perfect cup.
+                </p>
+                <div className="pt-6">
+                  {locationError && <p className="text-muted-foreground mb-4">{locationError}</p>}
+                  {searchInputGroup}
+                </div>
+              </div>
+              <div className="hidden md:block shrink-0 opacity-90 animate-in fade-in duration-700">
+                <Image
+                  src="/chammy-logo.png"
+                  alt="Chammy the QTeaCake mascot"
+                  width={280}
+                  height={280}
+                  className="object-contain drop-shadow-md"
+                  priority
+                />
               </div>
             </div>
           </div>
