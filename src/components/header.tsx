@@ -21,7 +21,7 @@ export function Header() {
             <Link href="/order">Order Tea</Link>
           </Button>
           <Button asChild variant="ghost">
-            <Link href="/tea-guide">Tea Guide</Link>
+            <Link href="/tea-education">Tea Guide</Link>
           </Button>
           <Button asChild variant="ghost">
             <Link href="/about">About</Link>
