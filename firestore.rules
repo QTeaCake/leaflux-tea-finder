@@ -122,8 +122,8 @@ service cloud.firestore {
      * @principle Write-Only. Allows any client to log analytics events, but no one can read, update, or delete them from the client-side. This protects the integrity and privacy of the raw event stream.
      */
     match /analyticsEvents/{analyticsEventId} {
-        allow get: if false;
-        allow list: if false;
+        allow get: if isAdmin() || isBusinessUser();
+        allow list: if isAdmin() || isBusinessUser();
         allow create: if true;
         allow update: if false;
         allow delete: if false;

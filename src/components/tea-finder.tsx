@@ -167,6 +167,15 @@ export function TeaFinder() {
 
   const mapCenter = useMemo(() => userLocation || DEFAULT_LOCATION, [userLocation]);
 
+  const isTeaDesert = !!userLocation && !!locationInput && filteredShops.length === 0;
+
+  // Log tea desert hits so they show up in analytics
+  useEffect(() => {
+    if (isTeaDesert) {
+      logAnalyticsEvent('teaDesert', locationInput);
+    }
+  }, [isTeaDesert, locationInput, logAnalyticsEvent]);
+
   if (!isClient || isLocating) {
     return (
       <div className="container mx-auto px-4 py-20 flex flex-col items-center justify-center space-y-4">
@@ -306,10 +315,25 @@ export function TeaFinder() {
               </Collapsible>
             </Card>
 
+            {isTeaDesert ? (
+              <div className="w-full rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 px-8 py-16 text-center space-y-4">
+                <div className="text-6xl">🏜️</div>
+                <h2 className="font-headline text-3xl font-bold text-primary">You're in a Tea Desert</h2>
+                <p className="text-foreground/70 max-w-lg mx-auto text-lg">
+                  No authentic tea shops found near <strong>{locationInput}</strong> within {radius} miles.
+                  Your search has been recorded — you're helping prove that tea demand exists here.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Try expanding your radius above, or{' '}
+                  <a href="/order" className="underline text-primary font-medium">order quality tea online</a>{' '}
+                  while we work to change that.
+                </p>
+              </div>
+            ) : (
             <div className="grid gap-8 lg:grid-cols-12">
               <div className="lg:col-span-4 h-[60vh] lg:h-[80vh] overflow-y-auto pr-2">
-                  <ShopList 
-                  shops={filteredShops} 
+                  <ShopList
+                  shops={filteredShops}
                   onSelectShop={(shop) => {
                       logAnalyticsEvent('shopClick', shop.id);
                       setSelectedShop(shop);
@@ -332,6 +356,7 @@ export function TeaFinder() {
                   />
               </div>
             </div>
+            )}
           </div>
         )}
 
