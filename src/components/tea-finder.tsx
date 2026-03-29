@@ -11,14 +11,12 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Label } from './ui/label';
-import { Slider } from './ui/slider';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { RecommendationsTool } from './recommendations-tool';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useFirestore } from '@/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -51,7 +49,6 @@ export function TeaFinder() {
   const [shopsData, setShopsData] = useState<TeaShop[]>(allShops);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<React.Node | null>(null);
-  const [radius, setRadius] = useState(150); // in miles
   const [filters, setFilters] = useState<Filters>({ offerings: [], teaTypes: [], ethical: false });
   const [selectedShop, setSelectedShop] = useState<TeaShop | null>(null);
   const [hoveredShopId, setHoveredShopId] = useState<string | null>(null);
@@ -148,48 +145,29 @@ export function TeaFinder() {
     }
   };
 
-  const shopsWithDistance = useMemo(() => {
-    if (!userLocation) return shopsData;
-    return shopsData.map(shop => ({
-      ...shop,
-      distance: getDistance(userLocation.lat, userLocation.lng, shop.location.lat, shop.location.lng),
-    })).sort((a, b) => (a.distance ?? 999) - (b.distance ?? 999));
-  }, [userLocation, shopsData]);
-
   const filteredShops = useMemo(() => {
-    const applyFilters = (shops: TeaShop[]) =>
-      shops
-        .filter(shop => !filters.ethical || shop.ethical)
-        .filter(shop => filters.offerings.length === 0 || filters.offerings.every(f => shop.offerings.includes(f as Offering)))
-        .filter(shop => filters.teaTypes.length === 0 || filters.teaTypes.every(t => shop.teaTypes.includes(t as TeaType)));
+    let shops = userLocation
+      ? shopsData.map(shop => ({
+          ...shop,
+          distance: getDistance(userLocation.lat, userLocation.lng, shop.location.lat, shop.location.lng),
+        })).sort((a, b) => a.distance - b.distance)
+      : shopsData;
 
-    const withinRadius = shopsWithDistance.filter(shop => (shop.distance ?? 0) <= radius);
-    const filtered = applyFilters(withinRadius);
-    // Always fall back to nearest shops — never show zero results
-    if (filtered.length === 0) return applyFilters(shopsWithDistance);
-    return filtered;
-  }, [shopsWithDistance, radius, filters]);
-
-  const isShowingBeyondRadius = useMemo(() => {
-    const withinRadius = shopsWithDistance.filter(shop => (shop.distance ?? 0) <= radius);
-    const applyFilters = (shops: TeaShop[]) =>
-      shops
-        .filter(shop => !filters.ethical || shop.ethical)
-        .filter(shop => filters.offerings.length === 0 || filters.offerings.every(f => shop.offerings.includes(f as Offering)))
-        .filter(shop => filters.teaTypes.length === 0 || filters.teaTypes.every(t => shop.teaTypes.includes(t as TeaType)));
-    return !!userLocation && applyFilters(withinRadius).length === 0;
-  }, [shopsWithDistance, radius, filters, userLocation]);
+    return shops
+      .filter(shop => !filters.ethical || shop.ethical)
+      .filter(shop => filters.offerings.length === 0 || filters.offerings.every(f => shop.offerings.includes(f as Offering)))
+      .filter(shop => filters.teaTypes.length === 0 || filters.teaTypes.every(t => shop.teaTypes.includes(t as TeaType)));
+  }, [userLocation, filters, shopsData]);
 
   const mapCenter = useMemo(() => userLocation || DEFAULT_LOCATION, [userLocation]);
 
-  const isTeaDesert = !!userLocation && !!locationInput && isShowingBeyondRadius;
-
-  // Log tea desert hits silently for analytics
+  // Silently log when a searched location has no shops nearby (within 100mi)
   useEffect(() => {
-    if (isTeaDesert) {
+    if (!userLocation || !locationInput || !filteredShops.length) return;
+    if ((filteredShops[0].distance ?? 0) > 100) {
       logAnalyticsEvent('teaDesert', locationInput);
     }
-  }, [isTeaDesert, locationInput, logAnalyticsEvent]);
+  }, [userLocation, locationInput, filteredShops, logAnalyticsEvent]);
 
   if (!isClient || isLocating) {
     return (
@@ -239,13 +217,6 @@ export function TeaFinder() {
       )}
 
       <div className="container mx-auto px-4 md:px-6 space-y-8 mt-12 mb-16">
-        <Alert className="border-secondary/20 bg-secondary/5">
-          <Icons.mapPin className="h-4 w-4 text-secondary" />
-          <AlertDescription>
-            <strong>Geographic Note:</strong> This version currently features select areas in Ohio, Indiana, Illinois, Michigan, and New York. Support for more areas is coming soon!
-          </AlertDescription>
-        </Alert>
-
         {userLocation && (
           <div className="flex flex-col gap-6">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -270,18 +241,6 @@ export function TeaFinder() {
                   </CollapsibleTrigger>
                 </CardHeader>
                 <CardContent>
-                   <div className="space-y-4 mb-8">
-                    <Label htmlFor="radius-slider">
-                      Search Radius: <span className="font-medium text-foreground">{radius} miles</span>
-                    </Label>
-                    <Slider
-                      id="radius-slider"
-                      value={[radius]}
-                      onValueChange={([val]) => setRadius(val)}
-                      max={250}
-                      step={5}
-                    />
-                  </div>
                   <CollapsibleContent className="grid gap-8 md:grid-cols-3">
                     <div className="space-y-4">
                       <Label>Values</Label>
