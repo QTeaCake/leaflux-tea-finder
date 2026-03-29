@@ -330,16 +330,6 @@ export function TeaFinder() {
               </Collapsible>
             </Card>
 
-            {isShowingBeyondRadius && filteredShops.length > 0 && (
-              <div className="flex items-start gap-3 rounded-lg border border-secondary/30 bg-secondary/5 px-4 py-3 text-sm text-muted-foreground">
-                <Icons.mapPin className="h-4 w-4 mt-0.5 text-secondary shrink-0" />
-                <span>
-                  No shops within {radius} miles of <strong>{locationInput}</strong> — showing the nearest available shops.
-                  Try expanding your radius or{' '}
-                  <a href="/order" className="underline text-primary">order online</a>.
-                </span>
-              </div>
-            )}
             <div className="grid gap-8 lg:grid-cols-12">
               <div className="lg:col-span-4 h-[60vh] lg:h-[80vh] overflow-y-auto pr-2">
                   <ShopList
