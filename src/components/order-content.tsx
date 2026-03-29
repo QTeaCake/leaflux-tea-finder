@@ -1,64 +1,133 @@
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { affiliateProducts, type AffiliateTeaType, type AffiliateProduct } from '@/lib/affiliate-products';
 import { Button } from './ui/button';
-import { Icons } from './icons';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from './ui/badge';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+const ALL = 'all' as const;
+
+const typeLabels: Record<AffiliateTeaType | 'all', string> = {
+  all: 'All',
+  black: 'Black',
+  green: 'Green',
+  oolong: 'Oolong',
+  white: 'White',
+  puerh: 'Puerh',
+  matcha: 'Matcha',
+  herbal: 'Herbal',
+  chai: 'Chai',
+  teaware: 'Teaware',
+  sampler: 'Samplers',
+};
+
+function ProductCard({ product, onShopClick }: { product: AffiliateProduct; onShopClick: (id: string) => void }) {
+  return (
+    <Card className="flex flex-col overflow-hidden border-primary/10 shadow-sm hover:shadow-md transition-shadow">
+      <div className="relative h-48 w-full bg-muted">
+        <Image
+          src={product.imageUrl}
+          alt={product.name}
+          fill
+          className="object-cover"
+        />
+        {product.featured && (
+          <div className="absolute top-2 left-2">
+            <Badge className="bg-primary text-primary-foreground text-xs">Featured</Badge>
+          </div>
+        )}
+      </div>
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle className="font-headline text-lg leading-tight">{product.name}</CardTitle>
+          <span className="text-primary font-bold text-lg shrink-0">{product.price}</span>
+        </div>
+        <p className="text-xs text-muted-foreground">{product.vendor}</p>
+      </CardHeader>
+      <CardContent className="pb-4 flex-grow">
+        <p className="text-sm text-foreground/70">{product.description}</p>
+      </CardContent>
+      <CardFooter>
+        <Button asChild className="w-full" onClick={() => onShopClick(product.id)}>
+          <a href={product.affiliateUrl} target="_blank" rel="noopener noreferrer">
+            Shop Now →
+          </a>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
 
 export function OrderContent() {
+  const [activeFilter, setActiveFilter] = useState<AffiliateTeaType | 'all'>(ALL);
+  const db = useFirestore();
+
+  const logClick = (productId: string) => {
+    if (!db) return;
+    addDoc(collection(db, 'analyticsEvents'), {
+      type: 'affiliateClick',
+      value: productId,
+      timestamp: serverTimestamp(),
+    }).catch(() => {});
+  };
+
+  const typesInUse = [ALL, ...Array.from(new Set(affiliateProducts.map(p => p.teaType)))] as (AffiliateTeaType | 'all')[];
+
+  const filtered = activeFilter === ALL
+    ? affiliateProducts
+    : affiliateProducts.filter(p => p.teaType === activeFilter);
+
   return (
-    <section className="w-full py-12 md:py-20 lg:py-24 bg-background">
+    <section className="w-full py-12 md:py-20 bg-background">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="flex flex-col items-center space-y-6 text-center">
-          <div className="bg-primary/10 p-4 rounded-full">
-            <Icons.order className="h-12 w-12 text-primary" />
-          </div>
-          <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-primary">
-            Order Tea Online - Coming Soon!
+
+        <div className="max-w-2xl mb-12">
+          <p className="text-secondary font-bold uppercase tracking-widest text-sm mb-3">Shop Tea Online</p>
+          <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary mb-4">
+            Quality Tea, Delivered
           </h1>
-          <p className="max-w-[800px] text-foreground/80 md:text-xl">
-            Soon, you'll be able to order directly from a curated selection of our partner tea shops, bringing their finest offerings right to your doorstep.
+          <p className="text-foreground/70 text-lg">
+            Can't find a shop nearby? These are teas and vendors worth ordering from — curated for enthusiasts.
+            Purchasing through these links supports QTeaCake.
           </p>
         </div>
 
-        <div className="mt-16 max-w-4xl mx-auto grid gap-8 md:grid-cols-2 lg:gap-12">
-          <div className="flex flex-col items-start p-6 rounded-lg border border-primary/10 bg-card">
-            <div className="bg-accent/10 p-3 rounded-lg w-fit mb-4">
-              <Icons.store className="h-8 w-8 text-accent" />
-            </div>
-            <h3 className="font-headline text-2xl font-bold mb-2">Support Local Shops</h3>
-            <p className="text-muted-foreground">
-              By ordering through QTeaCake, you'll be using affiliate links that directly support the authentic, local tea shops you discover on our map. It's a great way to fuel your hobby while strengthening the tea community.
-            </p>
-          </div>
-          <div className="flex flex-col items-start p-6 rounded-lg border border-primary/10 bg-card">
-            <div className="bg-accent/10 p-3 rounded-lg w-fit mb-4">
-              <Icons.wind className="h-8 w-8 text-accent" />
-            </div>
-            <h3 className="font-headline text-2xl font-bold mb-2">Faster, Cheaper Shipping</h3>
-            <p className="text-muted-foreground">
-              Why wait for cross-country shipments? Ordering from shops closer to you means your tea arrives faster and often with lower shipping costs. Get your perfect steep without the wait.
-            </p>
-          </div>
+        <div className="flex flex-wrap gap-2 mb-10">
+          {typesInUse.map(type => (
+            <Button
+              key={type}
+              variant={activeFilter === type ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setActiveFilter(type)}
+            >
+              {typeLabels[type]}
+            </Button>
+          ))}
         </div>
 
-        <div className="mt-20 max-w-2xl mx-auto">
-          <Card className="text-center shadow-lg p-6 border-primary/20">
-            <CardHeader className="p-0">
-              <div className="flex justify-center">
-                <div className="bg-primary/10 p-3 rounded-lg w-fit">
-                  <Icons.mail className="h-8 w-8 text-primary" />
-                </div>
-              </div>
-              <CardTitle className="font-headline text-3xl !mt-4">Are you a Tea Vendor?</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 pt-4">
-              <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-                Interested in reaching a dedicated community of tea lovers? Partner with us to feature your products for online ordering. Use the contact form below to get in touch!
-              </p>
-              <Button asChild>
-                  <Link href="#contact-section">Get in Touch</Link>
-              </Button>
-            </CardContent>
-          </Card>
+        {filtered.length > 0 ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filtered.map(product => (
+              <ProductCard key={product.id} product={product} onShopClick={logClick} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground">No products in this category yet.</p>
+        )}
+
+        <div className="mt-20 border border-primary/20 rounded-xl p-8 max-w-2xl">
+          <h3 className="font-headline text-2xl font-bold mb-2">Are you a tea vendor?</h3>
+          <p className="text-muted-foreground mb-4">
+            Interested in reaching a dedicated community of tea enthusiasts? Get in touch about being featured here.
+          </p>
+          <Button asChild variant="outline">
+            <Link href="/#contact-section">Contact Us</Link>
+          </Button>
         </div>
 
       </div>
