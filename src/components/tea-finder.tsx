@@ -54,7 +54,7 @@ export function TeaFinder() {
   const [hoveredShopId, setHoveredShopId] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [locationInput, setLocationInput] = useState('');
-  const [isLocating, setIsLocating] = useState(true);
+  const [isLocating, setIsLocating] = useState(false);
   const [praisedShops, setPraisedShops] = useState<string[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const db = useFirestore();
@@ -69,30 +69,25 @@ export function TeaFinder() {
     }).catch((error) => console.error("Error logging analytics event: ", error));
   }, [db]);
 
-  useEffect(() => {
-    setIsClient(true);
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          setLocationError(null);
-          setIsLocating(false);
-        },
-        error => {
-          console.error("Error getting location:", error);
-          setLocationError('Could not get your location. Please enable location services or enter an address.');
-          setUserLocation(null);
-          setIsLocating(false);
-        }
-      );
-    } else {
-      setLocationError('Geolocation is not supported by your browser. Please enter an address.');
-      setUserLocation(null);
-      setIsLocating(false);
+  useEffect(() => { setIsClient(true); }, []);
+
+  const handleAutoLocate = useCallback(() => {
+    if (!('geolocation' in navigator)) {
+      setLocationError('Location not supported by your browser. Please enter an address.');
+      return;
     }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
+        setLocationError(null);
+        setIsLocating(false);
+      },
+      () => {
+        setLocationError('Could not get your location. Please enter an address instead.');
+        setIsLocating(false);
+      }
+    );
   }, []);
 
   const handleLocationSearch = useCallback(async () => {
@@ -169,28 +164,34 @@ export function TeaFinder() {
     }
   }, [userLocation, locationInput, filteredShops, logAnalyticsEvent]);
 
-  if (!isClient || isLocating) {
-    return (
-      <div className="container mx-auto px-4 py-20 flex flex-col items-center justify-center space-y-4">
-        <Icons.spinner className="h-10 w-10 animate-spin text-primary" />
-        <h2 className="font-headline text-3xl font-bold text-primary">Pinpointing Location...</h2>
-      </div>
-    );
-  }
+  if (!isClient) return null;
 
   const searchInputGroup = (
     <div className="flex flex-col sm:flex-row gap-2 w-full max-w-lg">
-        <Input 
-            placeholder="Enter an address, city, or zip code" 
-            value={locationInput}
-            onChange={(e) => setLocationInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
-            className="flex-grow bg-white h-12"
-        />
-        <Button onClick={handleLocationSearch} size="lg" className="h-12 bg-primary">
-            <Icons.search className="mr-2 h-4 w-4" />
-            Search
-        </Button>
+      <Input
+        placeholder="City, zip code, or address"
+        value={locationInput}
+        onChange={(e) => setLocationInput(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
+        className="flex-grow bg-white h-12"
+      />
+      <Button
+        variant="outline"
+        size="lg"
+        className="h-12 px-3 shrink-0"
+        onClick={handleAutoLocate}
+        disabled={isLocating}
+        title="Use my location"
+      >
+        {isLocating
+          ? <Icons.spinner className="h-4 w-4 animate-spin" />
+          : <Icons.mapPin className="h-4 w-4" />
+        }
+      </Button>
+      <Button onClick={handleLocationSearch} size="lg" className="h-12 bg-primary">
+        <Icons.search className="mr-2 h-4 w-4" />
+        Search
+      </Button>
     </div>
   );
 
