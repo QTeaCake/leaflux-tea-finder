@@ -316,18 +316,16 @@ export function TeaFinder() {
             </Card>
 
             {isTeaDesert ? (
-              <div className="w-full rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 px-8 py-16 text-center space-y-4">
-                <div className="text-6xl">🏜️</div>
-                <h2 className="font-headline text-3xl font-bold text-primary">You're in a Tea Desert</h2>
-                <p className="text-foreground/70 max-w-lg mx-auto text-lg">
-                  No authentic tea shops found near <strong>{locationInput}</strong> within {radius} miles.
-                  Your search has been recorded — you're helping prove that tea demand exists here.
+              <div className="w-full rounded-xl border border-primary/20 bg-card px-8 py-16 text-center space-y-4">
+                <Icons.mapPin className="h-10 w-10 text-muted-foreground mx-auto" />
+                <h2 className="font-headline text-2xl font-bold text-foreground">No shops found nearby</h2>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  We couldn't find any authentic tea shops near <strong>{locationInput}</strong> within {radius} miles.
+                  Try expanding your radius, or order quality tea online while we continue adding shops to the map.
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  Try expanding your radius above, or{' '}
-                  <a href="/order" className="underline text-primary font-medium">order quality tea online</a>{' '}
-                  while we work to change that.
-                </p>
+                <a href="/order" className="inline-block text-sm underline text-primary font-medium">
+                  Browse tea online →
+                </a>
               </div>
             ) : (
             <div className="grid gap-8 lg:grid-cols-12">
